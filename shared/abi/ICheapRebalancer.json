@@ -1,0 +1,48 @@
+[
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "threshold",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "newPM",
+                "type": "uint256"
+            }
+        ],
+        "name": "rebalance",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "amountEth",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "amountUsdc",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "amountOsqth",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "to",
+                "type": "address"
+            }
+        ],
+        "name": "collectProtocol",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }
+]
