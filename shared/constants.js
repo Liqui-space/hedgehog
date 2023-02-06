@@ -20,8 +20,10 @@ const _uniMathAddress = "0x61d3312e32f3f6f69ae5629d717f318bc4656abd";
 const _oneClickDepositAddress = "0x468363E262999046BAFC5EA954768920ee349358";
 const _oneClickWithdrawAddress = "0xeD14d82a2D3435571646dA537A52AbBC113F5140";
 
-const _rebalanceModule = "0x86345a7f1D77F6056E2ff83e1b1071238AEf1483";
-const _cheapRebalancer = "0x17e8a3e01A73c754052cdCdee29E5804300c5406";
+const _rebalanceModule1 = "0x86345a7f1D77F6056E2ff83e1b1071238AEf1483";
+const _rebalanceModule2 = "0x24F378A96eDAA91b20b86300771929Fcb10190E2";
+const _rebalanceModule3 = "0xfE08EEb4d98551Ea6eB474b24356a82Cf60277e2";
+const _rebalancer = "0x17e8a3e01A73c754052cdCdee29E5804300c5406";
 
 const _deployerAddress = "0x8f69766b870C45339E02A68ca8298861fDA8A563";
 const _governanceAddress = "0x2f0b98eF1093B41897a99b76956Fb69025F1682b";
@@ -32,30 +34,32 @@ const _bigRebalancerEuler = "0x24F378A96eDAA91b20b86300771929Fcb10190E2";
 const _bigRebalancerEuler2 = "0xfE08EEb4d98551Ea6eB474b24356a82Cf60277e2";
 
 module.exports = {
-wethAddress,
-usdcAddress,
-osqthAddress,
-_biggestOSqthHolder,
-_biggestUSDCHolder,
-poolEthUsdc,
-poolEthOsqth,
-_harhatAccount1,
-_harhatAccount7,
-maxUint256,
-_vaultAddress,
-_vaultAuctionAddress,
-_vaultMathAddress,
-_vaultTreasuryAddress,
-_vaultStorageAddress,
-_uniMathAddress,
-_oneClickDepositAddress,
-_oneClickWithdrawAddress,
-_rebalanceModule,
-_cheapRebalancer,
-_governanceAddress,
-_hedgehogPeripheralsDeployer,
-_sharedGovernance,
-_deployerAddress,
-_bigRebalancerEuler,
-_bigRebalancerEuler2,
+    wethAddress,
+    usdcAddress,
+    osqthAddress,
+    _biggestOSqthHolder,
+    _biggestUSDCHolder,
+    poolEthUsdc,
+    poolEthOsqth,
+    _harhatAccount1,
+    _harhatAccount7,
+    maxUint256,
+    _vaultAddress,
+    _vaultAuctionAddress,
+    _vaultMathAddress,
+    _vaultTreasuryAddress,
+    _vaultStorageAddress,
+    _uniMathAddress,
+    _oneClickDepositAddress,
+    _oneClickWithdrawAddress,
+    _rebalanceModule1,
+    _rebalanceModule2,
+    _rebalanceModule3,
+    _rebalancer,
+    _governanceAddress,
+    _hedgehogPeripheralsDeployer,
+    _sharedGovernance,
+    _deployerAddress,
+    _bigRebalancerEuler,
+    _bigRebalancerEuler2,
 };

@@ -17,8 +17,12 @@ const {
     _vaultMathAddress,
     _vaultTreasuryAddress,
     _vaultStorageAddress,
-    _cheapRebalancer,
-    _rebalanceModule,
+    _rebalanceModule1,
+    _rebalanceModule2,
+    _rebalanceModule3,
+    _rebalancer,
+    _oneClickDepositAddress,
+    _oneClickWithdrawAddress,
 } = require("./constants");
 
 const deploymentParams = [
@@ -105,16 +109,30 @@ const hardhatInitializeDeploed = async () => {
 
     MyContract = await ethers.getContractFactory("VaultStorage");
     const VaultStorage = await MyContract.attach(_vaultStorageAddress);
+
+    //-- Perepherals
+
+    MyContract = await ethers.getContractFactory("OneClickDeposit");
+    const OneClickDeposit = await MyContract.attach(_oneClickDepositAddress);
+
+    MyContract = await ethers.getContractFactory("OneClickWithdraw");
+    const OneClickWithdraw = await MyContract.attach(_oneClickWithdrawAddress);
     
     //-- Rebalancers
 
-    MyContract = await ethers.getContractFactory("CheapRebalancer");
-    const CheapRebalancer = await MyContract.attach(_cheapRebalancer);
+    MyContract = await ethers.getContractFactory("Rebalancer");
+    const Rebalancer = await MyContract.attach(_rebalancer);
 
-    MyContract = await ethers.getContractFactory("BigRebalancer");
-    const RebalanceModule1 = await MyContract.attach(_rebalanceModule);
+    MyContract = await ethers.getContractFactory("Module1");
+    const RebalanceModule1 = await MyContract.attach(_rebalanceModule1);
+    
+    MyContract = await ethers.getContractFactory("Module2");
+    const RebalanceModule2 = await MyContract.attach(_rebalanceModule2);
+    
+    MyContract = await ethers.getContractFactory("Module2");
+    const RebalanceModule3 = await MyContract.attach(_rebalanceModule3);
 
-    //-- Perepherals
+    
 
     return [
         Vault,
@@ -122,8 +140,12 @@ const hardhatInitializeDeploed = async () => {
         VaultMath,
         VaultTreasury,
         VaultStorage,
-        CheapRebalancer,
-        RebalanceModule1
+        OneClickDeposit,
+        OneClickWithdraw,
+        Rebalancer,
+        RebalanceModule1,
+        RebalanceModule2,
+        RebalanceModule3
     ]
 };
 

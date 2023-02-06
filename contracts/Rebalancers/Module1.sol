@@ -1,3 +1,7 @@
+// https://docs.euler.finance/developers/integration-guide
+// https://gist.github.com/abhishekvispute/b0101938489a8b8dc292e3070c27156e
+// https://soliditydeveloper.com/uniswap3/
+
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity =0.8.4;
 
@@ -17,25 +21,43 @@ import {TransferHelper} from "@uniswap/v3-periphery/contracts/libraries/Transfer
 
 // Rebalance flow
 
-// branch 1 (targetEth < ethBalance && targetUsdc < usdcBalance && targetOsqth > osqthBalance)
+// branch 1 (targetEth > ethBalance && targetUsdc > usdcBalance && targetOsqth < osqthBalance)
+// 1) borrow weth & usdc
+// 2) get osqth
+// 3) sellv3 osqth
+// 4) return eth & usdc
+
+// branch 2 (targetEth < ethBalance && targetUsdc < usdcBalance && targetOsqth > osqthBalance)
 // 1) borrow osqth (get weth on euler and swap it to osqth)
 // 2) get usdc & weth
 // 3) sellv3 usdc
 // 4) return weth
 
-// branch 2 (targetEth < ethBalance && targetUsdc > usdcBalance && targetOsqth > osqthBalance)
+// branch 3 (targetEth < ethBalance && targetUsdc > usdcBalance && targetOsqth > osqthBalance)
 // 1) borrow usdc & osqth (borrow weth on euler and swap it to osqth)
 // 2) get weth
 // 3) sellv3 weth
 // 4) return usdc & weth
 
-// branch 3 (targetEth > ethBalance && targetUsdc < usdcBalance && targetOsqth > osqthBalance)
+// branch 4 (targetEth > ethBalance && targetUsdc < usdcBalance && targetOsqth < osqthBalance)
+// 1) borrow weth
+// 2) get usdc & osqth
+// 3) sellv3 usdc & osqth
+// 4) return weth
+
+// branch 5 (targetEth > ethBalance && targetUsdc < usdcBalance && targetOsqth > osqthBalance)
 // 1) borrow weth & osqth (borrow weth on euler and swap it to osqth)
 // 2) get usdc
 // 3) sellv3 usdc
 // 4) return weth
 
-contract BigRebalancerEuler is Ownable {
+// branch 6 (targetEth < ethBalance && targetUsdc > usdcBalance && targetOsqth < osqthBalance)
+// 1) borrow usdc
+// 2) get osqth & weth
+// 3) sellv3 osqth & weth
+// 4) return usdc
+
+contract Module1 is Ownable {
     using PRBMathUD60x18 for uint256;
 
     address public addressAuction = 0x2f1D08D53d04559933dBF436a5cD15182a190110;
@@ -61,17 +83,16 @@ contract BigRebalancerEuler is Ownable {
         uint256 amount1;
         uint256 amount2;
         uint256 threshold;
+        uint256 triggerTime;
     }
 
     constructor() Ownable() {
         TransferHelper.safeApprove(OSQTH, address(swapRouter), type(uint256).max);
         TransferHelper.safeApprove(WETH, address(swapRouter), type(uint256).max);
         TransferHelper.safeApprove(USDC, address(swapRouter), type(uint256).max);
-
         IERC20(USDC).approve(addressAuction, type(uint256).max);
         IERC20(OSQTH).approve(addressAuction, type(uint256).max);
         IERC20(WETH).approve(addressAuction, type(uint256).max);
-
         IERC20(USDC).approve(euler, type(uint256).max);
         IERC20(OSQTH).approve(euler, type(uint256).max);
         IERC20(WETH).approve(euler, type(uint256).max);
@@ -80,14 +101,11 @@ contract BigRebalancerEuler is Ownable {
     function setContracts(
         address _addressAuction,
         address _addressMath,
-        address _addressTreasury,
-        address _addressStorage
+        address _addressTreasury
     ) external onlyOwner {
         addressAuction = _addressAuction;
         addressMath = _addressMath;
         addressTreasury = _addressTreasury;
-        addressStorage = _addressStorage;
-
         IERC20(USDC).approve(addressAuction, type(uint256).max);
         IERC20(OSQTH).approve(addressAuction, type(uint256).max);
         IERC20(WETH).approve(addressAuction, type(uint256).max);
@@ -108,11 +126,16 @@ contract BigRebalancerEuler is Ownable {
         if (amountOsqth > 0) IERC20(OSQTH).transfer(to, amountOsqth);
     }
 
-    //dev triggerTime - deprecated param
     function rebalance(uint256 threshold, uint256 triggerTime) public onlyOwner {
         FlCallbackData memory data;
+        data.triggerTime = triggerTime;
 
-        (, uint256 auctionTriggerTime) = IVaultMath(addressMath).isTimeRebalance();
+        if (triggerTime == 0) {
+            (bool isTimeRebalance, uint256 auctionTriggerTime) = IVaultMath(addressMath).isTimeRebalance();
+
+            require(isTimeRebalance, "Not time");
+            triggerTime = auctionTriggerTime;
+        }
 
         IVaultTreasury(addressTreasury).externalPoke();
 
@@ -123,7 +146,7 @@ contract BigRebalancerEuler is Ownable {
             uint256 ethBalance,
             uint256 usdcBalance,
             uint256 osqthBalance
-        ) = IAuction(addressAuction).getParams(auctionTriggerTime);
+        ) = IAuction(addressAuction).getParams(triggerTime);
 
         data.threshold = threshold;
 
@@ -139,23 +162,23 @@ contract BigRebalancerEuler is Ownable {
 
             IExec(exec).deferLiquidityCheck(address(this), abi.encode(data));
         } else if (targetEth < ethBalance && targetUsdc < usdcBalance && targetOsqth > osqthBalance) {
-            // 1) borrow osqth
+            // 1) borrow osqth (get weth on euler and swap it to osqth)
             // 2) get usdc & weth
-            // 3) sellv3 usdc & weth
-            // 4) return osqth
+            // 3) sellv3 usdc
+            // 4) return weth
 
             data.type_of_arbitrage = 2;
             data.amount1 = targetOsqth - osqthBalance + 10;
 
             IExec(exec).deferLiquidityCheck(address(this), abi.encode(data));
         } else if (targetEth < ethBalance && targetUsdc > usdcBalance && targetOsqth > osqthBalance) {
-            // 1) borrow usdc & osqth
+            // 1) borrow usdc & osqth (borrow weth on euler and swap it to osqth)
             // 2) get weth
             // 3) sellv3 weth
-            // 4) return usdc & osqth
+            // 4) return usdc & weth
 
             data.type_of_arbitrage = 3;
-            data.amount1 = targetUsdc - usdcBalance + 10;
+            data.amount1 = (targetUsdc - usdcBalance + 10).mul(101);
             data.amount2 = targetOsqth - osqthBalance + 10;
 
             IExec(exec).deferLiquidityCheck(address(this), abi.encode(data));
@@ -170,10 +193,10 @@ contract BigRebalancerEuler is Ownable {
 
             IExec(exec).deferLiquidityCheck(address(this), abi.encode(data));
         } else if (targetEth > ethBalance && targetUsdc < usdcBalance && targetOsqth > osqthBalance) {
-            // 1) borrow weth & osqth
+            // 1) borrow weth & osqth (borrow weth on euler and swap it to osqth)
             // 2) get usdc
             // 3) sellv3 usdc
-            // 4) return osqth & weth
+            // 4) return weth
 
             data.type_of_arbitrage = 5;
             data.amount1 = targetEth - ethBalance + 10;
@@ -198,6 +221,7 @@ contract BigRebalancerEuler is Ownable {
     function onDeferredLiquidityCheck(bytes memory encodedData) external {
         require(msg.sender == euler, "e/flash-loan/on-deferred-caller");
         FlCallbackData memory data = abi.decode(encodedData, (FlCallbackData));
+
         uint256 ethBefore = IERC20(WETH).balanceOf(address(this));
 
         if (data.type_of_arbitrage == 1) {
@@ -206,7 +230,8 @@ contract BigRebalancerEuler is Ownable {
             IEulerDToken borrowedDToken2 = IEulerDToken(markets.underlyingToDToken(USDC));
             borrowedDToken2.borrow(0, data.amount2);
 
-            IAuction(addressAuction).timeRebalance(address(this), 0, 0, 0);
+            if (data.triggerTime == 0) IAuction(addressAuction).timeRebalance(address(this), 0, 0, 0);
+            else IAuction(addressAuction).priceRebalance(address(this), data.triggerTime, 0, 0, 0);
 
             // swap all oSQTH to wETH
             swapRouter.exactInputSingle(
@@ -239,12 +264,27 @@ contract BigRebalancerEuler is Ownable {
             borrowedDToken1.repay(0, data.amount1);
             borrowedDToken2.repay(0, data.amount2);
         } else if (data.type_of_arbitrage == 2) {
-            IEulerDToken borrowedDToken1 = IEulerDToken(markets.underlyingToDToken(OSQTH));
+            IEulerDToken borrowedDToken1 = IEulerDToken(markets.underlyingToDToken(WETH));
             borrowedDToken1.borrow(0, data.amount1);
 
-            IAuction(addressAuction).timeRebalance(address(this), 0, 0, 0);
+            // buy oSQTH with part of wETH
+            swapRouter.exactOutputSingle(
+                ISwapRouter.ExactOutputSingleParams({
+                    tokenIn: address(WETH),
+                    tokenOut: address(OSQTH),
+                    fee: 3000,
+                    recipient: address(this),
+                    deadline: block.timestamp,
+                    amountOut: data.amount1,
+                    amountInMaximum: type(uint256).max,
+                    sqrtPriceLimitX96: 0
+                })
+            );
 
-            // WETH -> USDC
+            if (data.triggerTime == 0) IAuction(addressAuction).timeRebalance(address(this), 0, 0, 0);
+            else IAuction(addressAuction).priceRebalance(address(this), data.triggerTime, 0, 0, 0);
+
+            // sell USDC for wETH
             swapRouter.exactInputSingle(
                 ISwapRouter.ExactInputSingleParams({
                     tokenIn: address(USDC),
@@ -257,29 +297,29 @@ contract BigRebalancerEuler is Ownable {
                     sqrtPriceLimitX96: 0
                 })
             );
-            // WETH -> OSQTH
-            swapRouter.exactOutputSingle(
-                ISwapRouter.ExactOutputSingleParams({
-                    tokenIn: address(WETH),
-                    tokenOut: address(OSQTH),
+
+            // swap oSQTH --> wETH
+            swapRouter.exactInputSingle(
+                ISwapRouter.ExactInputSingleParams({
+                    tokenIn: address(OSQTH),
+                    tokenOut: address(WETH),
                     fee: 3000,
                     recipient: address(this),
                     deadline: block.timestamp,
-                    amountOut: data.amount1,
-                    amountInMaximum: IERC20(WETH).balanceOf(address(this)),
+                    amountIn: IERC20(OSQTH).balanceOf(address(this)),
+                    amountOutMinimum: 0,
                     sqrtPriceLimitX96: 0
                 })
             );
+
             borrowedDToken1.repay(0, data.amount1);
         } else if (data.type_of_arbitrage == 3) {
             IEulerDToken borrowedDToken1 = IEulerDToken(markets.underlyingToDToken(USDC));
             borrowedDToken1.borrow(0, data.amount1);
-            IEulerDToken borrowedDToken2 = IEulerDToken(markets.underlyingToDToken(OSQTH));
+            IEulerDToken borrowedDToken2 = IEulerDToken(markets.underlyingToDToken(WETH));
             borrowedDToken2.borrow(0, data.amount2);
 
-            IAuction(addressAuction).timeRebalance(address(this), 0, 0, 0);
-
-            // WETH -> oSQTH
+            // buy oSQTH with wETH
             swapRouter.exactOutputSingle(
                 ISwapRouter.ExactOutputSingleParams({
                     tokenIn: address(WETH),
@@ -288,12 +328,28 @@ contract BigRebalancerEuler is Ownable {
                     recipient: address(this),
                     deadline: block.timestamp,
                     amountOut: data.amount2,
-                    amountInMaximum: IERC20(WETH).balanceOf(address(this)),
+                    amountInMaximum: type(uint256).max,
+                    sqrtPriceLimitX96: 0
+                })
+            );
+            if (data.triggerTime == 0) IAuction(addressAuction).timeRebalance(address(this), 0, 0, 0);
+            else IAuction(addressAuction).priceRebalance(address(this), data.triggerTime, 0, 0, 0);
+
+            // swap oSQTH --> wETH
+            swapRouter.exactInputSingle(
+                ISwapRouter.ExactInputSingleParams({
+                    tokenIn: address(OSQTH),
+                    tokenOut: address(WETH),
+                    fee: 3000,
+                    recipient: address(this),
+                    deadline: block.timestamp,
+                    amountIn: IERC20(OSQTH).balanceOf(address(this)),
+                    amountOutMinimum: 0,
                     sqrtPriceLimitX96: 0
                 })
             );
 
-            // USDC -> WETH
+            // buy USDC with wETH
             swapRouter.exactOutputSingle(
                 ISwapRouter.ExactOutputSingleParams({
                     tokenIn: address(WETH),
@@ -301,8 +357,8 @@ contract BigRebalancerEuler is Ownable {
                     fee: 500,
                     recipient: address(this),
                     deadline: block.timestamp,
-                    amountOut: data.amount1,
-                    amountInMaximum: IERC20(WETH).balanceOf(address(this)),
+                    amountOut: data.amount1.sub(IERC20(USDC).balanceOf(address(this))),
+                    amountInMaximum: type(uint256).max,
                     sqrtPriceLimitX96: 0
                 })
             );
@@ -313,7 +369,8 @@ contract BigRebalancerEuler is Ownable {
             IEulerDToken borrowedDToken1 = IEulerDToken(markets.underlyingToDToken(WETH));
             borrowedDToken1.borrow(0, data.amount1);
 
-            IAuction(addressAuction).timeRebalance(address(this), 0, 0, 0);
+            if (data.triggerTime == 0) IAuction(addressAuction).timeRebalance(address(this), 0, 0, 0);
+            else IAuction(addressAuction).priceRebalance(address(this), data.triggerTime, 0, 0, 0);
 
             // swap all oSQTH to wETH
             swapRouter.exactInputSingle(
@@ -346,13 +403,25 @@ contract BigRebalancerEuler is Ownable {
             borrowedDToken1.repay(0, data.amount1);
         } else if (data.type_of_arbitrage == 5) {
             IEulerDToken borrowedDToken1 = IEulerDToken(markets.underlyingToDToken(WETH));
-            borrowedDToken1.borrow(0, data.amount1);
-            IEulerDToken borrowedDToken2 = IEulerDToken(markets.underlyingToDToken(OSQTH));
-            borrowedDToken2.borrow(0, data.amount2);
+            borrowedDToken1.borrow(0, data.amount1.add(data.amount2));
 
-            IAuction(addressAuction).timeRebalance(address(this), 0, 0, 0);
+            // swap part wETH to oSQTH
+            swapRouter.exactOutputSingle(
+                ISwapRouter.ExactOutputSingleParams({
+                    tokenIn: address(WETH),
+                    tokenOut: address(OSQTH),
+                    fee: 3000,
+                    recipient: address(this),
+                    deadline: block.timestamp,
+                    amountOut: data.amount2,
+                    amountInMaximum: type(uint256).max,
+                    sqrtPriceLimitX96: 0
+                })
+            );
+            if (data.triggerTime == 0) IAuction(addressAuction).timeRebalance(address(this), 0, 0, 0);
+            else IAuction(addressAuction).priceRebalance(address(this), data.triggerTime, 0, 0, 0);
 
-            // WETH -> USDC
+            // swap all USDC to wETH
             swapRouter.exactInputSingle(
                 ISwapRouter.ExactInputSingleParams({
                     tokenIn: address(USDC),
@@ -365,28 +434,27 @@ contract BigRebalancerEuler is Ownable {
                     sqrtPriceLimitX96: 0
                 })
             );
-
-            // WETH -> oSQTH
-            swapRouter.exactOutputSingle(
-                ISwapRouter.ExactOutputSingleParams({
-                    tokenIn: address(WETH),
-                    tokenOut: address(OSQTH),
+            // swap all oSQTH to wETH
+            swapRouter.exactInputSingle(
+                ISwapRouter.ExactInputSingleParams({
+                    tokenIn: address(OSQTH),
+                    tokenOut: address(WETH),
                     fee: 3000,
                     recipient: address(this),
                     deadline: block.timestamp,
-                    amountOut: data.amount2,
-                    amountInMaximum: IERC20(WETH).balanceOf(address(this)),
+                    amountIn: IERC20(OSQTH).balanceOf(address(this)),
+                    amountOutMinimum: 0,
                     sqrtPriceLimitX96: 0
                 })
             );
 
-            borrowedDToken1.repay(0, data.amount1);
-            borrowedDToken2.repay(0, data.amount2);
+            borrowedDToken1.repay(0, data.amount1.add(data.amount2));
         } else if (data.type_of_arbitrage == 6) {
             IEulerDToken borrowedDToken1 = IEulerDToken(markets.underlyingToDToken(USDC));
             borrowedDToken1.borrow(0, data.amount1);
 
-            IAuction(addressAuction).timeRebalance(address(this), 0, 0, 0);
+            if (data.triggerTime == 0) IAuction(addressAuction).timeRebalance(address(this), 0, 0, 0);
+            else IAuction(addressAuction).priceRebalance(address(this), data.triggerTime, 0, 0, 0);
             // sell all oSQTH to wETH
             swapRouter.exactInputSingle(
                 ISwapRouter.ExactInputSingleParams({
@@ -416,7 +484,15 @@ contract BigRebalancerEuler is Ownable {
 
             borrowedDToken1.repay(0, data.amount1);
         }
-
         require(IERC20(WETH).balanceOf(address(this)).sub(ethBefore) > data.threshold, "NEP");
+    }
+
+    function isQuickRebalance() public view returns (bool) {
+        (uint256 ethUsdcPrice, ) = IVaultMath(addressMath).getPrices();
+        uint256 cachedPrice = IVaultStorage(addressStorage).ethPriceAtLastRebalance();
+
+        uint256 ratio = cachedPrice > ethUsdcPrice ? cachedPrice.div(ethUsdcPrice) : ethUsdcPrice.div(cachedPrice);
+
+        return ratio <= IVaultStorage(addressStorage).rebalanceThreshold();
     }
 }

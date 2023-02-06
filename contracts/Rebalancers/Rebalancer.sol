@@ -20,7 +20,7 @@ interface IVaultStorage {
     function setKeeper(address _governance) external;
 }
 
-interface IRebalancer {
+interface IModule {
     function rebalance(uint256 threshold, uint256 triggerTime) external;
 
     function collectProtocol(
@@ -40,7 +40,7 @@ interface IRebalancer {
  * M0: Not an owner
  */
 
-contract CheapRebalancer is Ownable {
+contract Rebalancer is Ownable {
     using PRBMathUD60x18 for uint256;
 
     address addressStorage = 0xa6D7b99c05038ad2CC39F695CF6D2A06DdAD799a;
@@ -49,12 +49,12 @@ contract CheapRebalancer is Ownable {
 
     constructor() Ownable() {}
 
-    function setContracts(address _addressStorage) external onlyOwner {
+    function setParams(address _addressStorage) external onlyOwner {
         addressStorage = _addressStorage;
     }
 
-    function returnOwner(address to, address rebalancer) external onlyOwner {
-        IRebalancer(rebalancer).transferOwnership(to);
+    function returnOwner(address to, address module) external onlyOwner {
+        IModule(module).transferOwnership(to);
     }
 
     function setGovernance(address to) external onlyOwner {
@@ -65,24 +65,23 @@ contract CheapRebalancer is Ownable {
         IVaultStorage(addressStorage).setKeeper(to);
     }
 
-    //TODO: think about should we pass 3 params exept 1
     function collectProtocol(
-        address rebalancer,
+        address module,
         uint256 amountEth,
         address to
     ) external onlyOwner {
-        IRebalancer(rebalancer).collectProtocol(amountEth, 0, 0, to);
+        IModule(module).collectProtocol(amountEth, 0, 0, to);
     }
 
     function rebalance(
-        address rebalancer,
+        address module,
         uint256 threshold,
         uint256 newPM,
         uint256 newThreshold
     ) public onlyOwner {
         IVaultStorage VaultStorage = IVaultStorage(addressStorage);
 
-        VaultStorage.setKeeper(rebalancer);
+        VaultStorage.setKeeper(module);
 
         uint256 maxPM = VaultStorage.maxPriceMultiplier();
         uint256 minPM = VaultStorage.minPriceMultiplier();
@@ -93,10 +92,10 @@ contract CheapRebalancer is Ownable {
             )
         );
 
-        IRebalancer(rebalancer).rebalance(threshold, 0);
+        IModule(module).rebalance(threshold, 0);
 
         VaultStorage.setRebalanceTimeThreshold(newThreshold);
 
-        IRebalancer(rebalancer).setKeeper(address(this));
+        IModule(module).setKeeper(address(this));
     }
 }

@@ -1,19 +1,9 @@
 const { ethers } = require("hardhat");
-const {
-    getAndApprove,
-    approveERC20,
-    getERC20Allowance,
-} = require("./approveERC20");
+const { getAndApprove, approveERC20, getERC20Allowance } = require("./approveERC20");
 
-const {
-    getETH,
-    getOSQTH,
-    getUSDC,
-    getWETH,
-    getERC20Balance,
-} = require("./getERC20");
+const { getETH, getOSQTH, getUSDC, getWETH, getERC20Balance } = require("./getERC20");
 
-const {loadTestDataset, assertWP, resetFork, logBlock, logBalance } = require("./testHelpers");
+const { loadTestDataset, assertWP, resetFork, logBlock, logBalance } = require("./testHelpers");
 
 const mineSomeBlocks = async (blocksToMine) => {
     await logBlock();
@@ -42,7 +32,6 @@ const getSnapshot = async (account) => {
 const toHexdigital = (amount) => {
     return "0x" + amount.toString(16);
 };
-
 
 module.exports = {
     impersontate,
