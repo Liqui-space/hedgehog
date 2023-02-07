@@ -203,14 +203,14 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
         //current implied volatility
         uint256 currentIV = IVaultMath(vaultMath).getIV();
             
-        //uint256 borrowAPY = IVaultMath(vaultMath).getBorrowAPY();
-        //uint256 borrowAPYP = IVaultStorage(vaultStorage).borrowApyAtLastRebalance();
-        uint256 borrowAPY = 25e17;
-        uint256 borrowAPYP = 24e17;
+        //uint256 interestRate = IVaultMath(vaultMath).getInterestRate();
+        //uint256 interestRateP = IVaultStorage(vaultStorage).interestRateAtLastRebalance();
+        uint256 interestRate = 25e17;
+        uint256 interestRateP = 24e17;
 
         uint256 priceMultiplier = IVaultMath(vaultMath).getPriceMultiplier(_auctionTriggerTime);
 
-        uint256 weightAdj = min(uint256(69e15).mul(borrowAPY).mul(currentIV), 25e16); // TODO as params
+        uint256 weightAdj = min(uint256(69e15).mul(interestRate).mul(currentIV), 25e16); // TODO as params
 
         int24 baseThreshold = _floor(toInt24(
             int256(
@@ -218,19 +218,19 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
                 )
                 )+10).mul(tickSpacing);  //TODO 10 as parameter
             
-        int24 tickAdj = toInt24(int256(floor(borrowAPY))).mul(tickSpacing); 
+        int24 tickAdj = toInt24(int256(floor(interestRate))).mul(tickSpacing); 
 
         //TODO as param
-        if (borrowAPY > 25e17) {
+        if (interestRate > 25e17) {
             lower = baseThreshold + tickAdj;
             upper = baseThreshold - tickAdj;
 
-            uint256 weight = borrowAPY >= borrowApyAtLastRebalance ? uint256(5e17).sub(weightAdj) : uint256(5e17).add(weightAdj);
+            uint256 weight = interestRate >= interestRateP ? uint256(5e17).sub(weightAdj) : uint256(5e17).add(weightAdj);
         } else {
             lower = baseThreshold - tickAdj;
             upper = baseThreshold + tickAdj;
 
-            uint256 weight = borrowAPY >= borrowApyAtLastRebalance ? uint256(5e17).add(weightAdj) : uint256(5e17).sub(weightAdj);
+            uint256 weight = interestRate >= interestRateP ? uint256(5e17).add(weightAdj) : uint256(5e17).sub(weightAdj);
         }
         
         //boundaries for auction prices (current price * multiplier)
