@@ -17,8 +17,112 @@ const {
 const { hardhatDeploy, deploymentParams } = require("@shared/deploy");
 const { BigNumber } = require("ethers");
 
-describe.skip("User story with", function () {
-    const getAndApproveWETH = async (owner, amount, toAddress) => {
+describe.skip("General Workflow", function () {
+    const     it("feees time! 😝 only half", async function () {
+        // State
+        const governanceEthBalanceBefore = await getERC20Balance(governance.address, wethAddress);
+        const governanceUsdcBalanceBefore = await getERC20Balance(governance.address, usdcAddress);
+        const governanceOsqthBalanceBefore = await getERC20Balance(governance.address, osqthAddress);
+        console.log("> governanceEthBalanceBefore %s", governanceEthBalanceBefore);
+        console.log("> governanceUsdcBalanceBefore %s", governanceUsdcBalanceBefore);
+        console.log("> governanceOsqthBalanceBefore %s", governanceOsqthBalanceBefore);
+
+        const fee0 = await VaultStorage.connect(governance).accruedFeesEth();
+        const fee1 = await VaultStorage.connect(governance).accruedFeesUsdc();
+        const fee2 = await VaultStorage.connect(governance).accruedFeesOsqth();
+        console.log("Fees:", fee0.toString(), fee1.toString(), fee2.toString());
+
+        tx = await Vault.connect(governance).collectProtocol(
+            fee0.div(BigNumber.from(2)).toString(),
+            fee1.div(BigNumber.from(2)).toString(),
+            fee2.div(BigNumber.from(2)).toString(),
+            governance.address
+        );
+        await tx.wait();
+
+        // State
+        const governanceEthBalanceAfter = await getERC20Balance(governance.address, wethAddress);
+        const governanceUsdcBalanceAfter = await getERC20Balance(governance.address, usdcAddress);
+        const governanceOsqthBalanceAfter = await getERC20Balance(governance.address, osqthAddress);
+        console.log("> governanceEthBalanceAfter %s", governanceEthBalanceAfter);
+        console.log("> governanceUsdcBalanceAfter %s", governanceUsdcBalanceAfter);
+        console.log("> governanceOsqthBalanceAfter %s", governanceOsqthBalanceAfter);
+    });
+
+    it("feees time! 😝 greater then could", async function () {
+        const fee0 = await VaultStorage.connect(governance).accruedFeesEth();
+        const fee1 = await VaultStorage.connect(governance).accruedFeesUsdc();
+        const fee2 = await VaultStorage.connect(governance).accruedFeesOsqth();
+
+        let errored = false;
+        try {
+            tx = await Vault.connect(governance).collectProtocol(
+                fee0.add(BigNumber.from(2)).toString(),
+                fee1.add(BigNumber.from(2)).toString(),
+                fee2.add(BigNumber.from(2)).toString(),
+                governance.address
+            );
+            await tx.wait();
+        } catch (err) {
+            if (
+                err.message ==
+                `VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation underflowed or overflowed outside of an unchecked block)`
+            ) {
+                errored = true;
+            } else console.error(err.message);
+        }
+
+        assert(errored, "No error due to input too big");
+    });
+
+    it("feees time! 😝 but not governance", async function () {
+        const fee0 = await VaultStorage.connect(governance).accruedFeesEth();
+        const fee1 = await VaultStorage.connect(governance).accruedFeesUsdc();
+        const fee2 = await VaultStorage.connect(governance).accruedFeesOsqth();
+
+        let errored = false;
+        try {
+            tx = await Vault.connect(notgovernance).collectProtocol(
+                fee0.toString(),
+                fee1.toString(),
+                fee2.toString(),
+                notgovernance.address
+            );
+            await tx.wait();
+        } catch (err) {
+            if (err.message == `VM Exception while processing transaction: reverted with reason string 'C15'`) {
+                errored = true;
+            } else console.error(err.message);
+        }
+
+        assert(errored, "No error due to input too big");
+    });
+
+    it("feees time! 😝 - all", async function () {
+        // State
+        const governanceEthBalanceBefore = await getERC20Balance(governance.address, wethAddress);
+        const governanceUsdcBalanceBefore = await getERC20Balance(governance.address, usdcAddress);
+        const governanceOsqthBalanceBefore = await getERC20Balance(governance.address, osqthAddress);
+        console.log("> governanceEthBalanceBefore %s", governanceEthBalanceBefore);
+        console.log("> governanceUsdcBalanceBefore %s", governanceUsdcBalanceBefore);
+        console.log("> governanceOsqthBalanceBefore %s", governanceOsqthBalanceBefore);
+
+        const fee0 = (await VaultStorage.connect(governance).accruedFeesEth()).toString();
+        const fee1 = (await VaultStorage.connect(governance).accruedFeesUsdc()).toString();
+        const fee2 = (await VaultStorage.connect(governance).accruedFeesOsqth()).toString();
+        console.log("Fees:", fee0, fee1, fee2);
+
+        tx = await Vault.connect(governance).collectProtocol(fee0, fee1, fee2, governance.address);
+        await tx.wait();
+
+        // State
+        const governanceEthBalanceAfter = await getERC20Balance(governance.address, wethAddress);
+        const governanceUsdcBalanceAfter = await getERC20Balance(governance.address, usdcAddress);
+        const governanceOsqthBalanceAfter = await getERC20Balance(governance.address, osqthAddress);
+        console.log("> governanceEthBalanceAfter %s", governanceEthBalanceAfter);
+        console.log("> governanceUsdcBalanceAfter %s", governanceUsdcBalanceAfter);
+        console.log("> governanceOsqthBalanceAfter %s", governanceOsqthBalanceAfter);
+    }); = async (owner, amount, toAddress) => {
         await getWETH(amount, owner.address, "0x06920c9fc643de77b99cb7670a944ad31eaaa260");
         await approveERC20(owner, toAddress, amount, wethAddress);
     };
@@ -284,7 +388,6 @@ describe.skip("User story with", function () {
         await logBalance(governance.address, "> Governance Balance After price rebalance");
     });
 
-    return;
     it("withdraw3", async function () {
         await logBalance(depositor3.address, "> user3 Balance Before Witdraw");
         console.log("> user3 Share Before Witdraw", await getERC20Balance(depositor3.address, Vault.address));
@@ -295,5 +398,111 @@ describe.skip("User story with", function () {
 
         await logBalance(depositor3.address, "> user3 Balance After Witdraw");
         console.log("> user3 Share After Witdraw", await getERC20Balance(depositor3.address, Vault.address));
+    });
+
+    it("feees time! 😝 only half", async function () {
+        // State
+        const governanceEthBalanceBefore = await getERC20Balance(governance.address, wethAddress);
+        const governanceUsdcBalanceBefore = await getERC20Balance(governance.address, usdcAddress);
+        const governanceOsqthBalanceBefore = await getERC20Balance(governance.address, osqthAddress);
+        console.log("> governanceEthBalanceBefore %s", governanceEthBalanceBefore);
+        console.log("> governanceUsdcBalanceBefore %s", governanceUsdcBalanceBefore);
+        console.log("> governanceOsqthBalanceBefore %s", governanceOsqthBalanceBefore);
+
+        const fee0 = await VaultStorage.connect(governance).accruedFeesEth();
+        const fee1 = await VaultStorage.connect(governance).accruedFeesUsdc();
+        const fee2 = await VaultStorage.connect(governance).accruedFeesOsqth();
+        console.log("Fees:", fee0.toString(), fee1.toString(), fee2.toString());
+
+        tx = await Vault.connect(governance).collectProtocol(
+            fee0.div(BigNumber.from(2)).toString(),
+            fee1.div(BigNumber.from(2)).toString(),
+            fee2.div(BigNumber.from(2)).toString(),
+            governance.address
+        );
+        await tx.wait();
+
+        // State
+        const governanceEthBalanceAfter = await getERC20Balance(governance.address, wethAddress);
+        const governanceUsdcBalanceAfter = await getERC20Balance(governance.address, usdcAddress);
+        const governanceOsqthBalanceAfter = await getERC20Balance(governance.address, osqthAddress);
+        console.log("> governanceEthBalanceAfter %s", governanceEthBalanceAfter);
+        console.log("> governanceUsdcBalanceAfter %s", governanceUsdcBalanceAfter);
+        console.log("> governanceOsqthBalanceAfter %s", governanceOsqthBalanceAfter);
+    });
+
+    it("feees time! 😝 greater then could", async function () {
+        const fee0 = await VaultStorage.connect(governance).accruedFeesEth();
+        const fee1 = await VaultStorage.connect(governance).accruedFeesUsdc();
+        const fee2 = await VaultStorage.connect(governance).accruedFeesOsqth();
+
+        let errored = false;
+        try {
+            tx = await Vault.connect(governance).collectProtocol(
+                fee0.add(BigNumber.from(2)).toString(),
+                fee1.add(BigNumber.from(2)).toString(),
+                fee2.add(BigNumber.from(2)).toString(),
+                governance.address
+            );
+            await tx.wait();
+        } catch (err) {
+            if (
+                err.message ==
+                `VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation underflowed or overflowed outside of an unchecked block)`
+            ) {
+                errored = true;
+            } else console.error(err.message);
+        }
+
+        assert(errored, "No error due to input too big");
+    });
+
+    it("feees time! 😝 but not governance", async function () {
+        const fee0 = await VaultStorage.connect(governance).accruedFeesEth();
+        const fee1 = await VaultStorage.connect(governance).accruedFeesUsdc();
+        const fee2 = await VaultStorage.connect(governance).accruedFeesOsqth();
+
+        let errored = false;
+        try {
+            tx = await Vault.connect(notgovernance).collectProtocol(
+                fee0.toString(),
+                fee1.toString(),
+                fee2.toString(),
+                notgovernance.address
+            );
+            await tx.wait();
+        } catch (err) {
+            if (err.message == `VM Exception while processing transaction: reverted with reason string 'C15'`) {
+                errored = true;
+            } else console.error(err.message);
+        }
+
+        assert(errored, "No error due to input too big");
+    });
+
+    it("feees time! 😝 - all", async function () {
+        // State
+        const governanceEthBalanceBefore = await getERC20Balance(governance.address, wethAddress);
+        const governanceUsdcBalanceBefore = await getERC20Balance(governance.address, usdcAddress);
+        const governanceOsqthBalanceBefore = await getERC20Balance(governance.address, osqthAddress);
+        console.log("> governanceEthBalanceBefore %s", governanceEthBalanceBefore);
+        console.log("> governanceUsdcBalanceBefore %s", governanceUsdcBalanceBefore);
+        console.log("> governanceOsqthBalanceBefore %s", governanceOsqthBalanceBefore);
+
+        const fee0 = (await VaultStorage.connect(governance).accruedFeesEth()).toString();
+        const fee1 = (await VaultStorage.connect(governance).accruedFeesUsdc()).toString();
+        const fee2 = (await VaultStorage.connect(governance).accruedFeesOsqth()).toString();
+        console.log("Fees:", fee0, fee1, fee2);
+
+        tx = await Vault.connect(governance).collectProtocol(fee0, fee1, fee2, governance.address);
+        await tx.wait();
+
+        // State
+        const governanceEthBalanceAfter = await getERC20Balance(governance.address, wethAddress);
+        const governanceUsdcBalanceAfter = await getERC20Balance(governance.address, usdcAddress);
+        const governanceOsqthBalanceAfter = await getERC20Balance(governance.address, osqthAddress);
+        console.log("> governanceEthBalanceAfter %s", governanceEthBalanceAfter);
+        console.log("> governanceUsdcBalanceAfter %s", governanceUsdcBalanceAfter);
+        console.log("> governanceOsqthBalanceAfter %s", governanceOsqthBalanceAfter);
     });
 });

@@ -17,7 +17,7 @@ const {
 const { hardhatDeploy, deploymentParams } = require("@shared/deploy");
 const { BigNumber } = require("ethers");
 
-describe.skip("User story with 5 swaps", function () {
+describe.skip("Workflow with many actors", function () {
     const getAndApproveWETH = async (owner, amount, toAddress) => {
         await getWETH(amount, owner.address, "0x06920c9fc643de77b99cb7670a944ad31eaaa260");
         await approveERC20(owner, toAddress, amount, wethAddress);

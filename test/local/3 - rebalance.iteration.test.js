@@ -22,7 +22,8 @@ const {
 const { hardhatDeploy, deploymentParams } = require("@shared/deploy");
 const { BigNumber } = require("ethers");
 
-describe.skip("Rebalance iterative", function () {
+//TODO: change this to cheep rebalance with all 6 branches tested
+describe.skip("Test of Rebalance in different market conditions", function () {
     let swaper, depositor1, depositor2, depositor3, keeper, governance, swapAmount;
     it("Should set actors", async function () {
         const signers = await ethers.getSigners();
