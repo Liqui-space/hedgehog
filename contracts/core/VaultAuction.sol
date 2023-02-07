@@ -200,40 +200,46 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
                 osqthEthPrice
             );
         }
+        //current implied volatility
+        uint256 currentIV = IVaultMath(vaultMath).getIV();
+            
+        //uint256 interestRate = IVaultMath(vaultMath).getInterestRate();
+        //uint256 interestRateP = IVaultStorage(vaultStorage).interestRateAtLastRebalance();
+        uint256 interestRate = 25e17;
+        uint256 interestRateP = 24e17;
 
-        uint256 priceMultiplier;
-        uint256 weight;
-        Constants.Boundaries memory boundaries;
-        {
-            //scope to avoid stack too deep error
-            //current implied volatility
-            uint256 cIV = IVaultMath(vaultMath).getIV();
-            //previous implied volatility
-            uint256 pIV = IVaultStorage(vaultStorage).ivAtLastRebalance();
+        uint256 priceMultiplier = IVaultMath(vaultMath).getPriceMultiplier(_auctionTriggerTime);
 
-            //is a positive IV bump
-            bool isPosIVbump = cIV < pIV;
+        uint256 weightAdj = min(uint256(69e15).mul(interestRate).mul(currentIV), 25e16); // TODO as params
 
-            priceMultiplier = IVaultMath(vaultMath).getPriceMultiplier(_auctionTriggerTime);
-            //expected IV bump
-            uint256 expIVbump;
-            if (isPosIVbump) {
-                expIVbump = pIV.div(cIV);
-                weight = priceMultiplier.div(priceMultiplier + uint256(1e18)) + uint256(1e16).div(cIV);
-            } else {
-                expIVbump = cIV.div(pIV);
-                weight = priceMultiplier.div(priceMultiplier + uint256(1e18)) - uint256(1e16).div(cIV);
-            }
-            uint256 cachedBump = expIVbump.mul(2e18).sub(2e18);
-            expIVbump = cachedBump > uint256(99e16) ? uint256(99e16) : cachedBump;
-            //boundaries for auction prices (current price * multiplier)
-            boundaries = _getBoundaries(
-                ethUsdcPrice.mul(priceMultiplier),
-                osqthEthPrice.mul(priceMultiplier),
-                isPosIVbump,
-                expIVbump
-            );
+        int24 baseThreshold = _floor(toInt24(
+            int256(
+                currentIV.mul(1e22).div(tickSpacing).div((365e18).sqrt())
+                )
+                )+10).mul(tickSpacing);  //TODO 10 as parameter
+            
+        int24 tickAdj = toInt24(int256(floor(interestRate))).mul(tickSpacing); 
+
+        //TODO as param
+        if (interestRate > 25e17) {
+            lower = baseThreshold + tickAdj;
+            upper = baseThreshold - tickAdj;
+
+            uint256 weight = interestRate >= interestRateP ? uint256(5e17).sub(weightAdj) : uint256(5e17).add(weightAdj);
+        } else {
+            lower = baseThreshold - tickAdj;
+            upper = baseThreshold + tickAdj;
+
+            uint256 weight = interestRate >= interestRateP ? uint256(5e17).add(weightAdj) : uint256(5e17).sub(weightAdj);
         }
+        
+        //boundaries for auction prices (current price * multiplier)
+        Constants.Boundaries memory boundaries = _getBoundaries(
+            ethUsdcPrice.mul(priceMultiplier),
+            osqthEthPrice.mul(priceMultiplier),
+            lower,
+            upper
+        );        
 
         //Calculate liquidities
         uint128 liquidityEthUsdc = IVaultMath(vaultMath).getLiquidityForValue(
@@ -257,7 +263,6 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
                 boundaries,
                 liquidityEthUsdc,
                 liquidityOsqthEth,
-                totalValue,
                 ethUsdcPrice.mul(priceMultiplier)
             );
     }
@@ -295,8 +300,8 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
     function _getBoundaries(
         uint256 aEthUsdcPrice,
         uint256 aOsqthEthPrice,
-        bool isPosIVbump,
-        uint256 expIVbump
+        int24 lower,
+        int24 upper
     ) internal view returns (Constants.Boundaries memory) {
         int24 tickSpacing = IVaultStorage(vaultStorage).tickSpacing();
         //const = 2^96
@@ -314,37 +319,13 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
             tickSpacing
         );
 
-        //base thresholds
-        int24 baseThreshold = IVaultStorage(vaultStorage).baseThreshold();
-
-        //iv adj parameter
-        int24 tickAdj;
-        {
-            int24 baseAdj = toInt24(
-                int256(
-                    ((expIVbump.div(IVaultStorage(vaultStorage).adjParam())).floor() * uint256(int256(tickSpacing)))
-                        .div(1e36)
-                )
+        return
+            Constants.Boundaries(
+                tickFloorEthUsdc + tickSpacing + lower,
+                tickFloorEthUsdc - upper,
+                tickFloorOsqthEth + tickSpacing + lower,
+                tickFloorOsqthEth - upper
             );
-            tickAdj = baseAdj < int24(120) ? int24(60) : baseAdj;
-        }
-
-        if (isPosIVbump) {
-            return
-                Constants.Boundaries(
-                    tickFloorEthUsdc - baseThreshold - tickAdj,
-                    tickFloorEthUsdc + tickSpacing + baseThreshold - tickAdj,
-                    tickFloorOsqthEth - baseThreshold - tickAdj,
-                    tickFloorOsqthEth + tickSpacing + baseThreshold - tickAdj
-                );
-        } else {
-            return
-                Constants.Boundaries(
-                    tickFloorEthUsdc - baseThreshold + tickAdj,
-                    tickFloorEthUsdc + tickSpacing + baseThreshold + tickAdj,
-                    tickFloorOsqthEth - baseThreshold + tickAdj,
-                    tickFloorOsqthEth + tickSpacing + baseThreshold + tickAdj
-                );
         }
     }
 
