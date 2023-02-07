@@ -8,6 +8,10 @@ import {IOracle} from "./uniswap/IOracle.sol";
 import {IOsqthController} from "./osqth/IController.sol";
 import {IUniswapMath} from "./uniswap/IUniswapMath.sol";
 
+interface IEulerMarkets {
+    function interestRateModel(address underlying) external view returns (uint256);
+}
+
 library Constants {
     //@dev ETH-USDC Uniswap pool
     address public constant poolEthUsdc = 0x8ad599c3A0ff1De082011EFDDc58f1908eb6e6D8;
@@ -24,6 +28,9 @@ library Constants {
     IOracle public constant oracle = IOracle(0x65D66c76447ccB45dAf1e8044e918fA786A483A1);
 
     IOsqthController public constant osqthController = IOsqthController(0x64187ae08781B09368e6253F9E94951243A493D5);
+
+    //@dev Euler markets
+    IEulerMarkets constant markets = IEulerMarkets(0x3520d5a913427E6F0D6A83E07ccD4A4da316e4d3);
 
     struct Boundaries {
         int24 ethUsdcLower;

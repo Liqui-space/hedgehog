@@ -33,9 +33,9 @@ const deploymentParams = [
     BigNumber.from("950000000000000000"),
     BigNumber.from("1050000000000000000"),
     BigNumber.from("0"),
-];;
+];
 
-const hardhatDeploy = async (governance, params, keeperAddress = governance.address) => {
+const hardhatDeploy = async (governance, params = deploymentParams, keeperAddress = governance.address) => {
     await network.provider.send("evm_setAutomine", [false]);
 
     const UniswapMath = await deployContract("UniswapMath", [], false);
@@ -65,32 +65,43 @@ const hardhatDeploy = async (governance, params, keeperAddress = governance.addr
     console.log("> VaultTreasury:", arguments[4]);
     console.log("> VaultStorage:", arguments[5]);
 
+    const OneClickDeposit = await deployContract("OneClickDeposit", [], false);
+    const OneClickWithdraw = await deployContract("OneClickWithdraw", [], false);
+
     await network.provider.request({
         method: "evm_mine",
     });
-    {
-        let tx;
 
-        tx = await Vault.setComponents(...arguments);
+    await Vault.setComponents(...arguments);
+    await VaultAuction.setComponents(...arguments);
+    await VaultMath.setComponents(...arguments);
+    await VaultTreasury.setComponents(...arguments);
+    await VaultStorage.setComponents(...arguments);
 
-        tx = await VaultAuction.setComponents(...arguments);
+    await OneClickDeposit.setContracts(Vault.address);
+    await OneClickWithdraw.setContracts(Vault.address);
 
-        tx = await VaultMath.setComponents(...arguments);
-
-        tx = await VaultTreasury.setComponents(...arguments);
-
-        tx = await VaultStorage.setComponents(...arguments);
-    }
     await network.provider.request({
         method: "evm_mine",
     });
     await network.provider.send("evm_setAutomine", [true]);
 
-    return [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage];
+    return [
+        Vault,
+        VaultAuction,
+        VaultMath,
+        VaultTreasury,
+        VaultStorage,
+        OneClickDeposit,
+        OneClickWithdraw,
+        // Rebalancer,
+        // RebalanceModule1,
+        // RebalanceModule2,
+        // RebalanceModule3,
+    ];
 };
 
-const hardhatInitializeDeploed = async () => {
-
+const hardhatInitializeDeploy = async () => {
     let MyContract;
 
     //-- Core
@@ -117,7 +128,7 @@ const hardhatInitializeDeploed = async () => {
 
     MyContract = await ethers.getContractFactory("OneClickWithdraw");
     const OneClickWithdraw = await MyContract.attach(_oneClickWithdrawAddress);
-    
+
     //-- Rebalancers
 
     MyContract = await ethers.getContractFactory("Rebalancer");
@@ -125,14 +136,12 @@ const hardhatInitializeDeploed = async () => {
 
     MyContract = await ethers.getContractFactory("Module1");
     const RebalanceModule1 = await MyContract.attach(_rebalanceModule1);
-    
+
     MyContract = await ethers.getContractFactory("Module2");
     const RebalanceModule2 = await MyContract.attach(_rebalanceModule2);
-    
+
     MyContract = await ethers.getContractFactory("Module2");
     const RebalanceModule3 = await MyContract.attach(_rebalanceModule3);
-
-    
 
     return [
         Vault,
@@ -145,12 +154,12 @@ const hardhatInitializeDeploed = async () => {
         Rebalancer,
         RebalanceModule1,
         RebalanceModule2,
-        RebalanceModule3
-    ]
+        RebalanceModule3,
+    ];
 };
 
-module.exports = {     
-    hardhatInitializeDeploed,
+module.exports = {
+    hardhatInitializeDeploy,
     deploymentParams,
-    hardhatDeploy, 
+    hardhatDeploy,
 };

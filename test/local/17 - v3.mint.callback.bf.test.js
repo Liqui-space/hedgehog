@@ -12,7 +12,7 @@ const {
     getOSQTH,
     getUSDC,
 } = require("../helpers");
-const { hardhatInitializeDeploed, deploymentParams, hardhatDeploy } = require("@shared/deploy");
+const { hardhatInitializeDeploy, deploymentParams, hardhatDeploy } = require("@shared/deploy");
 const { BigNumber } = require("ethers");
 const abi = ethers.utils.defaultAbiCoder;
 
@@ -41,7 +41,7 @@ describe.skip("V3 mint callback check bf", function () {
         this.skip();
         await resetFork(15278541);
 
-        [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage] = await hardhatInitializeDeploed();
+        [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage] = await hardhatInitializeDeploy();
         const signers = await ethers.getSigners();
         unuthorized = signers[12];
 
