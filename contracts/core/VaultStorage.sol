@@ -230,7 +230,6 @@ contract VaultStorage is IVaultStorage, Faucet {
         int24 _orderOsqthEthUpper,
         uint256 _timeAtLastRebalance,
         uint256 _ivAtLastRebalance,
-        uint256 _totalValue,
         uint256 _ethPriceAtLastRebalance
     ) external override onlyVault {
         orderEthUsdcLower = _orderEthUsdcLower;
@@ -239,7 +238,6 @@ contract VaultStorage is IVaultStorage, Faucet {
         orderOsqthEthUpper = _orderOsqthEthUpper;
         timeAtLastRebalance = _timeAtLastRebalance;
         ivAtLastRebalance = _ivAtLastRebalance;
-        totalValue = _totalValue;
         ethPriceAtLastRebalance = _ethPriceAtLastRebalance;
     }
 

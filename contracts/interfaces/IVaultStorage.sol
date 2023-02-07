@@ -80,7 +80,6 @@ interface IVaultStorage {
         int24 _orderOsqthEthUpper,
         uint256 _timeAtLastRebalance,
         uint256 _ivAtLastRebalance,
-        uint256 _totalValue,
         uint256 _ethPriceAtLastRebalance
     ) external;
 

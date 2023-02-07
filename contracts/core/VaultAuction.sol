@@ -61,7 +61,6 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
                 IVaultStorage(vaultStorage).orderOsqthEthUpper(),
                 block.timestamp,
                 IVaultMath(vaultMath).getIV(),
-                cachedValue,
                 cachedPrice
             );
 
@@ -170,7 +169,6 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
             params.boundaries.osqthEthUpper,
             block.timestamp,
             IVaultMath(vaultMath).getIV(),
-            params.totalValue,
             params.ethUsdcPrice
         );
 
@@ -200,6 +198,12 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
                 osqthEthPrice
             );
         }
+
+        uint256 priceMultiplier = IVaultMath(vaultMath).getPriceMultiplier(_auctionTriggerTime);
+
+        uint256 weight;
+        Constants.Boundaries memory boundaries;
+        {
         //current implied volatility
         uint256 currentIV = IVaultMath(vaultMath).getIV();
             
@@ -207,39 +211,42 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
         //uint256 interestRateP = IVaultStorage(vaultStorage).interestRateAtLastRebalance();
         uint256 interestRate = 25e17;
         uint256 interestRateP = 24e17;
-
-        uint256 priceMultiplier = IVaultMath(vaultMath).getPriceMultiplier(_auctionTriggerTime);
-
-        uint256 weightAdj = min(uint256(69e15).mul(interestRate).mul(currentIV), 25e16); // TODO as params
-
-        int24 baseThreshold = _floor(toInt24(
-            int256(
-                currentIV.mul(1e22).div(tickSpacing).div((365e18).sqrt())
-                )
-                )+10).mul(tickSpacing);  //TODO 10 as parameter
-            
-        int24 tickAdj = toInt24(int256(floor(interestRate))).mul(tickSpacing); 
-
         //TODO as param
+        uint256 weightAdj = _min(uint256(69e15).mul(interestRate).mul(currentIV), 25e16); // TODO as params
+        
+        int24 baseThreshold = _floor(
+            toInt24(
+                int256(
+                    currentIV.mul(1e22).div((uint256(365e18)).sqrt())
+                    )
+                    ), 60) + 600;  //TODO 10 as parameter
+
+        int24 lower;
+        int24 upper;
         if (interestRate > 25e17) {
+            int24 tickAdj = toInt24(int256(interestRate.floor())) * 60; 
+
             lower = baseThreshold + tickAdj;
             upper = baseThreshold - tickAdj;
 
-            uint256 weight = interestRate >= interestRateP ? uint256(5e17).sub(weightAdj) : uint256(5e17).add(weightAdj);
+            weight = interestRate >= interestRateP ? uint256(5e17).sub(weightAdj) : uint256(5e17).add(weightAdj);
         } else {
+            int24 tickAdj = toInt24(int256(interestRate.floor())) * 60; 
+
             lower = baseThreshold - tickAdj;
             upper = baseThreshold + tickAdj;
 
-            uint256 weight = interestRate >= interestRateP ? uint256(5e17).add(weightAdj) : uint256(5e17).sub(weightAdj);
+            weight = interestRate >= interestRateP ? uint256(5e17).add(weightAdj) : uint256(5e17).sub(weightAdj);
         }
         
         //boundaries for auction prices (current price * multiplier)
-        Constants.Boundaries memory boundaries = _getBoundaries(
+        boundaries = _getBoundaries(
             ethUsdcPrice.mul(priceMultiplier),
             osqthEthPrice.mul(priceMultiplier),
             lower,
             upper
-        );        
+        );
+        }
 
         //Calculate liquidities
         uint128 liquidityEthUsdc = IVaultMath(vaultMath).getLiquidityForValue(
@@ -327,8 +334,7 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
                 tickFloorOsqthEth - upper
             );
         }
-    }
-
+    
     /// @dev exchange tokens with keeper
     function _swapWithKeeper(
         uint256 balance,
@@ -389,6 +395,10 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
         int24 compressed = tick / tickSpacing;
         if (tick < 0 && tick % tickSpacing != 0) compressed--;
         return compressed * tickSpacing;
+    }
+
+    function _min(uint256 a, uint256 b) internal pure returns (uint256) {
+        return a <= b ? a : b;
     }
 
     /// @dev Casts uint256 to uint160 with overflow check.
