@@ -78,30 +78,15 @@ const hardhatDeploy = async (governance, params = deploymentParams, keeperAddres
     await VaultTreasury.setComponents(...arguments);
     await VaultStorage.setComponents(...arguments);
 
-    await OneClickDeposit.setContracts(Vault.address);
-    await OneClickWithdraw.setContracts(Vault.address);
-
     await network.provider.request({
         method: "evm_mine",
     });
     await network.provider.send("evm_setAutomine", [true]);
 
-    return [
-        Vault,
-        VaultAuction,
-        VaultMath,
-        VaultTreasury,
-        VaultStorage,
-        OneClickDeposit,
-        OneClickWithdraw,
-        // Rebalancer,
-        // RebalanceModule1,
-        // RebalanceModule2,
-        // RebalanceModule3,
-    ];
+    return [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage];
 };
 
-const hardhatInitializeDeploy = async () => {
+const hardhatInitializedDeploy = async () => {
     let MyContract;
 
     //-- Core
@@ -121,6 +106,10 @@ const hardhatInitializeDeploy = async () => {
     MyContract = await ethers.getContractFactory("VaultStorage");
     const VaultStorage = await MyContract.attach(_vaultStorageAddress);
 
+    return [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage];
+};
+
+const hardhatGetPerepherals = async () => {
     //-- Perepherals
 
     MyContract = await ethers.getContractFactory("OneClickDeposit");
@@ -143,23 +132,12 @@ const hardhatInitializeDeploy = async () => {
     MyContract = await ethers.getContractFactory("Module2");
     const RebalanceModule3 = await MyContract.attach(_rebalanceModule3);
 
-    return [
-        Vault,
-        VaultAuction,
-        VaultMath,
-        VaultTreasury,
-        VaultStorage,
-        OneClickDeposit,
-        OneClickWithdraw,
-        Rebalancer,
-        RebalanceModule1,
-        RebalanceModule2,
-        RebalanceModule3,
-    ];
+    return [OneClickDeposit, OneClickWithdraw, Rebalancer, RebalanceModule1, RebalanceModule2, RebalanceModule3];
 };
 
 module.exports = {
-    hardhatInitializeDeploy,
+    hardhatGetPerepherals,
+    hardhatInitializedDeploy,
     deploymentParams,
     hardhatDeploy,
 };

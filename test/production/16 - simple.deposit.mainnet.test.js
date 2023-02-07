@@ -19,7 +19,7 @@ const {
     getOSQTH,
     getUSDC,
 } = require("../helpers");
-const { hardhatInitializeDeploy } = require("@shared/deploy");
+const { hardhatInitializedDeploy } = require("@shared/deploy");
 const { BigNumber } = require("ethers");
 
 describe.skip("Simple Deposit Mainnet", function () {

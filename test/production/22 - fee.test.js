@@ -1,7 +1,7 @@
 const { ethers } = require("hardhat");
 const { _governanceAddress, _hedgehogPeripheralsDeployer } = require("@shared/constants");
 
-const { hardhatInitializeDeploy, hardhatDeploy } = require("@shared/deploy");
+const { hardhatInitializedDeploy, hardhatDeploy, hardhatGetPerepherals } = require("@shared/deploy");
 const { resetFork, impersontate, getETH } = require("../helpers");
 
 describe.only("Fee test", function () {
@@ -12,8 +12,9 @@ describe.only("Fee test", function () {
         governance = await impersontate(_governanceAddress);
         hedgehogPeripheralsDeployer = await impersontate(_hedgehogPeripheralsDeployer);
 
-        [Vault, , VaultMath, , , , , Rebalancer, RebalanceModule1] = await hardhatDeploy(governance);
-        [Vault, , VaultMath, , , , , Rebalancer, RebalanceModule1] = await hardhatInitializeDeploy();
+        [Vault, , VaultMath, ,] = await hardhatDeploy(governance);
+        [Vault, , VaultMath, ,] = await hardhatInitializedDeploy();
+        [Rebalancer, RebalanceModule1] = await hardhatGetPerepherals();
 
         await getETH(hedgehogPeripheralsDeployer.address, ethers.utils.parseEther("2.0"));
         await getETH(governance.address, ethers.utils.parseEther("2.0"));
