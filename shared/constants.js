@@ -1,8 +1,6 @@
 const wethAddress = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
 const usdcAddress = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
 const osqthAddress = "0xf1B99e3E573A1a9C5E6B2Ce818b617F0E664E86B";
-const _biggestOSqthHolder = "0x5d296b8de19a3c134efafde57beedad4a1b76334";
-const _biggestUSDCHolder = "0xcffad3200574698b78f32232aa9d63eabd290703";
 const poolEthUsdc = "0x8ad599c3A0ff1De082011EFDDc58f1908eb6e6D8";
 const poolEthOsqth = "0x82c427AdFDf2d245Ec51D8046b41c4ee87F0d29C";
 
@@ -24,6 +22,7 @@ const _rebalanceModule1 = "0x86345a7f1D77F6056E2ff83e1b1071238AEf1483";
 const _rebalanceModule2 = "0x24F378A96eDAA91b20b86300771929Fcb10190E2";
 const _rebalanceModule3 = "0xfE08EEb4d98551Ea6eB474b24356a82Cf60277e2";
 const _rebalancer = "0x17e8a3e01A73c754052cdCdee29E5804300c5406";
+const _cheapRebalancerOld = "0x17e8a3e01A73c754052cdCdee29E5804300c5406";
 
 const _deployerAddress = "0x8f69766b870C45339E02A68ca8298861fDA8A563";
 const _governanceAddress = "0x2f0b98eF1093B41897a99b76956Fb69025F1682b";
@@ -34,11 +33,10 @@ const _bigRebalancerEuler = "0x24F378A96eDAA91b20b86300771929Fcb10190E2";
 const _bigRebalancerEuler2 = "0xfE08EEb4d98551Ea6eB474b24356a82Cf60277e2";
 
 module.exports = {
+    _cheapRebalancerOld,
     wethAddress,
     usdcAddress,
     osqthAddress,
-    _biggestOSqthHolder,
-    _biggestUSDCHolder,
     poolEthUsdc,
     poolEthOsqth,
     _harhatAccount1,

@@ -204,48 +204,43 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
         uint256 weight;
         Constants.Boundaries memory boundaries;
         {
-        //current implied volatility
-        uint256 currentIV = IVaultMath(vaultMath).getIV();
-            
-        //uint256 interestRate = IVaultMath(vaultMath).getInterestRate();
-        //uint256 interestRateP = IVaultStorage(vaultStorage).interestRateAtLastRebalance();
-        uint256 interestRate = 25e17;
-        uint256 interestRateP = 24e17;
-        //TODO as param
-        uint256 weightAdj = _min(uint256(69e15).mul(interestRate).mul(currentIV), 25e16); // TODO as params
-        
-        int24 baseThreshold = _floor(
-            toInt24(
-                int256(
-                    currentIV.mul(1e22).div((uint256(365e18)).sqrt())
-                    )
-                    ), 60) + 600;  //TODO 10 as parameter
+            //current implied volatility
+            uint256 currentIV = IVaultMath(vaultMath).getIV();
 
-        int24 lower;
-        int24 upper;
-        if (interestRate > 25e17) {
-            int24 tickAdj = toInt24(int256(interestRate.floor())) * 60; 
+            //uint256 interestRate = IVaultMath(vaultMath).getInterestRate();
+            //uint256 interestRateP = IVaultStorage(vaultStorage).interestRateAtLastRebalance();
+            uint256 interestRate = 25e17;
+            uint256 interestRateP = 24e17;
+            //TODO as param
+            uint256 weightAdj = _min(uint256(69e15).mul(interestRate).mul(currentIV), 25e16); // TODO as params
 
-            lower = baseThreshold + tickAdj;
-            upper = baseThreshold - tickAdj;
+            int24 baseThreshold = _floor(toInt24(int256(currentIV.mul(1e22).div((uint256(365e18)).sqrt()))), 60) + 600; //TODO 10 as parameter
 
-            weight = interestRate >= interestRateP ? uint256(5e17).sub(weightAdj) : uint256(5e17).add(weightAdj);
-        } else {
-            int24 tickAdj = toInt24(int256(interestRate.floor())) * 60; 
+            int24 lower;
+            int24 upper;
+            if (interestRate > 25e17) {
+                int24 tickAdj = toInt24(int256(interestRate.floor())) * 60;
 
-            lower = baseThreshold - tickAdj;
-            upper = baseThreshold + tickAdj;
+                lower = baseThreshold + tickAdj;
+                upper = baseThreshold - tickAdj;
 
-            weight = interestRate >= interestRateP ? uint256(5e17).add(weightAdj) : uint256(5e17).sub(weightAdj);
-        }
-        
-        //boundaries for auction prices (current price * multiplier)
-        boundaries = _getBoundaries(
-            ethUsdcPrice.mul(priceMultiplier),
-            osqthEthPrice.mul(priceMultiplier),
-            lower,
-            upper
-        );
+                weight = interestRate >= interestRateP ? uint256(5e17).sub(weightAdj) : uint256(5e17).add(weightAdj);
+            } else {
+                int24 tickAdj = toInt24(int256(interestRate.floor())) * 60;
+
+                lower = baseThreshold - tickAdj;
+                upper = baseThreshold + tickAdj;
+
+                weight = interestRate >= interestRateP ? uint256(5e17).add(weightAdj) : uint256(5e17).sub(weightAdj);
+            }
+
+            //boundaries for auction prices (current price * multiplier)
+            boundaries = _getBoundaries(
+                ethUsdcPrice.mul(priceMultiplier),
+                osqthEthPrice.mul(priceMultiplier),
+                lower,
+                upper
+            );
         }
 
         //Calculate liquidities
@@ -266,12 +261,7 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
         );
 
         return
-            Constants.AuctionParams(
-                boundaries,
-                liquidityEthUsdc,
-                liquidityOsqthEth,
-                ethUsdcPrice.mul(priceMultiplier)
-            );
+            Constants.AuctionParams(boundaries, liquidityEthUsdc, liquidityOsqthEth, ethUsdcPrice.mul(priceMultiplier));
     }
 
     /**
@@ -333,8 +323,8 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
                 tickFloorOsqthEth + tickSpacing + lower,
                 tickFloorOsqthEth - upper
             );
-        }
-    
+    }
+
     /// @dev exchange tokens with keeper
     function _swapWithKeeper(
         uint256 balance,

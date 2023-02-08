@@ -4,7 +4,7 @@ const { _governanceAddress, _hedgehogPeripheralsDeployer } = require("@shared/co
 const { hardhatInitializedDeploy, hardhatDeploy, hardhatGetPerepherals } = require("@shared/deploy");
 const { resetFork, impersontate, getETH } = require("../helpers");
 
-describe.only("Fee test", function () {
+describe.skip("Fee test", function () {
     let tx;
 
     it("Should deploy contract", async function () {

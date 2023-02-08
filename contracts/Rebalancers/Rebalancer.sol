@@ -98,4 +98,11 @@ contract Rebalancer is Ownable {
 
         IModule(module).setKeeper(address(this));
     }
+
+    //TDOO: remove this in prod
+    function rebalanceClassic(address module, uint256 threshold) public onlyOwner {
+        IVaultStorage(addressStorage).setKeeper(module);
+        IModule(module).rebalance(threshold, 0);
+        IModule(module).setKeeper(address(this));
+    }
 }
