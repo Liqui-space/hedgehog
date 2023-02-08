@@ -17,6 +17,8 @@ import {Constants} from "../libraries/Constants.sol";
 import {Faucet} from "../libraries/Faucet.sol";
 import {IUniswapMath} from "../libraries/uniswap/IUniswapMath.sol";
 
+import "hardhat/console.sol";
+
 contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
     using PRBMathUD60x18 for uint256;
 
@@ -182,6 +184,8 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
     function _getAuctionParams(uint256 _auctionTriggerTime) internal view returns (Constants.AuctionParams memory) {
         //current ETH/USDC and oSQTH/ETH price
         (uint256 ethUsdcPrice, uint256 osqthEthPrice) = IVaultMath(vaultMath).getPrices();
+        console.log("ethUsdcPrice %s", ethUsdcPrice);
+        console.log("osqthEthPrice %s", osqthEthPrice);
 
         //total ETH value of the strategy holdings at the current prices
         uint256 totalValue;
@@ -198,41 +202,51 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
                 osqthEthPrice
             );
         }
+        console.log("totalValue %s", totalValue);        
 
         uint256 priceMultiplier = IVaultMath(vaultMath).getPriceMultiplier(_auctionTriggerTime);
+        console.log("priceMultiplier %s", priceMultiplier);
 
         uint256 weight;
         Constants.Boundaries memory boundaries;
         {
             //current implied volatility
             uint256 currentIV = IVaultMath(vaultMath).getIV();
+            console.log("currentIV %s", currentIV);
 
             //uint256 interestRate = IVaultMath(vaultMath).getInterestRate();
             //uint256 interestRateP = IVaultStorage(vaultStorage).interestRateAtLastRebalance();
-            uint256 interestRate = 25e17;
+            uint256 interestRate = _min(IVaultMath(vaultMath).getInterestRate(), 42e17); //TODO as param
+
+            console.log("interestRate %s", uint256(int256(interestRate.floor())));
             uint256 interestRateP = 24e17;
             //TODO as param
             uint256 weightAdj = _min(uint256(69e15).mul(interestRate).mul(currentIV), 25e16); // TODO as params
+            console.log("weightAdj %s", weightAdj);
 
-            int24 baseThreshold = _floor(toInt24(int256(currentIV.mul(1e22).div((uint256(365e18)).sqrt()))), 60) + 600; //TODO 10 as parameter
+            int24 baseThreshold = _floor(toInt24(int256(currentIV.div(19104973174542800179).div(1e32))) , 60) + 600; //TODO 10 as parameter
+            console.log("baseThreshold %s", uint256(int256(baseThreshold)));
 
             int24 lower;
             int24 upper;
             if (interestRate > 25e17) {
-                int24 tickAdj = toInt24(int256(interestRate.floor())) * 60;
+                int24 tickAdj = toInt24(int256((interestRate.floor()).div(1e36))) * 60;
 
                 lower = baseThreshold + tickAdj;
                 upper = baseThreshold - tickAdj;
 
                 weight = interestRate >= interestRateP ? uint256(5e17).sub(weightAdj) : uint256(5e17).add(weightAdj);
             } else {
-                int24 tickAdj = toInt24(int256(interestRate.floor())) * 60;
+                int24 tickAdj = toInt24(int256((interestRate.floor()).div(1e36))) * 60;
 
                 lower = baseThreshold - tickAdj;
                 upper = baseThreshold + tickAdj;
-
+    
                 weight = interestRate >= interestRateP ? uint256(5e17).add(weightAdj) : uint256(5e17).sub(weightAdj);
             }
+
+            console.log("lower %s, upper %s", uint256(int256(lower)), uint256(int256(upper)));
+            console.log("weight %s", weight);            
 
             //boundaries for auction prices (current price * multiplier)
             boundaries = _getBoundaries(
@@ -242,6 +256,9 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
                 upper
             );
         }
+        
+        console.log("abc %s", totalValue.mul(ethUsdcPrice).mul(weight).mul(priceMultiplier));            
+
 
         //Calculate liquidities
         uint128 liquidityEthUsdc = IVaultMath(vaultMath).getLiquidityForValue(
@@ -252,6 +269,8 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
             1e12
         );
 
+        console.log("liquidityEthUsdc %s", liquidityEthUsdc);
+
         uint128 liquidityOsqthEth = IVaultMath(vaultMath).getLiquidityForValue(
             totalValue.mul(uint256(1e18) - weight).mul(priceMultiplier),
             osqthEthPrice,
@@ -259,6 +278,8 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
             uint256(1e18).div(IVaultMath(vaultMath).getPriceFromTick(boundaries.osqthEthUpper)),
             1e18
         );
+
+        console.log("liquidityOsqthEth %s", liquidityOsqthEth);
 
         return
             Constants.AuctionParams(boundaries, liquidityEthUsdc, liquidityOsqthEth, ethUsdcPrice.mul(priceMultiplier));
@@ -308,6 +329,7 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
             ),
             tickSpacing
         );
+        console.log("tickFloorEthUsdc %s", uint256(int256(tickFloorEthUsdc)));
 
         int24 tickFloorOsqthEth = _floor(
             IUniswapMath(uniswapMath).getTickAtSqrtRatio(
@@ -316,12 +338,20 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
             tickSpacing
         );
 
+        console.log("tickFloorOsqthEth %s", uint256(int256(tickFloorOsqthEth)));
+        console.log("tickSpacing %s", uint256(int256(tickSpacing)));
+
+        console.log("euLower %s", uint256(int256(tickFloorEthUsdc + tickSpacing + lower)));
+        console.log("euUpper %s", uint256(int256(tickFloorEthUsdc - upper)));
+        console.log("seLower %s", uint256(int256(tickFloorOsqthEth + tickSpacing + lower)));
+        console.log("seUpper %s", uint256(int256(tickFloorOsqthEth - upper)));
+
         return
             Constants.Boundaries(
-                tickFloorEthUsdc + tickSpacing + lower,
                 tickFloorEthUsdc - upper,
-                tickFloorOsqthEth + tickSpacing + lower,
-                tickFloorOsqthEth - upper
+                tickFloorEthUsdc + tickSpacing + lower,
+                tickFloorOsqthEth - upper,
+                tickFloorOsqthEth + tickSpacing + lower
             );
     }
 

@@ -27,8 +27,6 @@ contract VaultMath is IVaultMath, ReentrancyGuard, Faucet {
      * @notice strategy constructor
      */
     constructor() Faucet() {
-        uint256 interest = Constants.markets.interestRateModel(address(Constants.weth));
-        console.log(interest);
     }
 
     /**
@@ -344,6 +342,11 @@ contract VaultMath is IVaultMath, ReentrancyGuard, Faucet {
         }
         return ((markIndex.ln()).mul(20857142857142857142)).sqrt();
     }
+
+    /// @dev Fetches USDC interest rate
+    function getInterestRate() external view override returns (uint256) {
+        return(uint256(int256(Constants.markets.interestRate(address(Constants.usdc)))).mul(31536000).mul(1e29)); 
+    } 
 
     /// @dev Casts uint256 to uint128 with overflow check.
     function _toUint128(uint256 x) internal pure returns (uint128) {

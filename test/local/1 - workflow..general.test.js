@@ -26,7 +26,7 @@ describe.only("General Workflow", function () {
 
     let Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, tx;
     it("Should deploy contract", async function () {
-        await resetFork(16584142);
+        await resetFork(16586904);
 
         const params = [...deploymentParams];
         params[6] = "0";
@@ -78,7 +78,7 @@ describe.only("General Workflow", function () {
 
     // return;
     it("2 swaps", async function () {
-        await mineSomeBlocks(2216);
+        await mineSomeBlocks(6000);
 
         swapAmount = utils.parseUnits("100", 18).toString();
         await getWETH(swapAmount, V3Helper.address);
@@ -86,14 +86,14 @@ describe.only("General Workflow", function () {
         tx = await V3Helper.connect(swaper).swapWETH_USDC(swapAmount);
         await tx.wait();
 
-        await mineSomeBlocks(554);
+        await mineSomeBlocks(200);
 
         swapAmount = utils.parseUnits("40", 18).toString();
         await getOSQTH(swapAmount, V3Helper.address);
         tx = await V3Helper.connect(swaper).swapOSQTH_WETH(swapAmount);
         await tx.wait();
 
-        await mineSomeBlocks(554);
+        await mineSomeBlocks(81000);
     });
 
     it("rebalance", async function () {

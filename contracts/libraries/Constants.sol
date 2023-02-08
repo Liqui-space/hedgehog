@@ -9,7 +9,7 @@ import {IOsqthController} from "./osqth/IController.sol";
 import {IUniswapMath} from "./uniswap/IUniswapMath.sol";
 
 interface IEulerMarkets {
-    function interestRateModel(address underlying) external view returns (uint256);
+    function interestRate(address underlying) external view returns (int96);
 }
 
 library Constants {
