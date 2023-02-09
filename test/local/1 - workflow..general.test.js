@@ -44,8 +44,8 @@ describe.only("General Workflow", function () {
             VaultStorage
         );
 
-        // tx = await Rebalancer.connect(rebalancer).setKeeper(keeper.address);
-        // await tx.wait();
+        tx = await Rebalancer.connect(rebalancer).setKeeper(keeper.address);
+        await tx.wait();
     });
 
     it("deposit1", async function () {
@@ -107,9 +107,7 @@ describe.only("General Workflow", function () {
 
         await logBalance(keeper.address, "> keeper before rebalance");
 
-        // tx = await VaultAuction.connect(keeper).timeRebalance(keeper.address, 0, 0, 0);
-        // receipt = await tx.wait();
-        tx = await Rebalancer.connect(rebalancer).rebalanceClassic(RebalanceModule3.address, 0);
+        tx = await VaultAuction.connect(keeper).timeRebalance(keeper.address, 0, 0, 0);
         receipt = await tx.wait();
 
         await logBalance(keeper.address, "> keeper after rebalance");
