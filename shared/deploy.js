@@ -1,18 +1,8 @@
 const { ethers } = require("hardhat");
 const { impersontate, getETH } = require("../test/helpers");
 const { utils, BigNumber } = ethers;
-
-const deployContract = async (name, params, deploy = true) => {
-    console.log("Deploying ->", name);
-    const Contract = await ethers.getContractFactory(name);
-    let contract = await Contract.deploy(...params);
-    if (deploy) {
-        await contract.deployed();
-    }
-    return contract;
-};
-
 const {
+    _uniMathAddress,
     _vaultAddress,
     _vaultAuctionAddress,
     _vaultMathAddress,
@@ -25,6 +15,16 @@ const {
     _oneClickDepositAddress,
     _oneClickWithdrawAddress,
 } = require("./constants");
+
+const deployContract = async (name, params, deploy = true) => {
+    console.log("Deploying ->", name);
+    const Contract = await ethers.getContractFactory(name);
+    let contract = await Contract.deploy(...params);
+    if (deploy) {
+        await contract.deployed();
+    }
+    return contract;
+};
 
 const deploymentParams = [
     utils.parseUnits("100", 18),
@@ -66,9 +66,6 @@ const hardhatDeploy = async (governanceAddress, params = deploymentParams, keepe
     console.log("> VaultTreasury:", arguments[4]);
     console.log("> VaultStorage:", arguments[5]);
 
-    const OneClickDeposit = await deployContract("OneClickDeposit", [], false);
-    const OneClickWithdraw = await deployContract("OneClickWithdraw", [], false);
-
     await network.provider.request({
         method: "evm_mine",
     });
@@ -84,7 +81,7 @@ const hardhatDeploy = async (governanceAddress, params = deploymentParams, keepe
     });
     await network.provider.send("evm_setAutomine", [true]);
 
-    return [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage];
+    return [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, arguments];
 };
 
 const hardhatInitializedDeploy = async () => {
@@ -107,11 +104,29 @@ const hardhatInitializedDeploy = async () => {
     MyContract = await ethers.getContractFactory("VaultStorage");
     const VaultStorage = await MyContract.attach(_vaultStorageAddress);
 
+    const arguments = [
+        _uniMathAddress,
+        Vault.address,
+        VaultAuction.address,
+        VaultMath.address,
+        VaultTreasury.address,
+        VaultStorage.address,
+    ];
+
+    console.log("> UniswapMath:", arguments[0]);
+    console.log("> Vault:", arguments[1]);
+    console.log("> VaultAuction:", arguments[2]);
+    console.log("> VaultMath:", arguments[3]);
+    console.log("> VaultTreasury:", arguments[4]);
+    console.log("> VaultStorage:", arguments[5]);
+
     return [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage];
 };
 
 //? Now we will reuse HV2 Perepherals to the fullest, and change it to new one in the future
-const hardhatGetPerepherals = async (vaultAddress, governance, keeper, rebalancer, VaultStorage) => {
+const hardhatGetPerepherals = async (governance, keeper, rebalancer, _arguments, VaultStorage) => {
+    const [, _Vault, _VaultAuction, _VaultMath, _VaultTreasury, _VaultStorage] = _arguments;
+
     const V3Helper = await deployContract("V3Helper", [], false);
 
     //-- Perepherals
@@ -125,50 +140,26 @@ const hardhatGetPerepherals = async (vaultAddress, governance, keeper, rebalance
     const owner = await impersontate(await OneClickDeposit.owner());
     await getETH(owner, ethers.utils.parseEther("2.5"));
 
-    // //? Change contracts in current oneclicks
-    tx = await OneClickDeposit.connect(owner).setContracts(vaultAddress);
+    //? Change contracts in current oneclicks
+    tx = await OneClickDeposit.connect(owner).setContracts(_Vault);
     await tx.wait();
 
-    tx = await OneClickWithdraw.connect(owner).setContracts(vaultAddress);
+    tx = await OneClickWithdraw.connect(owner).setContracts(_Vault);
     await tx.wait();
 
     //-- Rebalancers
 
     const Rebalancer = await deployContract("Rebalancer", [], false);
-    tx = await Rebalancer.setParams(VaultStorage.address);
+    tx = await Rebalancer.setParams(_VaultStorage);
     await tx.wait();
 
     tx = await Rebalancer.transferOwnership(rebalancer.address);
     await tx.wait();
 
-    MyContract = await ethers.getContractFactory("Module1");
-    const RebalanceModule1 = await MyContract.attach(_rebalanceModule1);
-
-    MyContract = await ethers.getContractFactory("Module2");
-    const RebalanceModule2 = await MyContract.attach(_rebalanceModule2);
-
-    MyContract = await ethers.getContractFactory("Module2");
-    const RebalanceModule3 = await MyContract.attach(_rebalanceModule3);
-
-    _CheapRebalancer = await ethers.getContractAt("ICheapRebalancerOld", _cheapRebalancerOld);
-
-    const owner3 = await impersontate(await RebalanceModule1.owner());
-    await getETH(owner3, ethers.utils.parseEther("2.5"));
-
-    tx = await RebalanceModule1.connect(owner3).transferOwnership(Rebalancer.address);
+    const RebalanceModule4 = await deployContract("Module2", [], false);
+    tx = await RebalanceModule4.setContracts(_VaultAuction, _VaultMath, _VaultTreasury, _VaultStorage);
     await tx.wait();
-
-    const owner2 = await impersontate(await _CheapRebalancer.owner());
-    await getETH(owner2, ethers.utils.parseEther("2.5"));
-
-    tx = await _CheapRebalancer.connect(owner2).setContracts(RebalanceModule2.address);
-    await tx.wait();
-    tx = await _CheapRebalancer.connect(owner2).returnOwner(Rebalancer.address);
-    await tx.wait();
-
-    tx = await _CheapRebalancer.connect(owner2).setContracts(RebalanceModule3.address);
-    await tx.wait();
-    tx = await _CheapRebalancer.connect(owner2).returnOwner(Rebalancer.address);
+    tx = await RebalanceModule4.transferOwnership(Rebalancer.address);
     await tx.wait();
 
     tx = await VaultStorage.connect(governance).setGovernance(Rebalancer.address);
@@ -177,15 +168,7 @@ const hardhatGetPerepherals = async (vaultAddress, governance, keeper, rebalance
     tx = await VaultStorage.connect(keeper).setKeeper(Rebalancer.address);
     await tx.wait();
 
-    return [
-        V3Helper,
-        OneClickDeposit,
-        OneClickWithdraw,
-        Rebalancer,
-        RebalanceModule1,
-        RebalanceModule2,
-        RebalanceModule3,
-    ];
+    return [V3Helper, OneClickDeposit, OneClickWithdraw, Rebalancer, undefined, undefined, undefined, RebalanceModule4];
 };
 
 module.exports = {

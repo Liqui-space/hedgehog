@@ -30,22 +30,14 @@ describe.only("General Workflow", function () {
 
         const params = [...deploymentParams];
         params[6] = "0";
-        [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage] = await hardhatDeploy(
+        [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, _arguments] = await hardhatDeploy(
             governance.address,
             params,
             keeper.address
         );
 
-        [V3Helper, OneClickDeposit, OneClickWithdraw, Rebalancer, , , RebalanceModule3] = await hardhatGetPerepherals(
-            Vault.address,
-            governance,
-            keeper,
-            rebalancer,
-            VaultStorage
-        );
-
-        // tx = await Rebalancer.connect(rebalancer).setKeeper(keeper.address);
-        // await tx.wait();
+        [V3Helper, OneClickDeposit, OneClickWithdraw, Rebalancer, , , RebalanceModule3, RebalanceModule4] =
+            await hardhatGetPerepherals(governance, keeper, rebalancer, _arguments, VaultStorage);
     });
 
     it("deposit1", async function () {
@@ -97,19 +89,9 @@ describe.only("General Workflow", function () {
     });
 
     it("rebalance", async function () {
-        await getAndApprove(
-            keeper,
-            VaultAuction.address,
-            utils.parseUnits("10", 18),
-            utils.parseUnits("10000", 6),
-            utils.parseUnits("4", 18)
-        );
-
         await logBalance(keeper.address, "> keeper before rebalance");
 
-        // tx = await VaultAuction.connect(keeper).timeRebalance(keeper.address, 0, 0, 0);
-        // receipt = await tx.wait();
-        tx = await Rebalancer.connect(rebalancer).rebalanceClassic(RebalanceModule3.address, 0);
+        tx = await Rebalancer.connect(rebalancer).rebalanceClassic(RebalanceModule4.address, 0);
         receipt = await tx.wait();
 
         await logBalance(keeper.address, "> keeper after rebalance");

@@ -3,6 +3,7 @@ pragma solidity =0.8.4;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import {PRBMathUD60x18} from "../libraries/math/PRBMathUD60x18.sol";
+import "hardhat/console.sol";
 
 interface IVaultStorage {
     function timeAtLastRebalance() external view returns (uint256);
@@ -18,6 +19,8 @@ interface IVaultStorage {
     function setGovernance(address _governance) external;
 
     function setKeeper(address _governance) external;
+
+    function keeper() external view returns (address);
 }
 
 interface IModule {
