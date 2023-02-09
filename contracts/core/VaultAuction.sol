@@ -202,7 +202,7 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
                 osqthEthPrice
             );
         }
-        console.log("totalValue %s", totalValue);        
+        console.log("totalValue %s", totalValue);
 
         uint256 priceMultiplier = IVaultMath(vaultMath).getPriceMultiplier(_auctionTriggerTime);
         console.log("priceMultiplier %s", priceMultiplier);
@@ -224,7 +224,7 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
             uint256 weightAdj = _min(uint256(69e15).mul(interestRate).mul(currentIV), 25e16); // TODO as params
             console.log("weightAdj %s", weightAdj);
 
-            int24 baseThreshold = _floor(toInt24(int256(currentIV.div(19104973174542800179).div(1e32))) , 60) + 600; //TODO 10 as parameter
+            int24 baseThreshold = _floor(toInt24(int256(currentIV.div(19104973174542800179).div(1e32))), 60) + 600; //TODO 10 as parameter
             console.log("baseThreshold %s", uint256(int256(baseThreshold)));
 
             int24 lower;
@@ -241,12 +241,12 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
 
                 lower = baseThreshold - tickAdj;
                 upper = baseThreshold + tickAdj;
-    
+
                 weight = interestRate >= interestRateP ? uint256(5e17).add(weightAdj) : uint256(5e17).sub(weightAdj);
             }
 
             console.log("lower %s, upper %s", uint256(int256(lower)), uint256(int256(upper)));
-            console.log("weight %s", weight);            
+            console.log("weight %s", weight);
 
             //boundaries for auction prices (current price * multiplier)
             boundaries = _getBoundaries(
@@ -256,9 +256,8 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
                 upper
             );
         }
-        
-        console.log("abc %s", totalValue.mul(ethUsdcPrice).mul(weight).mul(priceMultiplier));            
 
+        console.log("abc %s", totalValue.mul(ethUsdcPrice).mul(weight).mul(priceMultiplier));
 
         //Calculate liquidities
         uint128 liquidityEthUsdc = IVaultMath(vaultMath).getLiquidityForValue(
