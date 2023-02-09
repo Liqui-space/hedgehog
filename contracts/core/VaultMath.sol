@@ -344,9 +344,13 @@ contract VaultMath is IVaultMath, ReentrancyGuard, Faucet {
     }
 
     /// @dev Fetches USDC interest rate
-    function getInterestRate() external view override returns (uint256) {
-        return(uint256(int256(Constants.markets.interestRate(address(Constants.usdc)))).mul(31536000).mul(1e29)); 
-    } 
+    function getInterestRate() external view override returns (uint256 ir) {
+
+        uint256 irMax = IVaultStorage(vaultStorage).irMax();
+        
+        ir = uint256(int256(Constants.markets.interestRate(address(Constants.usdc)))).mul(31536000).mul(1e29);
+        ir = ir > irMax ? irMax : ir;
+    }
 
     /// @dev Casts uint256 to uint128 with overflow check.
     function _toUint128(uint256 x) internal pure returns (uint128) {

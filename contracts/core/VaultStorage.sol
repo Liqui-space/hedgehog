@@ -40,19 +40,30 @@ contract VaultStorage is IVaultStorage, Faucet {
     //@dev min price change for initiating rebalance (1.69%)
     uint256 public override rebalanceThreshold = 10169e14;
 
-    //@dev implied volatility when last rebalance executed
-    uint256 public override ivAtLastRebalance;
+    //@dev interest rate when last rebalance executed
+    uint256 public override interestRateAtLastRebalance;
+
+    
+    
+    //@dev iv adjustment parameter (0.05)
+    uint256 public override irMax = 42e17;
+
+    uint256 public override irLimit = 25e17;
+
+    uint256 public override weightAdjParam = 69e15;
+
+    uint256 public override weightAdjLimit = 25e16;
+
+    uint256 public override baseThresholdScale = 1e32;
+
+    int24 public override baseThresholdFloor = 10; 
+
+
+    
 
     //@dev time difference to trigger a hedge (seconds)
     uint256 public override rebalanceTimeThreshold;
     uint256 public override rebalancePriceThreshold;
-
-    //@dev iv adjustment parameter (0.05)
-    uint256 public override adjParam = 5e16;
-
-    //@dev ticks thresholds for boundaries calculation
-    //values for tests
-    int24 public override baseThreshold = 1020;
 
     //@dev protocol fee expressed as multiple of 1e-6
     uint256 public override protocolFee;
@@ -61,9 +72,6 @@ contract VaultStorage is IVaultStorage, Faucet {
     uint256 public override accruedFeesEth;
     uint256 public override accruedFeesUsdc;
     uint256 public override accruedFeesOsqth;
-
-    //@dev total value
-    uint256 public override totalValue;
 
     //@dev rebalance auction duration (seconds)
     uint256 public override auctionTime;
@@ -112,7 +120,6 @@ contract VaultStorage is IVaultStorage, Faucet {
         maxPriceMultiplier = _maxPriceMultiplier;
 
         timeAtLastRebalance = 0;
-        ivAtLastRebalance = 0;
 
         governance = _governance;
         keeper = _keeper;
@@ -175,22 +182,6 @@ contract VaultStorage is IVaultStorage, Faucet {
     }
 
     /**
-     * @notice owner can set the base threshold for boundaries calculation
-     * @param _baseThreshold the rebalance time threshold, in ticks
-     */
-    function setBaseThreshold(int24 _baseThreshold) external onlyGovernance {
-        baseThreshold = _baseThreshold;
-    }
-
-    /**
-     * @notice owner can set the base threshold for boundaries calculation
-     * @param _adjParam the iv adjustment parameter
-     */
-    function setAdjParam(uint256 _adjParam) external onlyGovernance {
-        adjParam = _adjParam;
-    }
-
-    /**
      * @notice owner can set the auction time, in seconds, that a hedge auction runs for
      * @param _auctionTime the length of the hedge auction in seconds
      */
@@ -229,7 +220,7 @@ contract VaultStorage is IVaultStorage, Faucet {
         int24 _orderOsqthEthLower,
         int24 _orderOsqthEthUpper,
         uint256 _timeAtLastRebalance,
-        uint256 _ivAtLastRebalance,
+        uint256 _interestRateAtLastRebalance,
         uint256 _ethPriceAtLastRebalance
     ) external override onlyVault {
         orderEthUsdcLower = _orderEthUsdcLower;
@@ -237,7 +228,7 @@ contract VaultStorage is IVaultStorage, Faucet {
         orderOsqthEthLower = _orderOsqthEthLower;
         orderOsqthEthUpper = _orderOsqthEthUpper;
         timeAtLastRebalance = _timeAtLastRebalance;
-        ivAtLastRebalance = _ivAtLastRebalance;
+        interestRateAtLastRebalance = _interestRateAtLastRebalance;
         ethPriceAtLastRebalance = _ethPriceAtLastRebalance;
     }
 
@@ -270,11 +261,11 @@ contract VaultStorage is IVaultStorage, Faucet {
     /// @dev function to set Time, IV, and ethPrice during the first deposit
     function setParamsBeforeDeposit(
         uint256 _timeAtLastRebalance,
-        uint256 _ivAtLastRebalance,
+        uint256 _interestRateAtLastRebalance,
         uint256 _ethPriceAtLastRebalance
     ) external override onlyVault {
         timeAtLastRebalance = _timeAtLastRebalance;
-        ivAtLastRebalance = _ivAtLastRebalance;
+        interestRateAtLastRebalance = _interestRateAtLastRebalance;
         ethPriceAtLastRebalance = _ethPriceAtLastRebalance;
     }
 
