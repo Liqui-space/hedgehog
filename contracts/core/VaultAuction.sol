@@ -52,12 +52,9 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
         uint256 cachedPrice = IVaultStorage(vaultStorage).ethPriceAtLastRebalance();
 
         uint256 ratio = cachedPrice > ethUsdcPrice ? cachedPrice.div(ethUsdcPrice) : ethUsdcPrice.div(cachedPrice);
-        uint256 cachedValue = 0;
-
-        //TODO поставить rebalanceThreshold в 1 при деплое, а потом поменять на нормальный
 
         // no rebalance if the price change <= rebalanceThreshold
-        if (ratio <= IVaultStorage(vaultStorage).rebalanceThreshold() && cachedValue != 0) {
+        if (ratio <= IVaultStorage(vaultStorage).rebalanceThreshold()) {
             IVaultStorage(vaultStorage).setSnapshot(
                 IVaultStorage(vaultStorage).orderEthUsdcLower(),
                 IVaultStorage(vaultStorage).orderEthUsdcUpper(),
@@ -224,7 +221,7 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
             
             int24 tickSpacing = IVaultStorage(vaultStorage).tickSpacing();
             
-            int24 baseThreshold = _floor(toInt24(int256(currentIV.div(19104973174542800179).div(IVaultStorage(vaultStorage).baseThresholdScale()))) , tickSpacing) + IVaultStorage(vaultStorage).baseThresholdFloor() * tickSpacing; //TODO 10 as parameter
+            int24 baseThreshold = _floor(toInt24(int256(currentIV.div(19104973174542800179).div(IVaultStorage(vaultStorage).baseThresholdScale()))) , tickSpacing) + IVaultStorage(vaultStorage).baseThresholdFloor() * tickSpacing;
             console.log("baseThreshold %s", uint256(int256(baseThreshold)));
 
             int24 lower;

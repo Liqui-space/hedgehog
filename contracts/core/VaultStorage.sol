@@ -38,7 +38,7 @@ contract VaultStorage is IVaultStorage, Faucet {
     uint256 public override ethPriceAtLastRebalance;
 
     //@dev min price change for initiating rebalance (1.69%)
-    uint256 public override rebalanceThreshold = 10169e14;
+    uint256 public override rebalanceThreshold = 1e18;
 
     //@dev interest rate when last rebalance executed
     uint256 public override interestRateAtLastRebalance;
@@ -56,7 +56,12 @@ contract VaultStorage is IVaultStorage, Faucet {
 
     uint256 public override baseThresholdScale = 1e32;
 
-    int24 public override baseThresholdFloor = 10; 
+    int24 public override baseThresholdFloor = 10;
+
+    int24 public override maxTwapDeviationEthUsdc = 120;
+
+    int24 public override maxTwapDeviationOsqthEth = 120;
+
 
 
     

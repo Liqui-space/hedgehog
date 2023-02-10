@@ -251,10 +251,7 @@ contract VaultMath is IVaultMath, ReentrancyGuard, Faucet {
         int24 deviation0 = ethUsdcTick > twapEthUsdc ? ethUsdcTick - twapEthUsdc : twapEthUsdc - ethUsdcTick;
         int24 deviation1 = osqthEthTick > twapOsqthEth ? osqthEthTick - twapOsqthEth : twapOsqthEth - osqthEthTick;
 
-        //max twap deviation = tick spacing * 2 (~1.5%)
-        int24 maxTD = IVaultStorage(vaultStorage).tickSpacing() * 2;
-
-        require(deviation0 <= maxTD || deviation1 <= maxTD, "C19");
+        require(deviation0 <= IVaultStorage(vaultStorage).maxTwapDeviationEthUsdc() && deviation1 <= IVaultStorage(vaultStorage).maxTwapDeviationOsqthEth(), "C19");
 
         ethUsdcPrice = uint256(1e30).div(getPriceFromTick(ethUsdcTick));
         osqthEthPrice = uint256(1e18).div(getPriceFromTick(osqthEthTick));
@@ -345,7 +342,7 @@ contract VaultMath is IVaultMath, ReentrancyGuard, Faucet {
 
     /// @dev Fetches USDC interest rate
     function getInterestRate() external view override returns (uint256 ir) {
-
+        //const = sqrt(365)
         uint256 irMax = IVaultStorage(vaultStorage).irMax();
         
         ir = uint256(int256(Constants.markets.interestRate(address(Constants.usdc)))).mul(31536000).mul(1e29);

@@ -40,6 +40,11 @@ interface IVaultStorage {
 
     function baseThresholdFloor() external view returns (int24);
 
+    function maxTwapDeviationEthUsdc() external view returns (int24);
+
+    function maxTwapDeviationOsqthEth() external view returns (int24);
+
+
 
 
 
