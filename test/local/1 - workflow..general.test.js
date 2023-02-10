@@ -31,9 +31,7 @@ describe.only("General Workflow", function () {
             await hardhatGetPerepherals(governance, keeper, rebalancer, _arguments, VaultStorage);
     });
 
-    it("deposit1", async function () {
-        await depositOCComponent("20", depositor1, Vault, OneClickDeposit, "user1");
-    });
+    it("deposit1", depositOCComponent("20", depositor1, Vault, OneClickDeposit, "user1"));
 
     it("withdraw1 -> No liquidity", async function () {
         const allShares = await getERC20Balance(depositor1.address, Vault.address);
@@ -45,9 +43,7 @@ describe.only("General Workflow", function () {
         );
     });
 
-    it("deposit2", async function () {
-        await depositOCComponent("29", depositor2, Vault, OneClickDeposit, "user2");
-    });
+    it("deposit2", depositOCComponent("29", depositor2, Vault, OneClickDeposit, "user2"));
 
     it("2 swaps", async function () {
         await mineSomeBlocks(6000);
@@ -57,9 +53,7 @@ describe.only("General Workflow", function () {
         await mineSomeBlocks(81000);
     });
 
-    it("rebalance", async function () {
-        await rebalanceClassicComponent(rebalance, Rebalancer, RebalanceModule4);
-    });
+    it("rebalance", rebalanceClassicComponent(rebalance, Rebalancer, RebalanceModule4));
 
     it("deposit3 -> cap limit", async function () {
         console.log("> totalSupply:", await Vault.totalSupply());
@@ -71,9 +65,7 @@ describe.only("General Workflow", function () {
         );
     });
 
-    it("deposit3", async function () {
-        await depositOCComponent("45", depositor3, Vault, OneClickDeposit, "user3", "990000000000000000");
-    });
+    it("deposit3", depositOCComponent("45", depositor3, Vault, OneClickDeposit, "user3", "990000000000000000"));
 
     it("withdraw2", async function () {
         const allShares = await getERC20Balance(depositor2.address, Vault.address);
