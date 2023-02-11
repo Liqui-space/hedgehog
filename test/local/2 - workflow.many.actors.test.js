@@ -6,7 +6,8 @@ const { depositOCComponent, withdrawComponent, swapComponent } = require("../hel
 
 describe.skip("Workflow with many actors", function () {
     it("Should set actors", async function () {
-        [owner, governance, rebalancer, depositor1, keeper, swaper, depositor2, depositor3] = await ethers.getSigners();
+        [owner, governance, rebalancerChad, depositor1, keeper, swaper, depositor2, depositor3] =
+            await ethers.getSigners();
     });
 
     let Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage;
@@ -22,7 +23,7 @@ describe.skip("Workflow with many actors", function () {
         );
 
         [V3Helper, OneClickDeposit, OneClickWithdraw, Rebalancer, , , RebalanceModule3, RebalanceModule4] =
-            await hardhatGetPerepherals(governance, keeper, rebalancer, _arguments, VaultStorage);
+            await hardhatGetPerepherals(governance, keeper, rebalancerChad, _arguments, VaultStorage);
     });
 
     it("deposit1", () => depositOCComponent("1", depositor1, Vault, OneClickDeposit, "user1"));
@@ -35,7 +36,7 @@ describe.skip("Workflow with many actors", function () {
         await mineSomeBlocks(554);
     });
 
-    it("rebalance1", () => rebalanceClassicComponent(rebalance, Rebalancer, RebalanceModule4));
+    it("rebalance1", () => rebalanceClassicComponent(rebalancerChad, Rebalancer, RebalanceModule4));
 
     it("deposit2", () => depositOCComponent("1", depositor2, Vault, OneClickDeposit, "user2"));
 
@@ -96,6 +97,6 @@ describe.skip("Workflow with many actors", function () {
 
     it("rebalance2", async function () {
         await mineSomeBlocks(83622);
-        await rebalanceClassicComponent(rebalance, Rebalancer, RebalanceModule4);
+        await rebalanceClassicComponent(rebalancerChad, Rebalancer, RebalanceModule4);
     });
 });

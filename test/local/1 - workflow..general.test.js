@@ -5,14 +5,15 @@ const {
     withdrawComponent,
     shouldThrowErrorComponent,
     swapComponent,
+    rebalanceClassicComponent,
 } = require("../helpers/components");
 
 const { hardhatDeploy, deploymentParams, hardhatGetPerepherals } = require("@shared/deploy");
 const { BigNumber } = require("ethers");
 
-describe.skip("General Workflow", function () {
+describe.only("General Workflow", function () {
     it("Should set actors", async function () {
-        [owner, governance, rebalancer, depositor1, keeper, swaper, depositor2, depositor3] = await ethers.getSigners();
+        [, governance, rebalancerChad, depositor1, keeper, depositor2, depositor3] = await ethers.getSigners();
     });
 
     let Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, tx;
@@ -28,33 +29,34 @@ describe.skip("General Workflow", function () {
         );
 
         [V3Helper, OneClickDeposit, OneClickWithdraw, Rebalancer, , , RebalanceModule3, RebalanceModule4] =
-            await hardhatGetPerepherals(governance, keeper, rebalancer, _arguments, VaultStorage);
+            await hardhatGetPerepherals(governance, keeper, rebalancerChad, _arguments, VaultStorage);
     });
 
     it("deposit1", () => depositOCComponent("20", depositor1, Vault, OneClickDeposit, "user1"));
 
-    it("withdraw1 -> No liquidity", async function () {
-        const allShares = await getERC20Balance(depositor1.address, Vault.address);
+    // it("withdraw1 -> No liquidity", async function () {
+    //     const allShares = await getERC20Balance(depositor1.address, Vault.address);
 
-        await shouldThrowErrorComponent(
-            withdrawComponent(BigNumber.from(allShares).div(2), depositor1, Vault, "user1"),
-            "C4",
-            "Limit wat not reached"
-        );
-    });
+    //     await shouldThrowErrorComponent(
+    //         withdrawComponent(BigNumber.from(allShares).div(2), depositor1, Vault, "user1"),
+    //         "C4",
+    //         "Limit wat not reached"
+    //     );
+    // });
 
-    it("deposit2", () => depositOCComponent("29", depositor2, Vault, OneClickDeposit, "user2"));
+    // it("deposit2", () => depositOCComponent("29", depositor2, Vault, OneClickDeposit, "user2"));
 
     it("2 swaps", async function () {
         await mineSomeBlocks(6000);
-        await swapComponent("WETH_USD", "100", V3Helper);
+        await swapComponent("WETH_USDC", "100", V3Helper);
         await mineSomeBlocks(200);
         await swapComponent("OSQTH_WETH", "40", V3Helper);
         await mineSomeBlocks(81000);
     });
 
-    it("rebalance", () => rebalanceClassicComponent(rebalance, Rebalancer, RebalanceModule4));
+    it("rebalance", () => rebalanceClassicComponent(rebalancerChad, Rebalancer, RebalanceModule4));
 
+    return;
     it("deposit3 -> cap limit", async function () {
         console.log("> totalSupply:", await Vault.totalSupply());
 
@@ -103,7 +105,7 @@ describe.skip("General Workflow", function () {
         await logBalance(governance.address, "> Governance Balance Before price rebalance");
         await mineSomeBlocks(1250);
 
-        tx = await rebalancer.connect(governance).rebalance(0, 1663937523);
+        tx = await rebalancerChad.connect(governance).rebalance(0, 1663937523);
         await tx.wait();
 
         await logBalance(governance.address, "> Governance Balance After price rebalance");

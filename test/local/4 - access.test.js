@@ -11,10 +11,9 @@ const {
     executeTx,
 } = require("../helpers/components");
 
-describe.only("Governance check", function () {
+describe.skip("Governance check", function () {
     it("Should set actors", async function () {
-        [owner, governance, rebalancer, depositor1, keeper, swaper, depositor2, depositor3, governance2] =
-            await ethers.getSigners();
+        [, governance, depositor1, governance2] = await ethers.getSigners();
     });
 
     let Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, tx;

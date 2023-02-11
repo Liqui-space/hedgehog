@@ -39,7 +39,7 @@ const withdrawComponent = async (allShares, actor, Vault, mainLabel) => {
 
 const swapTypes = ["USDC_WETH", "OSQTH_WETH", "WETH_USDC", "WETH_OSQTH"];
 const swapComponent = async (swapType, swapAmountString, V3Helper, log = false) => {
-    if (!swapTypes.inluces(swapType)) throw new Error("Swap type is not defined");
+    if (!swapTypes.includes(swapType)) throw new Error("Swap type is not defined");
 
     if (log) await logBalance(V3Helper.address, `> V3Helper before ${swapType}`);
 
@@ -61,7 +61,7 @@ const swapComponent = async (swapType, swapAmountString, V3Helper, log = false) 
         await getWETH(swapAmount, V3Helper.address);
     }
 
-    const tx = await V3Helper[swapType](swapAmount);
+    const tx = await V3Helper["swap" + swapType](swapAmount);
     await tx.wait();
 
     if (log) await logBalance(V3Helper.address, `> V3Helper after ${swapType}`);
