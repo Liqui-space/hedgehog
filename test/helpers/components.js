@@ -1,3 +1,5 @@
+const { assert } = require("chai");
+
 const { ethers } = require("hardhat");
 const { utils } = ethers;
 const { getAndApproveWETH, getERC20Balance, logBalance, getWETH, getOSQTH, getUSDC } = require("./index");
@@ -33,20 +35,6 @@ const withdrawComponent = async (allShares, actor, Vault, mainLabel) => {
 
     await logBalance(`> ${mainLabel} Balance After Witdraw`);
     console.log(`> ${mainLabel} Share After Witdraw`, await getERC20Balance(actor.address, Vault.address));
-};
-
-const shouldThrowErrorComponent = async (cb, errMessage, errText) => {
-    if (errMessage.length < 10)
-        errMessage = `VM Exception while processing transaction: reverted with reason string '${errMessage}'`;
-    let succeded = false;
-    try {
-        await cb();
-    } catch (err) {
-        if (err.message == errMessage) succeded = true;
-        else console.log(err.message);
-    }
-
-    assert(succeded, errText);
 };
 
 const swapTypes = ["USDC_WETH", "OSQTH_WETH", "WETH_USDC", "WETH_OSQTH"];
@@ -88,7 +76,29 @@ const rebalanceClassicComponent = async (rebalancer, Rebalancer, RebalanceModule
     await logBalance(RebalanceModule.address, "> RebalanceModule after rebalance");
 };
 
+const shouldThrowErrorComponent = async (promise, errMessage, errText) => {
+    if (errMessage.length < 10)
+        errMessage = `VM Exception while processing transaction: reverted with reason string '${errMessage}'`;
+    let succeded = false;
+
+    try {
+        await promise;
+    } catch (err) {
+        if (err.message == errMessage) succeded = true;
+        else console.log(err.message);
+    }
+    assert(succeded, errText);
+};
+
+const executeTx = async (promise, label = "", logGas = false) => {
+    tx = await promise;
+    recipt = await tx.wait();
+    if ((label != "") & !logGas) console.log(`> ${label}() executed`);
+    if ((label != "") & logGas) console.log(`> ${label}() executed with Gas: ${recipt.gasUsed.toString()}`);
+};
+
 module.exports = {
+    executeTx,
     rebalanceClassicComponent,
     depositOCComponent,
     withdrawComponent,

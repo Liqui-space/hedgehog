@@ -1,6 +1,6 @@
 const { ethers } = require("hardhat");
 const { mineSomeBlocks, resetFork, getERC20Balance } = require("../helpers");
-const { hardhatDeploy, deploymentParams } = require("@shared/deploy");
+const { hardhatDeploy, deploymentParams, hardhatGetPerepherals } = require("@shared/deploy");
 
 const { depositOCComponent, withdrawComponent, swapComponent } = require("../helpers/components");
 
@@ -25,7 +25,7 @@ describe.skip("Workflow with many actors", function () {
             await hardhatGetPerepherals(governance, keeper, rebalancer, _arguments, VaultStorage);
     });
 
-    it("deposit1", depositOCComponent("1", depositor1, Vault, OneClickDeposit, "user1"));
+    it("deposit1", () => depositOCComponent("1", depositor1, Vault, OneClickDeposit, "user1"));
 
     it("2 swaps", async function () {
         await mineSomeBlocks(2216);
@@ -35,21 +35,11 @@ describe.skip("Workflow with many actors", function () {
         await mineSomeBlocks(554);
     });
 
-    it("rebalance1", rebalanceClassicComponent(rebalance, Rebalancer, RebalanceModule4));
+    it("rebalance1", () => rebalanceClassicComponent(rebalance, Rebalancer, RebalanceModule4));
 
-    it("deposit2", depositOCComponent("1", depositor2, Vault, OneClickDeposit, "user2"));
+    it("deposit2", () => depositOCComponent("1", depositor2, Vault, OneClickDeposit, "user2"));
 
-    it("deposit3", depositOCComponent("1", depositor3, Vault, OneClickDeposit, "user3"));
-
-    it("2 swaps", async function () {
-        await mineSomeBlocks(2216);
-        await swapComponent("WETH_USDC", "100", V3Helper);
-        await mineSomeBlocks(554);
-        await swapComponent("OSQTH_WETH", "30", V3Helper);
-        await mineSomeBlocks(554);
-    });
-
-    it("deposit4", depositOCComponent("1", depositor4, Vault, OneClickDeposit, "user4"));
+    it("deposit3", () => depositOCComponent("1", depositor3, Vault, OneClickDeposit, "user3"));
 
     it("2 swaps", async function () {
         await mineSomeBlocks(2216);
@@ -59,7 +49,17 @@ describe.skip("Workflow with many actors", function () {
         await mineSomeBlocks(554);
     });
 
-    it("deposit5", depositOCComponent("1", depositor5, Vault, OneClickDeposit, "user5"));
+    it("deposit4", () => depositOCComponent("1", depositor4, Vault, OneClickDeposit, "user4"));
+
+    it("2 swaps", async function () {
+        await mineSomeBlocks(2216);
+        await swapComponent("WETH_USDC", "100", V3Helper);
+        await mineSomeBlocks(554);
+        await swapComponent("OSQTH_WETH", "30", V3Helper);
+        await mineSomeBlocks(554);
+    });
+
+    it("deposit5", () => depositOCComponent("1", depositor5, Vault, OneClickDeposit, "user5"));
 
     it("2 swaps", async function () {
         await mineSomeBlocks(2216);
