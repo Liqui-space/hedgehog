@@ -25,9 +25,6 @@ interface IVaultStorage {
 
     function interestRateAtLastRebalance() external view returns (uint256);
 
-
-
-
     function irMax() external view returns (uint256);
 
     function irLimit() external view returns (uint256);
@@ -44,14 +41,10 @@ interface IVaultStorage {
 
     function maxTwapDeviationOsqthEth() external view returns (int24);
 
-
-
-
-
     function setParamsBeforeDeposit(
         uint256 _timeAtLastRebalance,
         uint256 _ethPriceAtLastRebalance,
-        uint256 _interestRateAtLastRebalance 
+        uint256 _interestRateAtLastRebalance
     ) external;
 
     function rebalanceTimeThreshold() external view returns (uint256);

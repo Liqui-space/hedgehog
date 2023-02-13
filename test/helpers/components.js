@@ -26,14 +26,14 @@ const depositOCComponent = async (
 };
 
 const withdrawComponent = async (allShares, actor, Vault, mainLabel) => {
-    await logBalance(`> ${mainLabel} Balance Before Witdraw`);
+    await logBalance(actor, `> ${mainLabel} Balance Before Witdraw`);
     console.log(`> ${mainLabel} Share Before Witdraw`, await getERC20Balance(actor.address, Vault.address));
 
     tx = await Vault.connect(actor).withdraw(allShares, "0", "0", "0");
     await tx.wait();
     console.log(`> Vault.withdraw()`);
 
-    await logBalance(`> ${mainLabel} Balance After Witdraw`);
+    await logBalance(actor, `> ${mainLabel} Balance After Witdraw`);
     console.log(`> ${mainLabel} Share After Witdraw`, await getERC20Balance(actor.address, Vault.address));
 };
 

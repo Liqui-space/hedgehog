@@ -43,8 +43,6 @@ contract VaultStorage is IVaultStorage, Faucet {
     //@dev interest rate when last rebalance executed
     uint256 public override interestRateAtLastRebalance;
 
-    
-    
     //@dev iv adjustment parameter (0.05)
     uint256 public override irMax = 42e17;
 
@@ -61,10 +59,6 @@ contract VaultStorage is IVaultStorage, Faucet {
     int24 public override maxTwapDeviationEthUsdc = 120;
 
     int24 public override maxTwapDeviationOsqthEth = 120;
-
-
-
-    
 
     //@dev time difference to trigger a hedge (seconds)
     uint256 public override rebalanceTimeThreshold;
