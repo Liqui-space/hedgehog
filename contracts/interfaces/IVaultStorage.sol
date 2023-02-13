@@ -23,14 +23,35 @@ interface IVaultStorage {
 
     function timeAtLastRebalance() external view returns (uint256);
 
-    function ivAtLastRebalance() external view returns (uint256);
+    function interestRateAtLastRebalance() external view returns (uint256);
 
-    function totalValue() external view returns (uint256);
+
+
+
+    function irMax() external view returns (uint256);
+
+    function irLimit() external view returns (uint256);
+
+    function weightAdjParam() external view returns (uint256);
+
+    function weightAdjLimit() external view returns (uint256);
+
+    function baseThresholdScale() external view returns (uint256);
+
+    function baseThresholdFloor() external view returns (int24);
+
+    function maxTwapDeviationEthUsdc() external view returns (int24);
+
+    function maxTwapDeviationOsqthEth() external view returns (int24);
+
+
+
+
 
     function setParamsBeforeDeposit(
         uint256 _timeAtLastRebalance,
-        uint256 _ivAtLastRebalance,
-        uint256 _ethPriceAtLastRebalance
+        uint256 _ethPriceAtLastRebalance,
+        uint256 _interestRateAtLastRebalance 
     ) external;
 
     function rebalanceTimeThreshold() external view returns (uint256);
@@ -51,11 +72,7 @@ interface IVaultStorage {
 
     function auctionTime() external view returns (uint256);
 
-    function adjParam() external view returns (uint256);
-
     function twapPeriod() external view returns (uint32);
-
-    function baseThreshold() external view returns (int24);
 
     function tickSpacing() external view returns (int24);
 
@@ -79,7 +96,7 @@ interface IVaultStorage {
         int24 _orderOsqthEthLower,
         int24 _orderOsqthEthUpper,
         uint256 _timeAtLastRebalance,
-        uint256 _ivAtLastRebalance,
+        uint256 _interestRateAtLastRebalance,
         uint256 _ethPriceAtLastRebalance
     ) external;
 

@@ -52,17 +52,16 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
         uint256 cachedPrice = IVaultStorage(vaultStorage).ethPriceAtLastRebalance();
 
         uint256 ratio = cachedPrice > ethUsdcPrice ? cachedPrice.div(ethUsdcPrice) : ethUsdcPrice.div(cachedPrice);
-        uint256 cachedValue = IVaultStorage(vaultStorage).totalValue();
 
         // no rebalance if the price change <= rebalanceThreshold
-        if (ratio <= IVaultStorage(vaultStorage).rebalanceThreshold() && cachedValue != 0) {
+        if (ratio <= IVaultStorage(vaultStorage).rebalanceThreshold()) {
             IVaultStorage(vaultStorage).setSnapshot(
                 IVaultStorage(vaultStorage).orderEthUsdcLower(),
                 IVaultStorage(vaultStorage).orderEthUsdcUpper(),
                 IVaultStorage(vaultStorage).orderOsqthEthLower(),
                 IVaultStorage(vaultStorage).orderOsqthEthUpper(),
                 block.timestamp,
-                IVaultMath(vaultMath).getIV(),
+                IVaultMath(vaultMath).getInterestRate(),
                 cachedPrice
             );
 
@@ -170,7 +169,7 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
             params.boundaries.osqthEthLower,
             params.boundaries.osqthEthUpper,
             block.timestamp,
-            IVaultMath(vaultMath).getIV(),
+            IVaultMath(vaultMath).getInterestRate(),
             params.ethUsdcPrice
         );
 
@@ -202,7 +201,7 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
                 osqthEthPrice
             );
         }
-        console.log("totalValue %s", totalValue);
+        console.log("totalValue %s", totalValue);        
 
         uint256 priceMultiplier = IVaultMath(vaultMath).getPriceMultiplier(_auctionTriggerTime);
         console.log("priceMultiplier %s", priceMultiplier);
@@ -214,39 +213,37 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
             uint256 currentIV = IVaultMath(vaultMath).getIV();
             console.log("currentIV %s", currentIV);
 
-            //uint256 interestRate = IVaultMath(vaultMath).getInterestRate();
-            //uint256 interestRateP = IVaultStorage(vaultStorage).interestRateAtLastRebalance();
-            uint256 interestRate = _min(IVaultMath(vaultMath).getInterestRate(), 42e17); //TODO as param
+            uint256 interestRate = IVaultMath(vaultMath).getInterestRate(); 
+            console.log("interestRate %s", interestRate);
 
-            console.log("interestRate %s", uint256(int256(interestRate.floor())));
-            uint256 interestRateP = 24e17;
-            //TODO as param
-            uint256 weightAdj = _min(uint256(69e15).mul(interestRate).mul(currentIV), 25e16); // TODO as params
+            uint256 weightAdj = getWeightAdj(interestRate, currentIV);
             console.log("weightAdj %s", weightAdj);
-
-            int24 baseThreshold = _floor(toInt24(int256(currentIV.div(19104973174542800179).div(1e32))), 60) + 600; //TODO 10 as parameter
+            
+            int24 tickSpacing = IVaultStorage(vaultStorage).tickSpacing();
+            
+            int24 baseThreshold = _floor(toInt24(int256(currentIV.div(19104973174542800179).div(IVaultStorage(vaultStorage).baseThresholdScale()))) , tickSpacing) + IVaultStorage(vaultStorage).baseThresholdFloor() * tickSpacing;
             console.log("baseThreshold %s", uint256(int256(baseThreshold)));
 
             int24 lower;
             int24 upper;
-            if (interestRate > 25e17) {
-                int24 tickAdj = toInt24(int256((interestRate.floor()).div(1e36))) * 60;
+            if (interestRate > IVaultStorage(vaultStorage).irLimit()) {
+                int24 tickAdj = toInt24(int256((interestRate.floor()).div(1e36))) * tickSpacing;
 
                 lower = baseThreshold + tickAdj;
                 upper = baseThreshold - tickAdj;
 
-                weight = interestRate >= interestRateP ? uint256(5e17).sub(weightAdj) : uint256(5e17).add(weightAdj);
+                weight = interestRate >= IVaultStorage(vaultStorage).interestRateAtLastRebalance() ? uint256(5e17).sub(weightAdj) : uint256(5e17).add(weightAdj);
             } else {
-                int24 tickAdj = toInt24(int256((interestRate.floor()).div(1e36))) * 60;
+                int24 tickAdj = toInt24(int256((interestRate.floor()).div(1e36))) * tickSpacing;
 
                 lower = baseThreshold - tickAdj;
                 upper = baseThreshold + tickAdj;
-
-                weight = interestRate >= interestRateP ? uint256(5e17).add(weightAdj) : uint256(5e17).sub(weightAdj);
+    
+                weight = interestRate >= IVaultStorage(vaultStorage).interestRateAtLastRebalance() ? uint256(5e17).add(weightAdj) : uint256(5e17).sub(weightAdj);
             }
 
             console.log("lower %s, upper %s", uint256(int256(lower)), uint256(int256(upper)));
-            console.log("weight %s", weight);
+            console.log("weight %s", weight);            
 
             //boundaries for auction prices (current price * multiplier)
             boundaries = _getBoundaries(
@@ -256,7 +253,7 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
                 upper
             );
         }
-
+        
         console.log("abc %s", totalValue.mul(ethUsdcPrice).mul(weight).mul(priceMultiplier));
 
         //Calculate liquidities
@@ -416,8 +413,12 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
         return compressed * tickSpacing;
     }
 
-    function _min(uint256 a, uint256 b) internal pure returns (uint256) {
-        return a <= b ? a : b;
+    function getWeightAdj(uint256 interestRate, uint256 currentIV) internal view returns (uint256 weightAdj) {
+
+        uint256 weightAdjLimit = IVaultStorage(vaultStorage).weightAdjLimit();
+        
+        weightAdj = uint256(IVaultStorage(vaultStorage).weightAdjParam()).mul(interestRate).mul(currentIV);
+        weightAdj = weightAdj > weightAdjLimit ? weightAdjLimit : weightAdj;
     }
 
     /// @dev Casts uint256 to uint160 with overflow check.
