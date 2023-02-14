@@ -44,11 +44,11 @@ describe.only("Workflow with many actors", function () {
     it("deposit1", () => depositOCComponent("5", depositor1, Vault, OneClickDeposit, "user1"));
 
     it("2 swaps", async function () {
-        await mineSomeBlocks(2216);
+        await mineSomeBlocks(6000);
         await swapComponent("WETH_USDC", "100", V3Helper);
-        await mineSomeBlocks(554);
+        await mineSomeBlocks(200);
         await swapComponent("OSQTH_WETH", "30", V3Helper);
-        await mineSomeBlocks(554);
+        await mineSomeBlocks(81000);
     });
 
     it("rebalance1", () => rebalanceClassicComponent(rebalancerChad, Rebalancer, RebalanceModule4));
