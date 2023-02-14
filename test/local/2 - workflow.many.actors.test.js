@@ -7,6 +7,7 @@ const {
     withdrawComponent,
     swapComponent,
     rebalanceClassicComponent,
+    shouldThrowErrorComponent,
 } = require("../helpers/components");
 
 describe.only("Workflow with many actors", function () {
@@ -53,37 +54,36 @@ describe.only("Workflow with many actors", function () {
 
     it("rebalance1", () => rebalanceClassicComponent(rebalancerChad, Rebalancer, RebalanceModule4));
 
-    return;
     it("deposit2", () => depositOCComponent("1", depositor2, Vault, OneClickDeposit, "user2"));
 
     it("deposit3", () => depositOCComponent("1", depositor3, Vault, OneClickDeposit, "user3"));
 
     it("2 swaps", async function () {
-        await mineSomeBlocks(2216);
+        await mineSomeBlocks(6000);
         await swapComponent("WETH_USDC", "100", V3Helper);
-        await mineSomeBlocks(554);
+        await mineSomeBlocks(200);
         await swapComponent("OSQTH_WETH", "30", V3Helper);
-        await mineSomeBlocks(554);
+        await mineSomeBlocks(81000);
     });
 
     it("deposit4", () => depositOCComponent("1", depositor4, Vault, OneClickDeposit, "user4"));
 
     it("2 swaps", async function () {
-        await mineSomeBlocks(2216);
+        await mineSomeBlocks(6000);
         await swapComponent("WETH_USDC", "100", V3Helper);
-        await mineSomeBlocks(554);
+        await mineSomeBlocks(200);
         await swapComponent("OSQTH_WETH", "30", V3Helper);
-        await mineSomeBlocks(554);
+        await mineSomeBlocks(81000);
     });
 
     it("deposit5", () => depositOCComponent("1", depositor5, Vault, OneClickDeposit, "user5"));
 
     it("2 swaps", async function () {
-        await mineSomeBlocks(2216);
+        await mineSomeBlocks(6000);
         await swapComponent("WETH_USDC", "100", V3Helper);
-        await mineSomeBlocks(554);
+        await mineSomeBlocks(200);
         await swapComponent("OSQTH_WETH", "30", V3Helper);
-        await mineSomeBlocks(554);
+        await mineSomeBlocks(81000);
     });
 
     it("withdraw1", async function () {
@@ -101,6 +101,11 @@ describe.only("Workflow with many actors", function () {
         await withdrawComponent(allShares, depositor3, Vault, "user3");
     });
 
+    it("rebalance2", async function () {
+        await mineSomeBlocks(83622);
+        await rebalanceClassicComponent(rebalancerChad, Rebalancer, RebalanceModule4);
+    });
+
     it("withdraw4", async function () {
         const allShares = await getERC20Balance(depositor4.address, Vault.address);
         await withdrawComponent(allShares, depositor4, Vault, "user4");
@@ -109,10 +114,5 @@ describe.only("Workflow with many actors", function () {
     it("withdraw5", async function () {
         const allShares = await getERC20Balance(depositor5.address, Vault.address);
         await withdrawComponent(allShares, depositor5, Vault, "user5");
-    });
-
-    it("rebalance2", async function () {
-        await mineSomeBlocks(83622);
-        await rebalanceClassicComponent(rebalancerChad, Rebalancer, RebalanceModule4);
     });
 });
