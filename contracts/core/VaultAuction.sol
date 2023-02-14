@@ -143,6 +143,10 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
             params.liquidityOsqthEth
         );
 
+        console.log("targetEth %s", targetEth);
+        console.log("targetUsdc %s", targetUsdc);
+        console.log("targetOsqth %s", targetOsqth);
+
         //Exchange tokens with keeper
         _swapWithKeeper(ethBalance, targetEth, minAmounts.minAmountEth, address(Constants.weth), _keeper);
         _swapWithKeeper(usdcBalance, targetUsdc, minAmounts.minAmountUsdc, address(Constants.usdc), _keeper);
@@ -193,6 +197,10 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
             //current balances
             (uint256 ethBalance, uint256 usdcBalance, uint256 osqthBalance) = IVaultMath(vaultMath).getTotalAmounts();
 
+            console.log("ethBalance %s", ethBalance);
+            console.log("usdcBalance %s", usdcBalance);
+            console.log("osqthBalance %s", osqthBalance);
+
             totalValue = IVaultMath(vaultMath).getValue(
                 ethBalance,
                 usdcBalance,
@@ -215,6 +223,7 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
 
             uint256 interestRate = IVaultMath(vaultMath).getInterestRate();
             console.log("interestRate %s", interestRate);
+            console.log("irP %s", IVaultStorage(vaultStorage).interestRateAtLastRebalance());
 
             uint256 weightAdj = getWeightAdj(interestRate, currentIV);
             console.log("weightAdj %s", weightAdj);
@@ -262,8 +271,6 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
                 upper
             );
         }
-
-        console.log("abc %s", totalValue.mul(ethUsdcPrice).mul(weight).mul(priceMultiplier));
 
         //Calculate liquidities
         uint128 liquidityEthUsdc = IVaultMath(vaultMath).getLiquidityForValue(

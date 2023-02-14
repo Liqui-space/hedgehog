@@ -264,10 +264,15 @@ contract Vault is IVault, ERC20, ReentrancyGuard, Faucet {
     {
         //Get current prices
         (uint256 ethUsdcPrice, uint256 osqthEthPrice) = IVaultMath(vaultMath).getPrices();
+        
+        console.log("ethUsdcPrice %s, osqthEthPrice %s", ethUsdcPrice, osqthEthPrice);
+        
         uint256 depositorValue = _isFlash
             ? _amountEth
             : IVaultMath(vaultMath).getValue(_amountEth, _amountUsdc, _amountOsqth, ethUsdcPrice, osqthEthPrice);
 
+        console.log("depositorValue %s", depositorValue);
+        
         if (_totalSupply == 0) {
             //deposit in a 50% eth, 25% usdc, and 25% osqth proportion
             shares = depositorValue;
@@ -275,11 +280,21 @@ contract Vault is IVault, ERC20, ReentrancyGuard, Faucet {
             ethToDeposit = depositorValue.mul(5e17);
             usdcToDeposit = depositorValue.mul(25e16).mul(ethUsdcPrice).div(uint256(1e30));
             osqthToDeposit = depositorValue.mul(25e16).div(osqthEthPrice);
+
+            console.log("ethToDeposit %s", ethToDeposit);
+            console.log("usdcToDeposit %s", usdcToDeposit);
+            console.log("osqthToDeposit %s", osqthToDeposit);
+
         } else {
             //Get total amounts of token balances
             (uint256 ethAmount, uint256 usdcAmount, uint256 osqthAmount) = IVaultMath(vaultMath).getTotalAmounts();
-
+            
+            console.log("ethAmount %s", ethAmount);
+            console.log("usdcAmount %s", usdcAmount);
+            console.log("osqthAmount %s", osqthAmount);
+            
             uint256 ratio;
+            
             {
                 uint256 totalValue = IVaultMath(vaultMath).getValue(
                     ethAmount,
@@ -288,14 +303,26 @@ contract Vault is IVault, ERC20, ReentrancyGuard, Faucet {
                     ethUsdcPrice,
                     osqthEthPrice
                 );
+                
+                console.log("totalValue %s", totalValue);
+                
                 ratio = depositorValue.div(totalValue);
+                console.log("ratio %s", ratio);
+
                 uint256 sharePrice = totalValue.div(_totalSupply);
+                console.log("sharePrice %s", sharePrice);
+
                 shares = depositorValue.div(sharePrice);
+                console.log("shares %s", shares);
             }
 
             ethToDeposit = ethAmount.mul(ratio);
             usdcToDeposit = usdcAmount.mul(ratio);
             osqthToDeposit = osqthAmount.mul(ratio);
+
+            console.log("ethToDeposit %s", ethToDeposit);
+            console.log("usdcToDeposit %s", usdcToDeposit);
+            console.log("osqthToDeposit %s", osqthToDeposit);
         }
     }
 }

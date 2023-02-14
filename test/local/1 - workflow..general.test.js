@@ -90,7 +90,7 @@ describe.only("General Workflow", function () {
         await swapComponent("USDC_WETH", "3300000", V3Helper);
         await logBlock();
         await swapComponent("WETH_OSQTH", "1500", V3Helper);
-    });
+    }).timeout(10000000);
 
     // it("price rebalance", async function () {
     //     await mineSomeBlocks(200);
@@ -171,4 +171,4 @@ describe.only("General Workflow", function () {
 
         await logBalance(governance, "> governance after");
     });
-});
+}).timeout(100000000);
