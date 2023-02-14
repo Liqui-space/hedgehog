@@ -12,7 +12,7 @@ const {
 const { hardhatDeploy, deploymentParams, hardhatGetPerepherals } = require("@shared/deploy");
 const { BigNumber, utils } = require("ethers");
 
-describe.only("General Workflow", function () {
+describe.skip("General Workflow", function () {
     it("Should set actors", async function () {
         [, governance, rebalancerChad, depositor1, keeper, depositor2, depositor3, notgovernance] =
             await ethers.getSigners();

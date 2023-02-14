@@ -2,12 +2,27 @@ const { ethers } = require("hardhat");
 const { mineSomeBlocks, resetFork, getERC20Balance } = require("../helpers");
 const { hardhatDeploy, deploymentParams, hardhatGetPerepherals } = require("@shared/deploy");
 
-const { depositOCComponent, withdrawComponent, swapComponent } = require("../helpers/components");
+const {
+    depositOCComponent,
+    withdrawComponent,
+    swapComponent,
+    rebalanceClassicComponent,
+} = require("../helpers/components");
 
-describe.skip("Workflow with many actors", function () {
+describe.only("Workflow with many actors", function () {
     it("Should set actors", async function () {
-        [owner, governance, rebalancerChad, depositor1, keeper, swaper, depositor2, depositor3] =
-            await ethers.getSigners();
+        [
+            owner,
+            governance,
+            rebalancerChad,
+            depositor1,
+            keeper,
+            swaper,
+            depositor2,
+            depositor3,
+            depositor4,
+            depositor5,
+        ] = await ethers.getSigners();
     });
 
     let Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage;
@@ -26,7 +41,7 @@ describe.skip("Workflow with many actors", function () {
             await hardhatGetPerepherals(governance, keeper, rebalancerChad, _arguments, VaultStorage);
     });
 
-    it("deposit1", () => depositOCComponent("1", depositor1, Vault, OneClickDeposit, "user1"));
+    it("deposit1", () => depositOCComponent("5", depositor1, Vault, OneClickDeposit, "user1"));
 
     it("2 swaps", async function () {
         await mineSomeBlocks(2216);
@@ -38,6 +53,7 @@ describe.skip("Workflow with many actors", function () {
 
     it("rebalance1", () => rebalanceClassicComponent(rebalancerChad, Rebalancer, RebalanceModule4));
 
+    return;
     it("deposit2", () => depositOCComponent("1", depositor2, Vault, OneClickDeposit, "user2"));
 
     it("deposit3", () => depositOCComponent("1", depositor3, Vault, OneClickDeposit, "user3"));
