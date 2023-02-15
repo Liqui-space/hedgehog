@@ -28,7 +28,7 @@ const deployContract = async (name, params, deploy = true) => {
 };
 
 const deploymentParams = [
-    utils.parseUnits("100", 18),
+    utils.parseUnits("228", 18),
     BigNumber.from(43200),
     utils.parseUnits("0.1", 18),
     BigNumber.from("1200"),

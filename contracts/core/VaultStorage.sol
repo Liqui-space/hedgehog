@@ -10,6 +10,7 @@ import {Constants} from "../libraries/Constants.sol";
 import {Faucet} from "../libraries/Faucet.sol";
 import {SharedEvents} from "../libraries/SharedEvents.sol";
 
+//TODO: Transform all state manually
 contract VaultStorage is IVaultStorage, Faucet {
     //@dev governance address
     address public override governance;
@@ -32,10 +33,10 @@ contract VaultStorage is IVaultStorage, Faucet {
     int24 public override orderOsqthEthUpper = 30120;
 
     //@dev timestamp when last rebalance executed
-    uint256 public override timeAtLastRebalance;
+    uint256 public override timeAtLastRebalance = 1676453723;
 
     //@dev ETH/USDC price when last rebalance executed
-    uint256 public override ethPriceAtLastRebalance;
+    uint256 public override ethPriceAtLastRebalance = 1544622731792988669735;
 
     //@dev min price change for initiating rebalance (1.69%)
     uint256 public override rebalanceThreshold = 1e18;

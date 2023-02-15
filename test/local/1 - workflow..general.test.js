@@ -23,7 +23,6 @@ describe.only("General Workflow", function () {
         await resetFork(16634147);
 
         const params = [...deploymentParams];
-        params[0] = utils.parseUnits("230", 18);
         params[6] = "0";
         [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, _arguments] = await hardhatPartialDeploy(
             governance.address,
@@ -37,12 +36,11 @@ describe.only("General Workflow", function () {
         console.log("> totalSupply:", (await Vault.totalSupply()).toString());
         console.log("> cap:", (await VaultStorage.cap()).toString());
         console.log("> balances:", (await VaultMath.getTotalAmounts()).toString());
-        console.log("> ethUsdcLower",  (await VaultStorage.orderEthUsdcLower()).toString());
+        console.log("> ethUsdcLower", (await VaultStorage.orderEthUsdcLower()).toString());
     });
 
     it("deposit1", () => depositOCComponent("1", depositor1, Vault, OneClickDeposit, "user1"));
 
-    return;
     it("deposit2", () => depositOCComponent("5", depositor2, Vault, OneClickDeposit, "user2"));
 
     it("2 swaps", async function () {
