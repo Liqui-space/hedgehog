@@ -17,6 +17,18 @@ const logBalance = async (account, label = "", extended = false) => {
     console.log(label + " oSQTH", await getERC20Balance(account, osqthAddress));
 };
 
+const logFaucet = async (account) => {
+    if (typeof account == "object") account = account.address;
+    const Faucet = await ethers.getContractAt("IFaucetHelper", account);
+
+    console.log(`${await Faucet.uniswapMath()}`);
+    console.log(`${await Faucet.vault()}`);
+    console.log(`${await Faucet.auction()}`);
+    console.log(`${await Faucet.vaultMath()}`);
+    console.log(`${await Faucet.vaultTreasury()}`);
+    console.log(`${await Faucet.vaultStorage()}`);
+};
+
 const getSnapshot = async (account) => {
     return {
         WETH: await getERC20Balance(account, wethAddress),
@@ -27,6 +39,7 @@ const getSnapshot = async (account) => {
 };
 
 module.exports = {
+    logFaucet,
     logBalance,
     logBlock,
     getSnapshot,

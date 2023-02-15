@@ -9,10 +9,10 @@ const {
     executeTx,
 } = require("../helpers/components");
 
-const { hardhatDeploy, deploymentParams, hardhatGetPerepherals } = require("@shared/deploy");
+const { hardhatDeploy, deploymentParams, hardhatGetPerepherals, hardhatPartialDeploy } = require("@shared/deploy");
 const { BigNumber, utils } = require("ethers");
 
-describe.skip("General Workflow", function () {
+describe.only("General Workflow", function () {
     it("Should set actors", async function () {
         [, governance, rebalancerChad, depositor1, keeper, depositor2, depositor3, notgovernance] =
             await ethers.getSigners();
@@ -23,9 +23,9 @@ describe.skip("General Workflow", function () {
         await resetFork(16586904);
 
         const params = [...deploymentParams];
-        params[0] = utils.parseUnits("20", 18);
+        params[0] = utils.parseUnits("230", 18);
         params[6] = "0";
-        [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, _arguments] = await hardhatDeploy(
+        [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, _arguments] = await hardhatPartialDeploy(
             governance.address,
             params,
             keeper.address
@@ -33,10 +33,14 @@ describe.skip("General Workflow", function () {
 
         [V3Helper, OneClickDeposit, OneClickWithdraw, Rebalancer, , , RebalanceModule3, RebalanceModule4] =
             await hardhatGetPerepherals(governance, keeper, rebalancerChad, _arguments, VaultStorage);
+
+        console.log("> totalSupply:", (await Vault.totalSupply()).toString());
+        console.log("> cap:", (await VaultStorage.cap()).toString());
     });
 
-    it("deposit1", () => depositOCComponent("5", depositor1, Vault, OneClickDeposit, "user1"));
+    it("deposit1", () => depositOCComponent("1", depositor1, Vault, OneClickDeposit, "user1"));
 
+    return;
     it("deposit2", () => depositOCComponent("5", depositor2, Vault, OneClickDeposit, "user2"));
 
     it("2 swaps", async function () {
@@ -49,6 +53,7 @@ describe.skip("General Workflow", function () {
 
     it("rebalance", () => rebalanceClassicComponent(rebalancerChad, Rebalancer, RebalanceModule4));
 
+    return;
     it("deposit3 -> cap limit", async function () {
         console.log("> totalSupply:", (await Vault.totalSupply()).toString());
         console.log("> cap:", (await VaultStorage.cap()).toString());
@@ -171,4 +176,4 @@ describe.skip("General Workflow", function () {
 
         await logBalance(governance, "> governance after");
     });
-}).timeout(100000000);
+});

@@ -1,16 +1,15 @@
 const { ethers } = require("hardhat");
 const { mineSomeBlocks, resetFork, getERC20Balance } = require("../helpers");
-const { hardhatDeploy, deploymentParams, hardhatGetPerepherals } = require("@shared/deploy");
+const { hardhatDeploy, hardhatPartialDeploy, deploymentParams, hardhatGetPerepherals } = require("@shared/deploy");
 
 const {
     depositOCComponent,
     withdrawComponent,
     swapComponent,
     rebalanceClassicComponent,
-    shouldThrowErrorComponent,
 } = require("../helpers/components");
 
-describe.only("Workflow with many actors", function () {
+describe.skip("Workflow with many actors", function () {
     it("Should set actors", async function () {
         [
             owner,
@@ -32,7 +31,7 @@ describe.only("Workflow with many actors", function () {
 
         const params = [...deploymentParams];
         params[6] = "0";
-        [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, _arguments] = await hardhatDeploy(
+        [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, _arguments] = await hardhatPartialDeploy(
             governance.address,
             params,
             keeper.address

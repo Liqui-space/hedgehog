@@ -1,5 +1,6 @@
 const { ethers } = require("hardhat");
-const { impersontate, getETH } = require("../test/helpers");
+const { impersontate, getETH, logFaucet } = require("../test/helpers");
+const { executeTx } = require("../test/helpers/components");
 const { utils, BigNumber } = ethers;
 const {
     _uniMathAddress,
@@ -80,6 +81,63 @@ const hardhatDeploy = async (governanceAddress, params = deploymentParams, keepe
         method: "evm_mine",
     });
     await network.provider.send("evm_setAutomine", [true]);
+
+    return [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, arguments];
+};
+
+const hardhatPartialDeploy = async (
+    governanceAddress,
+    params = deploymentParams,
+    keeperAddress = governance.address
+) => {
+    MyContract = await ethers.getContractFactory("Vault");
+    const Vault = await MyContract.attach(_vaultAddress);
+    MyContract = await ethers.getContractFactory("VaultTreasury");
+    const VaultTreasury = await MyContract.attach(_vaultTreasuryAddress);
+
+    const owner = await impersontate(await Vault.owner());
+    await getETH(owner.address, utils.parseEther("20"));
+
+    await network.provider.send("evm_setAutomine", [false]);
+
+    const VaultAuction = await deployContract("VaultAuction", [], false);
+    const VaultMath = await deployContract("VaultMath", [], false);
+
+    params.push(governanceAddress);
+    params.push(keeperAddress);
+    const VaultStorage = await deployContract("VaultStorage", params, false);
+
+    const arguments = [
+        await Vault.uniswapMath(),
+        Vault.address,
+        VaultAuction.address,
+        VaultMath.address,
+        VaultTreasury.address,
+        VaultStorage.address,
+    ];
+
+    console.log("> UniswapMath:", arguments[0]);
+    console.log("> Vault:", arguments[1]);
+    console.log("> VaultAuction:", arguments[2]);
+    console.log("> VaultMath:", arguments[3]);
+    console.log("> VaultTreasury:", arguments[4]);
+    console.log("> VaultStorage:", arguments[5]);
+
+    await network.provider.request({
+        method: "evm_mine",
+    });
+    await network.provider.send("evm_setAutomine", [true]);
+
+    // await logFaucet(VaultAuction.address);
+    // console.log("arguments", arguments);
+
+    await executeTx(Vault.connect(owner).setComponents(...arguments));
+    await executeTx(VaultAuction.setComponents(...arguments));
+    await executeTx(VaultMath.setComponents(...arguments));
+    await executeTx(VaultTreasury.connect(owner).setComponents(...arguments));
+    await executeTx(VaultStorage.setComponents(...arguments));
+
+    // await logFaucet(VaultTreasury.address);
 
     return [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, arguments];
 };
@@ -172,6 +230,7 @@ const hardhatGetPerepherals = async (governance, keeper, rebalancer, _arguments,
 };
 
 module.exports = {
+    hardhatPartialDeploy,
     hardhatGetPerepherals,
     hardhatInitializedDeploy,
     deploymentParams,

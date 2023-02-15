@@ -1,4 +1,4 @@
-require('module-alias/register')
+require("module-alias/register");
 require("@nomiclabs/hardhat-waffle");
 require("hardhat-contract-sizer");
 require("hardhat-gas-reporter");
@@ -20,7 +20,7 @@ const test = {
     allowUnlimitedContractSize: process.env.DEBUG ? true : false,
     chainId: 1,
     forking: getForkingParams(),
-    gasPrice: 70 * 10 ** 9,
+    gasPrice: 42 * 10 ** 9,
 };
 
 const simulate = {
@@ -52,7 +52,7 @@ module.exports = {
             {
                 version: "0.8.0",
                 optimizer: { enabled: true, runs: 10000 },
-            }
+            },
         ],
     },
     etherscan: {
