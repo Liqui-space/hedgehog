@@ -42,23 +42,33 @@ contract VaultStorage is IVaultStorage, Faucet {
     uint256 public override rebalanceThreshold = 1e18;
 
     //@dev interest rate when last rebalance executed
-    uint256 public override interestRateAtLastRebalance;
+    uint256 public override interestRateAtLastRebalance = 3e18;
 
-    //@dev iv adjustment parameter (0.05)
-    uint256 public override irMax = 42e17;
+    //@dev max interest rate 4.2%
+    uint256 public override irMax = 42e17; 
 
+    //@dev interest rate limit for trend adjustments
     uint256 public override irLimit = 25e17;
 
+    //@dev interest rate precision (0.01)
+    uint256 public override irPrecision = 1e16;
+
+    //@dev weight adjustment parameter
     uint256 public override weightAdjParam = 69e15;
 
+    //@dev max weight adjustment
     uint256 public override weightAdjLimit = 25e16;
 
+    //@dev base threshold scale (10000)
     uint256 public override baseThresholdScale = 1e32;
 
+    //@dev minimum lp-range width
     int24 public override baseThresholdFloor = 10;
 
+    //@dev max TWAP deviation ETH/USDC pool
     int24 public override maxTwapDeviationEthUsdc = 120;
 
+    //@dev max TWAP deviation oSQTH/ETH pool
     int24 public override maxTwapDeviationOsqthEth = 120;
 
     //@dev time difference to trigger a hedge (seconds)
@@ -203,6 +213,41 @@ contract VaultStorage is IVaultStorage, Faucet {
      */
     function setMaxPriceMultiplier(uint256 _maxPriceMultiplier) external onlyGovernance {
         maxPriceMultiplier = _maxPriceMultiplier;
+    }
+
+    function setIrMax(uint256 _irMax) external onlyGovernance {
+        irMax = _irMax;
+    }
+
+    function setIrLimit(uint256 _irLimit) external onlyGovernance {
+        irLimit = _irLimit;
+    }
+
+    function setIrPrecision(uint256 _irPrecision) external onlyGovernance {
+        irPrecision = _irPrecision;
+    }
+
+    function setWeightAdjParam(uint256 _weightAdjParam) external onlyGovernance {
+        weightAdjParam = _weightAdjParam;
+    }
+    
+    function setWeightAdjLimit(uint256 _weightAdjLimit) external onlyGovernance {
+        weightAdjLimit = _weightAdjLimit;
+    }
+    function setBaseThresholdScale(uint256 _baseThresholdScale) external onlyGovernance {
+        baseThresholdScale = _baseThresholdScale;
+    }
+
+    function setBaseThresholdFloor(int24 _baseThresholdFloor) external onlyGovernance {
+        baseThresholdFloor = _baseThresholdFloor;
+    }
+
+    function setMaxTwapDeviationEthUsdc(int24 _maxTwapDeviationEthUsdc) external onlyGovernance {
+        maxTwapDeviationEthUsdc = _maxTwapDeviationEthUsdc;
+    }
+
+    function setMaxTwapDeviationOsqthEth(int24 _maxTwapDeviationOsqthEth) external onlyGovernance {
+        maxTwapDeviationOsqthEth = _maxTwapDeviationOsqthEth;
     }
 
     /**
