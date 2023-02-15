@@ -26,10 +26,10 @@ contract VaultStorage is IVaultStorage, Faucet {
     uint256 public override cap;
 
     //@dev lower and upper ticks in Uniswap pools
-    int24 public override orderEthUsdcLower;
-    int24 public override orderEthUsdcUpper;
-    int24 public override orderOsqthEthLower;
-    int24 public override orderOsqthEthUpper;
+    int24 public override orderEthUsdcLower = 201180;
+    int24 public override orderEthUsdcUpper = 204240;
+    int24 public override orderOsqthEthLower = 27060;
+    int24 public override orderOsqthEthUpper = 30120;
 
     //@dev timestamp when last rebalance executed
     uint256 public override timeAtLastRebalance;
