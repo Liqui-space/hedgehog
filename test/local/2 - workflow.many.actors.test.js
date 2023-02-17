@@ -9,7 +9,7 @@ const {
     rebalanceClassicComponent,
 } = require("../helpers/components");
 
-describe.skip("Workflow with many actors", function () {
+describe.only("Workflow with many actors", function () {
     it("Should set actors", async function () {
         [
             owner,
@@ -27,7 +27,7 @@ describe.skip("Workflow with many actors", function () {
 
     let Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage;
     it("Should deploy contract", async function () {
-        await resetFork(16586904);
+        await resetFork(16634147);
 
         const params = [...deploymentParams];
         params[6] = "0";
