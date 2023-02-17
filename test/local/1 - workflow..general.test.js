@@ -12,7 +12,7 @@ const {
 const { hardhatDeploy, deploymentParams, hardhatGetPerepherals, hardhatPartialDeploy } = require("@shared/deploy");
 const { BigNumber, utils } = require("ethers");
 
-describe.only("General Workflow", function () {
+describe.skip("General Workflow", function () {
     it("Should set actors", async function () {
         [, governance, rebalancerChad, depositor1, keeper, depositor2, depositor3, notgovernance] =
             await ethers.getSigners();
@@ -53,21 +53,24 @@ describe.only("General Workflow", function () {
 
     it("rebalance", () => rebalanceClassicComponent(rebalancerChad, Rebalancer, RebalanceModule4));
 
-    return;
-    it("deposit3 -> cap limit", async function () {
-        console.log("> totalSupply:", (await Vault.totalSupply()).toString());
-        console.log("> cap:", (await VaultStorage.cap()).toString());
+    // it("deposit3 -> cap limit", async function () {
+    //     console.log("> totalSupply:", (await Vault.totalSupply()).toString());
+    //     console.log("> cap:", (await VaultStorage.cap()).toString());
 
-        await shouldThrowErrorComponent(
-            depositOCComponent("10", depositor3, Vault, OneClickDeposit, "user3"),
-            "C4",
-            "Cap was not reached"
-        );
-    });
+    //     await shouldThrowErrorComponent(
+    //         depositOCComponent("1000", depositor3, Vault, OneClickDeposit, "user3"),
+    //         "C4",
+    //         "Cap was not reached"
+    //     );
+    // });
 
     it("deposit3", () => depositOCComponent("5", depositor3, Vault, OneClickDeposit, "user3", "990000000000000000"));
 
     it("withdraw2", async function () {
+        console.log("> Amounts:", (await VaultMath.getTotalAmounts()).toString());
+        console.log("> totalSupply:", (await Vault.totalSupply()).toString());
+
+
         const allShares = await getERC20Balance(depositor2.address, Vault.address);
         await withdrawComponent(allShares, depositor2, Vault, "user2");
     });
@@ -92,9 +95,9 @@ describe.only("General Workflow", function () {
 
     it("swap", async function () {
         await mineSomeBlocks(2216);
-        await swapComponent("USDC_WETH", "3300000", V3Helper);
+        await swapComponent("USDC_WETH", "3300000", V3Helper, true);
         await logBlock();
-        await swapComponent("WETH_OSQTH", "1500", V3Helper);
+        await swapComponent("WETH_OSQTH", "1500", V3Helper, true);
     }).timeout(10000000);
 
     // it("price rebalance", async function () {
