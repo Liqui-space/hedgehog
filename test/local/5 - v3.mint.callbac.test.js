@@ -1,77 +1,29 @@
-const { expect, assert } = require("chai");
 const { ethers } = require("hardhat");
-const { utils } = ethers;
-const { wethAddress, osqthAddress, usdcAddress } = require("@shared/constants");
-const {
-    mineSomeBlocks,
-    resetFork,
-    logBlock,
-    getAndApprove2,
-    getERC20Balance,
-    getWETH,
-    getOSQTH,
-    getUSDC,
-} = require("../helpers");
-const { hardhatInitializedDeploy, deploymentParams, hardhatDeploy } = require("@shared/deploy");
-const { BigNumber } = require("ethers");
+const { wethAddress, usdcAddress } = require("@shared/constants");
+const { resetFork } = require("../helpers");
+const { hardhatPartialDeploy } = require("@shared/deploy");
+const { executeTx, shouldThrowErrorComponent } = require("../helpers/components");
 const abi = ethers.utils.defaultAbiCoder;
 
-describe.skip("V3 mint callback check bf", function () {
-    it("1 test", async function () {
-        this.skip();
-        await resetFork(15278550);
+describe.only("V3 mint callback check access", function () {
+    it("Should set actors", async function () {
+        [, governance, unuthorized] = await ethers.getSigners();
+    });
 
-        let MyContract = await ethers.getContractFactory("Rebalancer");
-        const rebalancer = await MyContract.attach(_rebalancerAddress);
+    let Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, tx;
+    it("Should deploy contract", async function () {
+        await resetFork(16634147);
 
-        console.log("> userEth %s", await getERC20Balance(rebalancer.address, wethAddress));
-        console.log("> userUsdc %s", await getERC20Balance(rebalancer.address, usdcAddress));
-        console.log("> userOsqth %s", await getERC20Balance(rebalancer.address, osqthAddress));
-
-        await resetFork(15278554);
-
-        console.log("> userEth %s", await getERC20Balance(rebalancer.address, wethAddress));
-        console.log("> userUsdc %s", await getERC20Balance(rebalancer.address, usdcAddress));
-        console.log("> userOsqth %s", await getERC20Balance(rebalancer.address, osqthAddress));
-
-        console.log(0.000023504084671461 * 1600);
+        [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage] = await hardhatPartialDeploy(governance.address);
     });
 
     it("unuthorized test", async function () {
-        this.skip();
-        await resetFork(15278541);
+        const args = abi.encode(["address", "address", "address"], [unuthorized.address, wethAddress, usdcAddress]);
 
-        [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage] = await hardhatInitializedDeploy();
-        const signers = await ethers.getSigners();
-        unuthorized = signers[12];
-
-        const arr = abi.encode(["address", "address", "address"], [unuthorized.address, wethAddress, usdcAddress]);
-        tx = await VaultTreasury.connect(unuthorized).uniswapV3MintCallback(1, 1, arr);
-        await tx.wait();
-
-        console.log("> unuthorized ETH %s", await getERC20Balance(unuthorized.address, wethAddress));
-        console.log("> unuthorized USDC %s", await getERC20Balance(unuthorized.address, usdcAddress));
-        console.log("> unuthorized oSQTH %s", await getERC20Balance(unuthorized.address, osqthAddress));
-    });
-
-    let unuthorized, governance;
-    it("Should deploy contract", async function () {
-        // this.skip();
-        const signers = await ethers.getSigners();
-        governance = signers[0];
-        unuthorized = signers[12];
-        await resetFork(15173789);
-
-        const params = [...deploymentParams];
-        deploymentParams[6] = "10000";
-        [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage] = await hardhatDeploy(governance, params);
-    });
-
-    it("Should deploy contract", async function () {
-        // this.skip();
-        console.log(unuthorized.address);
-        const arr = abi.encode(["address", "address"], [wethAddress, usdcAddress]);
-        tx = await VaultTreasury.connect(unuthorized).uniswapV3MintCallback(1, 1, arr);
-        await tx.wait();
+        await shouldThrowErrorComponent(
+            executeTx(VaultTreasury.connect(unuthorized).uniswapV3MintCallback(1, 1, args)),
+            "C20",
+            "This should fail"
+        );
     });
 });

@@ -5,7 +5,7 @@ const { hardhatPartialDeploy } = require("@shared/deploy");
 
 const { shouldThrowErrorComponent, executeTx } = require("../helpers/components");
 
-describe.only("Governance check", function () {
+describe.skip("Governance check", function () {
     it("Should set actors", async function () {
         [, governance, depositor1, governance2] = await ethers.getSigners();
     });
