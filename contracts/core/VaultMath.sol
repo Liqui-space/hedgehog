@@ -349,7 +349,13 @@ contract VaultMath is IVaultMath, ReentrancyGuard, Faucet {
         uint256 irMax = IVaultStorage(vaultStorage).irMax();
         uint256 irPrecision = IVaultStorage(vaultStorage).irPrecision();
 
-        ir = (((uint256(int256(Constants.markets.interestRate(address(Constants.usdc)))).mul(31536000).mul(1e29)).div(irPrecision)).floor()).mul(irPrecision);
+        ir = (
+            (
+                (uint256(int256(Constants.markets.interestRate(address(Constants.usdc)))).mul(31536000).mul(1e29)).div(
+                    irPrecision
+                )
+            ).floor()
+        ).mul(irPrecision);
         console.log("ir %s", ir);
 
         ir = ir > irMax ? irMax : ir;

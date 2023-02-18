@@ -45,7 +45,7 @@ contract VaultStorage is IVaultStorage, Faucet {
     uint256 public override interestRateAtLastRebalance = 3e18;
 
     //@dev max interest rate 4.2%
-    uint256 public override irMax = 42e17; 
+    uint256 public override irMax = 42e17;
 
     //@dev interest rate limit for trend adjustments
     uint256 public override irLimit = 25e17;
@@ -230,10 +230,11 @@ contract VaultStorage is IVaultStorage, Faucet {
     function setWeightAdjParam(uint256 _weightAdjParam) external onlyGovernance {
         weightAdjParam = _weightAdjParam;
     }
-    
+
     function setWeightAdjLimit(uint256 _weightAdjLimit) external onlyGovernance {
         weightAdjLimit = _weightAdjLimit;
     }
+
     function setBaseThresholdScale(uint256 _baseThresholdScale) external onlyGovernance {
         baseThresholdScale = _baseThresholdScale;
     }

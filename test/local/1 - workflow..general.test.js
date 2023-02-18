@@ -70,7 +70,6 @@ describe.skip("General Workflow", function () {
         console.log("> Amounts:", (await VaultMath.getTotalAmounts()).toString());
         console.log("> totalSupply:", (await Vault.totalSupply()).toString());
 
-
         const allShares = await getERC20Balance(depositor2.address, Vault.address);
         await withdrawComponent(allShares, depositor2, Vault, "user2");
     });

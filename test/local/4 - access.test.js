@@ -1,40 +1,34 @@
 const { assert } = require("chai");
 const { ethers } = require("hardhat");
-const { resetFork, logBlock } = require("../helpers");
-const { hardhatDeploy, deploymentParams, hardhatGetPerepherals } = require("@shared/deploy");
+const { resetFork } = require("../helpers");
+const { hardhatPartialDeploy } = require("@shared/deploy");
 
-const {
-    depositOCComponent,
-    withdrawComponent,
-    shouldThrowErrorComponent,
-    swapComponent,
-    executeTx,
-} = require("../helpers/components");
+const { shouldThrowErrorComponent, executeTx } = require("../helpers/components");
 
-describe.skip("Governance check", function () {
+describe.only("Governance check", function () {
     it("Should set actors", async function () {
         [, governance, depositor1, governance2] = await ethers.getSigners();
     });
 
     let Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, tx;
     it("Should deploy contract", async function () {
-        await resetFork(16586904);
+        await resetFork(16634147);
 
-        [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, _arguments] = await hardhatDeploy(
+        [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, _arguments] = await hardhatPartialDeploy(
             governance.address
         );
     });
 
     it("check", async function () {
-        assert((await VaultStorage.cap()).toString() == "100000000000000000000");
+        assert((await VaultStorage.cap()).toString() == "228000000000000000000");
         await shouldThrowErrorComponent(
-            executeTx(VaultStorage.connect(depositor1).setCap("100000000000000000001")),
+            executeTx(VaultStorage.connect(depositor1).setCap("228000000000000000001")),
             "C15",
             "This should fail"
         );
 
-        await executeTx(VaultStorage.connect(governance).setCap("100000000000000000001"));
-        assert((await VaultStorage.cap()).toString() == "100000000000000000001");
+        await executeTx(VaultStorage.connect(governance).setCap("228000000000000000001"));
+        assert((await VaultStorage.cap()).toString() == "228000000000000000001");
     });
 
     it("setGov", async function () {
@@ -55,12 +49,12 @@ describe.skip("Governance check", function () {
 
     it("check", async function () {
         await shouldThrowErrorComponent(
-            executeTx(VaultStorage.connect(governance).setCap("100000000000000000002")),
+            executeTx(VaultStorage.connect(governance).setCap("228000000000000000002")),
             "C15",
             "This should fail"
         );
 
-        await executeTx(VaultStorage.connect(governance2).setCap("100000000000000000002"));
-        assert((await VaultStorage.cap()).toString() == "100000000000000000002");
+        await executeTx(VaultStorage.connect(governance2).setCap("228000000000000000002"));
+        assert((await VaultStorage.cap()).toString() == "228000000000000000002");
     });
 });

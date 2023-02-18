@@ -29,7 +29,7 @@ interface IVaultStorage {
 
     function irLimit() external view returns (uint256);
 
-    function irPrecision() external view returns (uint256); 
+    function irPrecision() external view returns (uint256);
 
     function weightAdjParam() external view returns (uint256);
 
