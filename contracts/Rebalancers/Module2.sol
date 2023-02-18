@@ -201,6 +201,8 @@ contract Module2 is Ownable {
         FlCallbackData memory data = abi.decode(encodedData, (FlCallbackData));
         uint256 ethBefore = IERC20(WETH).balanceOf(address(this));
 
+        console.log(data.type_of_arbitrage);
+
         if (data.type_of_arbitrage == 1) {
             IEulerDToken borrowedDToken1 = IEulerDToken(markets.underlyingToDToken(WETH));
             borrowedDToken1.borrow(0, data.amount1);

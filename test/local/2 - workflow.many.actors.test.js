@@ -9,7 +9,7 @@ const {
     rebalanceClassicComponent,
 } = require("../helpers/components");
 
-describe.skip("Workflow with many actors", function () {
+describe("Workflow with many actors", function () {
     it("Should set actors", async function () {
         [
             owner,
