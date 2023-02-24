@@ -389,12 +389,19 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
     }
 
     function _getBaseThreshold(int24 tickSpacing) internal view returns (int24 baseThreshold) {
-     baseThreshold = _floor(
+        baseThreshold =
+            _floor(
                 toInt24(
-                    int256(IVaultMath(vaultMath).getIV().div(19104973174542800179).div(IVaultStorage(vaultStorage).baseThresholdScale()))
+                    int256(
+                        IVaultMath(vaultMath).getIV().div(19104973174542800179).div(
+                            IVaultStorage(vaultStorage).baseThresholdScale()
+                        )
+                    )
                 ),
                 tickSpacing
-            ) + IVaultStorage(vaultStorage).baseThresholdFloor() * tickSpacing;
+            ) +
+            IVaultStorage(vaultStorage).baseThresholdFloor() *
+            tickSpacing;
     }
 
     /// @dev Casts uint256 to uint160 with overflow check.

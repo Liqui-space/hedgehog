@@ -17,7 +17,6 @@ import {Constants} from "../libraries/Constants.sol";
 import {PRBMathUD60x18} from "../libraries/math/PRBMathUD60x18.sol";
 import {Faucet} from "../libraries/Faucet.sol";
 import {IUniswapMath} from "../libraries/uniswap/IUniswapMath.sol";
-import "hardhat/console.sol";
 
 contract VaultMath is IVaultMath, ReentrancyGuard, Faucet {
     using PRBMathUD60x18 for uint256;

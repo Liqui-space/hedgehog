@@ -14,8 +14,6 @@ import {TransferHelper} from "@uniswap/v3-periphery/contracts/libraries/Transfer
 
 import {IOracle} from "../libraries/uniswap/IOracle.sol";
 
-import "hardhat/console.sol";
-
 contract V3Helper {
     IERC20 public constant weth = IERC20(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
     IERC20 public constant usdc = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);

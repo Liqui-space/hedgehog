@@ -20,8 +20,6 @@ import {Faucet} from "../libraries/Faucet.sol";
 
 import {VaultAuction} from "./VaultAuction.sol";
 
-import "hardhat/console.sol";
-
 /**
  * Error
  * C0: Paused
@@ -274,7 +272,6 @@ contract Vault is IVault, ERC20, ReentrancyGuard, Faucet {
             ethToDeposit = depositorValue.mul(5e17);
             usdcToDeposit = depositorValue.mul(25e16).mul(ethUsdcPrice).div(uint256(1e30));
             osqthToDeposit = depositorValue.mul(25e16).div(osqthEthPrice);
-
         } else {
             //Get total amounts of token balances
             (uint256 ethAmount, uint256 usdcAmount, uint256 osqthAmount) = IVaultMath(vaultMath).getTotalAmounts();
