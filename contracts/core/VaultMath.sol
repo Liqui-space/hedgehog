@@ -356,7 +356,6 @@ contract VaultMath is IVaultMath, ReentrancyGuard, Faucet {
                 )
             ).floor()
         ).mul(irPrecision);
-        console.log("ir %s", ir);
 
         ir = ir > irMax ? irMax : ir;
     }

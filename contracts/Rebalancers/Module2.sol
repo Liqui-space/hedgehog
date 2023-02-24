@@ -14,7 +14,6 @@ import {IEulerDToken, IEulerMarkets, IExec} from "./IEuler.sol";
 
 import {ISwapRouter} from "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
 import {TransferHelper} from "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
-import "hardhat/console.sol";
 
 // Rebalance flow
 
@@ -200,8 +199,6 @@ contract Module2 is Ownable {
         require(msg.sender == euler, "e/flash-loan/on-deferred-caller");
         FlCallbackData memory data = abi.decode(encodedData, (FlCallbackData));
         uint256 ethBefore = IERC20(WETH).balanceOf(address(this));
-
-        console.log(data.type_of_arbitrage);
 
         if (data.type_of_arbitrage == 1) {
             IEulerDToken borrowedDToken1 = IEulerDToken(markets.underlyingToDToken(WETH));
