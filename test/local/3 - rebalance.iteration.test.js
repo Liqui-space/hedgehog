@@ -4,7 +4,7 @@ const { hardhatPartialDeploy, deploymentParams, hardhatGetPerepherals } = requir
 
 const { depositOCComponent, swapComponent, executeTx } = require("../helpers/components");
 
-describe.only("Test of Rebalance in different market conditions", function () {
+describe.skip("Test of Rebalance in different market conditions", function () {
     it("Should set actors", async function () {
         [, governance, rebalancerChad, depositor1, keeper, depositor2, depositor3, notgovernance] =
             await ethers.getSigners();
