@@ -381,6 +381,7 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
         return compressed * tickSpacing;
     }
 
+    /// @dev calculates weight adjustment
     function _getWeightAdj(uint256 interestRate) internal view returns (uint256 weightAdj) {
         uint256 weightAdjLimit = IVaultStorage(vaultStorage).weightAdjLimit();
 
@@ -388,7 +389,9 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
         weightAdj = weightAdj > weightAdjLimit ? weightAdjLimit : weightAdj;
     }
 
+    /// @dev calculates base threshold
     function _getBaseThreshold(int24 tickSpacing) internal view returns (int24 baseThreshold) {
+        //const = sqrt(365) = 19.1
         baseThreshold =
             _floor(
                 toInt24(

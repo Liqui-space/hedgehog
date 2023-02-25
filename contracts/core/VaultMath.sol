@@ -344,10 +344,10 @@ contract VaultMath is IVaultMath, ReentrancyGuard, Faucet {
 
     /// @dev Fetches USDC interest rate
     function getInterestRate() external view override returns (uint256 ir) {
-        //const = sqrt(365)
         uint256 irMax = IVaultStorage(vaultStorage).irMax();
         uint256 irPrecision = IVaultStorage(vaultStorage).irPrecision();
 
+        //const = 86400*365
         ir = (
             (
                 (uint256(int256(Constants.markets.interestRate(address(Constants.usdc)))).mul(31536000).mul(1e29)).div(
