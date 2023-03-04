@@ -54,13 +54,13 @@ contract VaultStorage is IVaultStorage, Faucet {
     uint256 public override weightAdjParam = 1e16;
 
     //@dev max weight adjustment
-    uint256 public override weightAdjLimit = 69e15;
+    uint256 public override weightAdjLimit = 42e15;
 
     //@dev base threshold scale (10000)
     uint256 public override baseThresholdScale = 1e32;
 
     //@dev minimum lp-range width
-    int24 public override baseThresholdFloor = 5;
+    int24 public override baseThresholdFloor = 10;
 
     //@dev max TWAP deviation ETH/USDC pool
     int24 public override maxTwapDeviationEthUsdc = 120;
