@@ -21,7 +21,7 @@ async function getUSDC(amount, account, ath) {
 }
 
 async function getOSQTH(amount, account, ath) {
-    await getToken(amount, account, osqthAddress, ath || "0x56178a0d5F301bAf6CF3e1Cd53d9863437345Bf9");
+    await getToken(amount, account, osqthAddress, ath || "0x8D5ACF995dae10BdbBada2044C7217ac99edF5Bf");
 }
 
 const athsV1 = ["0x06920c9fc643de77b99cb7670a944ad31eaaa260", "0xf885bdd59e5652fe4940ca6b8c6ebb88e85a5a40", undefined];

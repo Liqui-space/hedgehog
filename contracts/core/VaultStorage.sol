@@ -245,7 +245,7 @@ contract VaultStorage is IVaultStorage, Faucet {
     }
 
     /**
-     * @notice owner can set base threshold scale 
+     * @notice owner can set base threshold scale
      * @param _baseThresholdScale the max interest rate
      */
     function setBaseThresholdScale(uint256 _baseThresholdScale) external onlyGovernance {
@@ -253,7 +253,7 @@ contract VaultStorage is IVaultStorage, Faucet {
     }
 
     /**
-     * @notice owner can set base threshold floor (min range size) 
+     * @notice owner can set base threshold floor (min range size)
      * @param _baseThresholdFloor the max interest rate
      */
     function setBaseThresholdFloor(int24 _baseThresholdFloor) external onlyGovernance {
@@ -261,7 +261,7 @@ contract VaultStorage is IVaultStorage, Faucet {
     }
 
     /**
-     * @notice owner can set max twap deviation for the ETH/USDC pool oracle  
+     * @notice owner can set max twap deviation for the ETH/USDC pool oracle
      * @param _maxTwapDeviationEthUsdc the max interest rate
      */
     function setMaxTwapDeviationEthUsdc(int24 _maxTwapDeviationEthUsdc) external onlyGovernance {
@@ -269,7 +269,7 @@ contract VaultStorage is IVaultStorage, Faucet {
     }
 
     /**
-     * @notice owner can set max twap deviation for the oSQTH/ETH pool oracle  
+     * @notice owner can set max twap deviation for the oSQTH/ETH pool oracle
      * @param _maxTwapDeviationOsqthEth the max interest rate
      */
     function setMaxTwapDeviationOsqthEth(int24 _maxTwapDeviationOsqthEth) external onlyGovernance {
