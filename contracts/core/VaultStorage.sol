@@ -10,7 +10,6 @@ import {Constants} from "../libraries/Constants.sol";
 import {Faucet} from "../libraries/Faucet.sol";
 import {SharedEvents} from "../libraries/SharedEvents.sol";
 
-//TODO: Transform all state manually
 contract VaultStorage is IVaultStorage, Faucet {
     //@dev governance address
     address public override governance;
@@ -54,7 +53,7 @@ contract VaultStorage is IVaultStorage, Faucet {
     uint256 public override weightAdjParam = 1e16;
 
     //@dev max weight adjustment
-    uint256 public override weightAdjLimit = 69e15;
+    uint256 public override weightAdjLimit = 42e15;
 
     //@dev base threshold scale (10000)
     uint256 public override baseThresholdScale = 1e32;

@@ -20,7 +20,7 @@ describe.only("General Workflow", function () {
 
     let Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, tx;
     it("Should deploy contract", async function () {
-        await resetFork(16754599);
+        await resetFork(16754905);
 
         const params = [...deploymentParams];
         params[6] = "0";
@@ -75,15 +75,17 @@ describe.only("General Workflow", function () {
     });
 
     it("swap", async function () {
-        await mineSomeBlocks(2216);
+        await mineSomeBlocks(2000);
         await swapComponent("USDC_WETH", "1000000", V3Helper, true);
-        await mineSomeBlocks(554);
+        await mineSomeBlocks(400);
         await swapComponent("WETH_OSQTH", "100", V3Helper, true);
-        await mineSomeBlocks(554);
+        await mineSomeBlocks(2400);
     });
 
     it("rebalance2", async function () {
-        await mineSomeBlocks(83622);
+        await mineSomeBlocks(650);
+
+        await mineSomeBlocks(600000);
         await rebalanceClassicComponent(rebalancerChad, Rebalancer, RebalanceModule4);
     });
 
