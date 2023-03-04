@@ -20,7 +20,7 @@ describe.only("General Workflow", function () {
 
     let Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, tx;
     it("Should deploy contract", async function () {
-        await resetFork(16634147);
+        await resetFork(16754434);
 
         const params = [...deploymentParams];
         params[6] = "0";
@@ -49,7 +49,7 @@ describe.only("General Workflow", function () {
         await mineSomeBlocks(200);
         await swapComponent("OSQTH_WETH", "40", V3Helper);
         await mineSomeBlocks(81000);
-    });
+    }).timeout(1000000);
 
     it("rebalance", () => rebalanceClassicComponent(rebalancerChad, Rebalancer, RebalanceModule4));
 
