@@ -238,13 +238,13 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
             int24 lower;
             int24 upper;
             if (interestRate >= IVaultStorage(vaultStorage).interestRateAtLastRebalance()) {
-                lower = baseThreshold + tickAdj;
-                upper = baseThreshold - tickAdj;
+                lower = baseThreshold - tickAdj;
+                upper = baseThreshold + tickAdj;
 
                 weight = uint256(5e17).sub(weightAdj);
             } else {
-                lower = baseThreshold - tickAdj;
-                upper = baseThreshold + tickAdj;
+                lower = baseThreshold + tickAdj;
+                upper = baseThreshold - tickAdj;
 
                 weight = uint256(5e17).add(weightAdj);
             }
