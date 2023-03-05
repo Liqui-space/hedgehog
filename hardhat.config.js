@@ -5,7 +5,7 @@ require("hardhat-gas-reporter");
 require("@nomiclabs/hardhat-etherscan");
 require("@nomiclabs/hardhat-ethers");
 
-const { ETHERSCAN_KEY, HEDGEHOG_REBALANCER, IFURA_MAINNET_URL } = require("@shared/config");
+const { ETHERSCAN_KEY, HEDGEHOG_REBALANCER, HEDGEHOG_DEPLOYER, IFURA_MAINNET_URL } = require("@shared/config");
 const { getForkingParams } = require("hardhat.helpers");
 
 task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
@@ -35,7 +35,7 @@ module.exports = {
         hardhat: process.env.SIMULATION ? simulate : test,
         mainnet: {
             url: IFURA_MAINNET_URL,
-            accounts: [HEDGEHOG_REBALANCER],
+            accounts: [HEDGEHOG_DEPLOYER],
             gasPrice: 30 * 10 ** 9,
         },
     },

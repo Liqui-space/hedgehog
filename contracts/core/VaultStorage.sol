@@ -125,8 +125,6 @@ contract VaultStorage is IVaultStorage, Faucet {
         minPriceMultiplier = _minPriceMultiplier;
         maxPriceMultiplier = _maxPriceMultiplier;
 
-        timeAtLastRebalance = 0;
-
         governance = _governance;
         keeper = _keeper;
     }
