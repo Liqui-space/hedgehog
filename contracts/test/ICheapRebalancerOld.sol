@@ -13,4 +13,6 @@ interface ICheapRebalancerOld {
     function owner() external view returns (address);
 
     function transferOwnership(address newOwner) external;
+
+    function rebalance(uint256 a, uint256 b) external;
 }
