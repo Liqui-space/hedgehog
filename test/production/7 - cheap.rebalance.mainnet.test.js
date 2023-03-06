@@ -15,18 +15,19 @@ const { executeTx } = require("../helpers/components");
 const { deployContract } = require("@shared/deploy");
 
 describe.only("Cheap Rebalancer test mainnet", function () {
-    it("Phase 0", async function () {
-        await resetFork(16770265);
+    it("Initial", async function () {
+        await resetFork(16770071);
 
         CheapRebalancerOld = await ethers.getContractAt("ICheapRebalancerOld", _cheapRebalancerOld);
-        ModuleOld = await ethers.getContractAt("IModuleOld", _bigRebalancerEuler2);
+        // ModuleOld = await ethers.getContractAt("IModuleOld", _bigRebalancerEuler2);
 
-        const _owner = await ModuleOld.owner();
-        console.log(_owner);
+        // const _owner = await ModuleOld.owner();
+        // console.log(_owner);
 
-        owner = await impersontate(_owner);
-        await getETH(owner, ethers.utils.parseEther("3.0"));
+        // owner = await impersontate(_owner);
+        // await getETH(owner, ethers.utils.parseEther("3.0"));
     });
+
     it("Configure", async function () {
         this.skip();
 
@@ -49,6 +50,6 @@ describe.only("Cheap Rebalancer test mainnet", function () {
         owner = await impersontate(_owner);
         await getETH(owner, ethers.utils.parseEther("3.0"));
 
-        await executeTx(CheapRebalancerOld.connect(owner).rebalance("0", "950000000000000000"));
+        await executeTx(CheapRebalancerOld.connect(owner).rebalance("0", "999000000000000000"));
     });
 });
