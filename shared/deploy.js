@@ -235,4 +235,5 @@ module.exports = {
     hardhatInitializedDeploy,
     deploymentParams,
     hardhatDeploy,
+    deployContract,
 };
