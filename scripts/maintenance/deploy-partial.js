@@ -14,6 +14,7 @@ const {
     _vaultMathAddressV2,
     _cheapRebalancerOld,
     _vaultStorageAddressV2,
+    _bigRebalancerEuler,
     _bigRebalancerEuler2,
 } = require("../../shared/constants");
 const { deployContract, deploymentParams } = require("../../shared/deploy");
@@ -46,7 +47,11 @@ const hardhatDeployContractsPartial = async () => {
     // IFaucet = await ethers.getContractFactory("Faucet");
     // const Faucet = await IFaucet.attach(_vaultAddress);
     // ModuleOld = await ethers.getContractAt("IModuleOld", _bigRebalancerEuler2);
-    // tx = await ModuleOld.setContracts(
+    // console.log((await ModuleOld.addressAuction()) == _vaultAuctionAddressV2);
+    // console.log((await ModuleOld.addressMath()) == _vaultMathAddressV2);
+    // console.log((await ModuleOld.addressTreasury()) == _vaultTreasuryAddress);
+    // console.log((await ModuleOld.addressStorage()) == _vaultStorageAddressV2);
+    // tx = await ModuleOld.callStatic.setContracts(
     //     _vaultAuctionAddressV2,
     //     _vaultMathAddressV2,
     //     _vaultTreasuryAddress,
