@@ -44,7 +44,7 @@ const getAndApprove = async (
 };
 
 const getAndApproveWETH = async (owner, amount, toAddress) => {
-    await getWETH(amount, owner.address, "0xF02e86D9E0eFd57aD034FaF52201B79917fE0713");
+    await getWETH(amount, owner.address);
     await approveERC20(owner, toAddress, amount, wethAddress);
 };
 

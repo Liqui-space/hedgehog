@@ -20,7 +20,7 @@ describe.only("General Workflow", function () {
 
     let Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, tx;
     it("Should deploy contract", async function () {
-        await resetFork(16825778);
+        await resetFork(16828230);
 
         const params = [...deploymentParams];
         params[6] = "0";
@@ -39,8 +39,9 @@ describe.only("General Workflow", function () {
         console.log("> ethUsdcLower", (await VaultStorage.orderEthUsdcLower()).toString());
     });
 
-    // it("deposit1", () => depositOCComponent("1", depositor1, Vault, OneClickDeposit, "user1"));
+    it("deposit1", () => depositOCComponent("0.2", depositor1, Vault, OneClickDeposit, "user1"));
 
+    return;
     // it("deposit2", () => depositOCComponent("5", depositor2, Vault, OneClickDeposit, "user2"));
 
     // it("2 swaps", async function () {
