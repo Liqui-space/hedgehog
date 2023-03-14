@@ -126,6 +126,9 @@ contract Module2 is Ownable {
             uint256 osqthBalance
         ) = IAuction(addressAuction).getParams(auctionTriggerTime);
 
+        console.log("here");
+
+
         data.threshold = threshold;
 
         if (targetEth > ethBalance && targetUsdc > usdcBalance && targetOsqth < osqthBalance) {

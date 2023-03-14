@@ -305,9 +305,11 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
             uint256
         )
     {
+
+        console.log("here");
         (uint256 ethAmount, uint256 usdcAmount, uint256 osqthAmount) = IVaultTreasury(vaultTreasury)
             .allAmountsForLiquidity(boundaries, liquidityEthUsdc, liquidityOsqthEth);
-
+        console.log("here1");
         return (ethAmount, usdcAmount, osqthAmount);
     }
 
@@ -404,6 +406,10 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
             auctionDetails.liquidityEthUsdc,
             auctionDetails.liquidityOsqthEth
         );
+
+        console.log("targetEth %s", targetEth);
+        console.log("targetUsdc %s", targetUsdc);
+        console.log("targetOsqth %s", targetOsqth);
 
         (uint256 ethBalance, uint256 usdcBalance, uint256 osqthBalance) = IVaultMath(vaultMath).getTotalAmounts();
 
