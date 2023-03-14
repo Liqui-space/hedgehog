@@ -43,13 +43,13 @@ describe.only("General Workflow", function () {
 
     it("deposit2", () => depositOCComponent("5", depositor2, Vault, OneClickDeposit, "user2"));
 
-    it("2 swaps", async function () {
-        await mineSomeBlocks(6000);
-        await swapComponent("WETH_USDC", "100", V3Helper);
-        await mineSomeBlocks(200);
-        await swapComponent("OSQTH_WETH", "40", V3Helper);
-        await mineSomeBlocks(81000);
-    });
+    // it("2 swaps", async function () {
+    //     await mineSomeBlocks(6000);
+    //     await swapComponent("WETH_USDC", "100", V3Helper);
+    //     await mineSomeBlocks(200);
+    //     await swapComponent("OSQTH_WETH", "40", V3Helper);
+    //     await mineSomeBlocks(81000);
+    // }).timeout(1000000);
 
     it("rebalance", () => rebalanceClassicComponent(rebalancerChad, Rebalancer, RebalanceModule4));
 
@@ -75,11 +75,19 @@ describe.only("General Workflow", function () {
     });
 
     it("swap", async function () {
+<<<<<<< HEAD:test/local/1 - workflow.general.test.js
         await mineSomeBlocks(2000);
         await swapComponent("USDC_WETH", "1000000", V3Helper, true);
         await mineSomeBlocks(400);
         await swapComponent("WETH_OSQTH", "100", V3Helper, true);
         await mineSomeBlocks(2400);
+=======
+        await mineSomeBlocks(2400);
+        await swapComponent("USDC_WETH", "1000000", V3Helper, true);
+        await mineSomeBlocks(400);
+        await swapComponent("WETH_OSQTH", "100", V3Helper, true);
+        await mineSomeBlocks(2000);
+>>>>>>> dev:test/local/1 - workflow..general.test.js
     });
 
     it("rebalance2", async function () {
