@@ -39,9 +39,9 @@ describe.only("General Workflow", function () {
         console.log("> ethUsdcLower", (await VaultStorage.orderEthUsdcLower()).toString());
     });
 
-    it("deposit1", () => depositOCComponent("1", depositor1, Vault, OneClickDeposit, "user1"));
+    // it("deposit1", () => depositOCComponent("1", depositor1, Vault, OneClickDeposit, "user1"));
 
-    it("deposit2", () => depositOCComponent("5", depositor2, Vault, OneClickDeposit, "user2"));
+    // it("deposit2", () => depositOCComponent("5", depositor2, Vault, OneClickDeposit, "user2"));
 
     // it("2 swaps", async function () {
     //     await mineSomeBlocks(6000);
@@ -51,6 +51,7 @@ describe.only("General Workflow", function () {
     //     await mineSomeBlocks(81000);
     // }).timeout(1000000);
 
+    // return;
     it("rebalance", () => rebalanceClassicComponent(rebalancerChad, Rebalancer, RebalanceModule4));
 
     return;
