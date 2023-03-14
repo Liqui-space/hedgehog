@@ -214,7 +214,7 @@ const hardhatGetPerepherals = async (governance, keeper, rebalancer, _arguments,
     tx = await Rebalancer.transferOwnership(rebalancer.address);
     await tx.wait();
 
-    const RebalanceModule4 = await deployContract("Module2", [], false);
+    const RebalanceModule4 = await deployContract("Module3", [], false);
     tx = await RebalanceModule4.setContracts(_VaultAuction, _VaultMath, _VaultTreasury, _VaultStorage);
     await tx.wait();
     tx = await RebalanceModule4.transferOwnership(Rebalancer.address);
