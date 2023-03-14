@@ -20,4 +20,6 @@ interface IModuleOld {
         address _addressTreasury,
         address _addressStorage
     ) external;
+
+    function setKeeper(address to) external;
 }

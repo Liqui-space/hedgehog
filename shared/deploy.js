@@ -15,6 +15,8 @@ const {
     _cheapRebalancerOld,
     _oneClickDepositAddress,
     _oneClickWithdrawAddress,
+    _vaultAuctionAddressV2,
+    _vaultStorageAddressV2,
 } = require("./constants");
 
 const deployContract = async (name, params, deploy = true) => {
@@ -85,27 +87,17 @@ const hardhatDeploy = async (governanceAddress, params = deploymentParams, keepe
     return [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, arguments];
 };
 
-const hardhatPartialDeploy = async (
-    governanceAddress,
-    params = deploymentParams,
-    keeperAddress = governance.address
-) => {
+const hardhatPartialDeploy = async () => {
     MyContract = await ethers.getContractFactory("Vault");
     const Vault = await MyContract.attach(_vaultAddress);
+    MyContract = await ethers.getContractFactory("VaultAuction");
+    const VaultAuction = await MyContract.attach(_vaultAuctionAddressV2);
     MyContract = await ethers.getContractFactory("VaultTreasury");
     const VaultTreasury = await MyContract.attach(_vaultTreasuryAddress);
+    MyContract = await ethers.getContractFactory("VaultStorage");
+    const VaultStorage = await MyContract.attach(_vaultStorageAddressV2);
 
-    const owner = await impersontate(await Vault.owner());
-    await getETH(owner.address, utils.parseEther("20"));
-
-    await network.provider.send("evm_setAutomine", [false]);
-
-    const VaultAuction = await deployContract("VaultAuction", [], false);
-    const VaultMath = await deployContract("VaultMath", [], false);
-
-    params.push(governanceAddress);
-    params.push(keeperAddress);
-    const VaultStorage = await deployContract("VaultStorage", params, false);
+    const VaultMath = await deployContract("VaultMath", [], true);
 
     const arguments = [
         await Vault.uniswapMath(),
@@ -123,19 +115,16 @@ const hardhatPartialDeploy = async (
     console.log("> VaultTreasury:", arguments[4]);
     console.log("> VaultStorage:", arguments[5]);
 
-    await network.provider.request({
-        method: "evm_mine",
-    });
-    await network.provider.send("evm_setAutomine", [true]);
-
     // await logFaucet(VaultAuction.address);
     // console.log("arguments", arguments);
 
+    const owner = await impersontate(await Vault.owner());
+    await getETH(owner.address, utils.parseEther("20"));
     await executeTx(Vault.connect(owner).setComponents(...arguments));
-    await executeTx(VaultAuction.setComponents(...arguments));
+    await executeTx(VaultAuction.connect(owner).setComponents(...arguments));
     await executeTx(VaultMath.setComponents(...arguments));
     await executeTx(VaultTreasury.connect(owner).setComponents(...arguments));
-    await executeTx(VaultStorage.setComponents(...arguments));
+    await executeTx(VaultStorage.connect(owner).setComponents(...arguments));
 
     // await logFaucet(VaultTreasury.address);
 
@@ -195,36 +184,24 @@ const hardhatGetPerepherals = async (governance, keeper, rebalancer, _arguments,
     MyContract = await ethers.getContractFactory("OneClickWithdraw");
     const OneClickWithdraw = await MyContract.attach(_oneClickWithdrawAddress);
 
-    const owner = await impersontate(await OneClickDeposit.owner());
-    await getETH(owner, ethers.utils.parseEther("2.5"));
-
-    //? Change contracts in current oneclicks
-    tx = await OneClickDeposit.connect(owner).setContracts(_Vault);
-    await tx.wait();
-
-    tx = await OneClickWithdraw.connect(owner).setContracts(_Vault);
-    await tx.wait();
-
     //-- Rebalancers
 
     const Rebalancer = await deployContract("Rebalancer", [], false);
-    tx = await Rebalancer.setParams(_VaultStorage);
-    await tx.wait();
+    await executeTx(Rebalancer.transferOwnership(rebalancer.address));
 
-    tx = await Rebalancer.transferOwnership(rebalancer.address);
-    await tx.wait();
+    const CheapRebalancerOld = await ethers.getContractAt("ICheapRebalancerOld", _cheapRebalancerOld);
+    const owner = await impersontate(await CheapRebalancerOld.owner());
+    await getETH(owner.address, utils.parseEther("20"));
+    await executeTx(CheapRebalancerOld.connect(owner).returnOwner(owner.address));
+    const ModuleOld = await ethers.getContractAt("IModuleOld", await CheapRebalancerOld.bigRebalancer());
 
     const RebalanceModule4 = await deployContract("Module3", [], false);
-    tx = await RebalanceModule4.setContracts(_VaultAuction, _VaultMath, _VaultTreasury, _VaultStorage);
-    await tx.wait();
-    tx = await RebalanceModule4.transferOwnership(Rebalancer.address);
-    await tx.wait();
+    await executeTx(RebalanceModule4.setContracts(_VaultAuction, _VaultMath, _VaultTreasury, _VaultStorage));
+    await executeTx(RebalanceModule4.transferOwnership(Rebalancer.address));
 
-    tx = await VaultStorage.connect(governance).setGovernance(Rebalancer.address);
-    await tx.wait();
+    await executeTx(ModuleOld.connect(owner).setKeeper(RebalanceModule4.address));
 
-    tx = await VaultStorage.connect(keeper).setKeeper(Rebalancer.address);
-    await tx.wait();
+    await executeTx(CheapRebalancerOld.connect(owner).returnGovernance(Rebalancer.address));
 
     return [V3Helper, OneClickDeposit, OneClickWithdraw, Rebalancer, undefined, undefined, undefined, RebalanceModule4];
 };

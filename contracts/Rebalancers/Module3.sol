@@ -86,7 +86,7 @@ interface IVaultMath {
 
 contract Module3 is Ownable, FlashLoanReceiverBase {
     address public addressAuction = 0x30EF1938673c5513a817D202CDD33471894a7ED8;
-    address public addressMath = 0xf21A50489166B10d109381d7Cc5441f1152aE666;
+    address public addressMath = 0x47c05BCCA7d57c87083EB4e586007530eE4539e9; //TODO: chage to current addresses
     address public addressTreasury = 0x12804580C15F4050dda61D44AFC94623198848bC;
     address public addressStorage = 0x66aE7D409F559Df4E13dFe8b323b570Ab86e68B8;
 

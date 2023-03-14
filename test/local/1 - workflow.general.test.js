@@ -9,7 +9,7 @@ const {
     executeTx,
 } = require("../helpers/components");
 
-const { deploymentParams, hardhatGetPerepherals, hardhatPartialDeploy } = require("@shared/deploy");
+const { hardhatGetPerepherals, hardhatPartialDeploy } = require("@shared/deploy");
 const { BigNumber } = require("ethers");
 
 describe.only("General Workflow", function () {
@@ -22,13 +22,7 @@ describe.only("General Workflow", function () {
     it("Should deploy contract", async function () {
         await resetFork(16828230);
 
-        const params = [...deploymentParams];
-        params[6] = "0";
-        [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, _arguments] = await hardhatPartialDeploy(
-            governance.address,
-            params,
-            keeper.address
-        );
+        [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, _arguments] = await hardhatPartialDeploy();
 
         [V3Helper, OneClickDeposit, OneClickWithdraw, Rebalancer, , , RebalanceModule3, RebalanceModule4] =
             await hardhatGetPerepherals(governance, keeper, rebalancerChad, _arguments, VaultStorage);
