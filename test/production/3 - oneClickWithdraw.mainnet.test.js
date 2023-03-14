@@ -3,7 +3,7 @@ const { _oneClickWithdrawAddress } = require("@shared/constants");
 const { resetFork, logBalance } = require("../helpers");
 
 describe.skip("One Click deposit Withdraw", function () {
-    let tx, receipt, OneClickDeposit;
+    let tx, receipt;
     let actor;
     let actorAddress = "0x42B1299fCcA091A83C08C24915Be6E6d63906b1a";
 

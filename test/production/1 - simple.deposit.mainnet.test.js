@@ -1,4 +1,3 @@
-const { expect, assert } = require("chai");
 const { ethers } = require("hardhat");
 const { utils } = ethers;
 const {
@@ -9,17 +8,7 @@ const {
     _vaultAddress,
     maxUint256,
 } = require("@shared/constants");
-const {
-    mineSomeBlocks,
-    resetFork,
-    logBlock,
-    getAndApprove2,
-    getERC20Balance,
-    getWETH,
-    getOSQTH,
-    getUSDC,
-} = require("../helpers");
-const { hardhatInitializedDeploy } = require("@shared/deploy");
+const { resetFork, getERC20Balance } = require("../helpers");
 const { BigNumber } = require("ethers");
 
 describe.skip("Simple Deposit Mainnet", function () {
