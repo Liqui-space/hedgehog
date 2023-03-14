@@ -10,6 +10,7 @@ describe.skip("Cheap Rebalancer test mainnet", function () {
         CheapRebalancerOld = await ethers.getContractAt("ICheapRebalancerOld", _cheapRebalancerOld);
         ModuleOld = await ethers.getContractAt("IModuleOld", _bigRebalancerEuler2);
         VaultStorage = await (await ethers.getContractFactory("VaultStorage")).attach(_vaultStorageAddressV2);
+        VaultMath = await (await ethers.getContractFactory("VaultMath")).attach(_vaultMathAddressV2);
 
         const _owner = await CheapRebalancerOld.owner();
         owner = await impersontate(_owner);
@@ -31,6 +32,8 @@ describe.skip("Cheap Rebalancer test mainnet", function () {
         owner = await impersontate(_owner);
         await getETH(owner, ethers.utils.parseEther("30.0"));
 
-        await executeTx(CheapRebalancerOld.connect(owner).rebalance("0", "950000000000000000"));
+        console.log("ir %s", await VaultMath.getInterestRate());
+
+        await executeTx(CheapRebalancerOld.connect(owner).rebalance("0", "999000000000000000"));
     });
 });
