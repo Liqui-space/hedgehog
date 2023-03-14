@@ -17,6 +17,7 @@ import {Constants} from "../libraries/Constants.sol";
 import {PRBMathUD60x18} from "../libraries/math/PRBMathUD60x18.sol";
 import {Faucet} from "../libraries/Faucet.sol";
 import {IUniswapMath} from "../libraries/uniswap/IUniswapMath.sol";
+import "hardhat/console.sol";
 
 contract VaultMath is IVaultMath, ReentrancyGuard, Faucet {
     using PRBMathUD60x18 for uint256;
@@ -343,20 +344,23 @@ contract VaultMath is IVaultMath, ReentrancyGuard, Faucet {
     }
 
     /// @dev Fetches USDC interest rate
-    function getInterestRate() external view override returns (uint256 ir) {
-        uint256 irMax = IVaultStorage(vaultStorage).irMax();
-        uint256 irPrecision = IVaultStorage(vaultStorage).irPrecision();
+    function getInterestRate() external view override returns (uint256) {
+        //const = sqrt(365)
+        // uint256 irMax = IVaultStorage(vaultStorage).irMax();
+        // uint256 irPrecision = IVaultStorage(vaultStorage).irPrecision();
 
-        //const = 86400*365
-        ir = (
-            (
-                (uint256(int256(Constants.markets.interestRate(address(Constants.usdc)))).mul(31536000).mul(1e29)).div(
-                    irPrecision
-                )
-            ).floor()
-        ).mul(irPrecision);
+        return (IVaultStorage(vaultStorage).irMax());
 
-        ir = ir > irMax ? irMax : ir;
+        // ir = (
+        //     (
+        //         (uint256(int256(Constants.markets.interestRate(address(Constants.usdc)))).mul(31536000).mul(1e29)).div(
+        //             irPrecision
+        //         )
+        //     ).floor()
+        // ).mul(irPrecision);
+        // console.log("ir %s", ir);
+
+        // ir = ir > irMax ? irMax : ir;
     }
 
     /// @dev Casts uint256 to uint128 with overflow check.

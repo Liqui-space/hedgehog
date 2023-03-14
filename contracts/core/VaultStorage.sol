@@ -26,25 +26,25 @@ contract VaultStorage is IVaultStorage, Faucet {
     uint256 public override cap;
 
     //@dev lower and upper ticks in Uniswap pools
-    int24 public override orderEthUsdcLower = 201360;
-    int24 public override orderEthUsdcUpper = 204420;
+    int24 public override orderEthUsdcLower = 201480;
+    int24 public override orderEthUsdcUpper = 203700;
     int24 public override orderOsqthEthLower = 27360;
-    int24 public override orderOsqthEthUpper = 30420;
+    int24 public override orderOsqthEthUpper = 29580;
 
     //@dev timestamp when last rebalance executed
-    uint256 public override timeAtLastRebalance = 1677824795;
+    uint256 public override timeAtLastRebalance = 1678703039;
 
     //@dev ETH/USDC price when last rebalance executed
-    uint256 public override ethPriceAtLastRebalance = 1563425252593763190027;
+    uint256 public override ethPriceAtLastRebalance = 1589581204324333163651;
 
     //@dev min price change for initiating rebalance (1.69%)
     uint256 public override rebalanceThreshold = 1e18;
 
     //@dev interest rate when last rebalance executed
-    uint256 public override interestRateAtLastRebalance = 3e18;
+    uint256 public override interestRateAtLastRebalance = 0;
 
     //@dev max interest rate 4.2%
-    uint256 public override irMax = 42e17;
+    uint256 public override irMax = 0;
 
     //@dev interest rate precision (0.01)
     uint256 public override irPrecision = 1e16;

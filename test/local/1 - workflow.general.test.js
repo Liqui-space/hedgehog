@@ -20,7 +20,7 @@ describe.only("General Workflow", function () {
 
     let Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, tx;
     it("Should deploy contract", async function () {
-        await resetFork(16754905);
+        await resetFork(16825778);
 
         const params = [...deploymentParams];
         params[6] = "0";
