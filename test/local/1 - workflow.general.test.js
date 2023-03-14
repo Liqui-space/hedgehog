@@ -75,11 +75,19 @@ describe.only("General Workflow", function () {
     });
 
     it("swap", async function () {
+<<<<<<< HEAD:test/local/1 - workflow.general.test.js
+        await mineSomeBlocks(2000);
+        await swapComponent("USDC_WETH", "1000000", V3Helper, true);
+        await mineSomeBlocks(400);
+        await swapComponent("WETH_OSQTH", "100", V3Helper, true);
+        await mineSomeBlocks(2400);
+=======
         await mineSomeBlocks(2400);
         await swapComponent("USDC_WETH", "1000000", V3Helper, true);
         await mineSomeBlocks(400);
         await swapComponent("WETH_OSQTH", "100", V3Helper, true);
         await mineSomeBlocks(2000);
+>>>>>>> dev:test/local/1 - workflow..general.test.js
     });
 
     it("rebalance2", async function () {

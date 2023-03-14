@@ -10,7 +10,6 @@ import {Constants} from "../libraries/Constants.sol";
 import {Faucet} from "../libraries/Faucet.sol";
 import {SharedEvents} from "../libraries/SharedEvents.sol";
 
-//TODO: Transform all state manually
 contract VaultStorage is IVaultStorage, Faucet {
     //@dev governance address
     address public override governance;
@@ -126,8 +125,6 @@ contract VaultStorage is IVaultStorage, Faucet {
         minPriceMultiplier = _minPriceMultiplier;
         maxPriceMultiplier = _maxPriceMultiplier;
 
-        timeAtLastRebalance = 0;
-
         governance = _governance;
         keeper = _keeper;
     }
@@ -212,34 +209,66 @@ contract VaultStorage is IVaultStorage, Faucet {
         maxPriceMultiplier = _maxPriceMultiplier;
     }
 
+    /**
+     * @notice owner can set the max interest rate
+     * @param _irMax the max interest rate
+     */
     function setIrMax(uint256 _irMax) external onlyGovernance {
         irMax = _irMax;
     }
 
+    /**
+     * @notice owner can set the interest rate floor precision (0.01)
+     * @param _irPrecision the max interest rate
+     */
     function setIrPrecision(uint256 _irPrecision) external onlyGovernance {
         irPrecision = _irPrecision;
     }
 
+    /**
+     * @notice owner can set weight adjustment parameter
+     * @param _weightAdjParam the max interest rate
+     */
     function setWeightAdjParam(uint256 _weightAdjParam) external onlyGovernance {
         weightAdjParam = _weightAdjParam;
     }
 
+    /**
+     * @notice owner can set weight adjustment limit
+     * @param _weightAdjLimit the max interest rate
+     */
     function setWeightAdjLimit(uint256 _weightAdjLimit) external onlyGovernance {
         weightAdjLimit = _weightAdjLimit;
     }
 
+    /**
+     * @notice owner can set base threshold scale
+     * @param _baseThresholdScale the max interest rate
+     */
     function setBaseThresholdScale(uint256 _baseThresholdScale) external onlyGovernance {
         baseThresholdScale = _baseThresholdScale;
     }
 
+    /**
+     * @notice owner can set base threshold floor (min range size)
+     * @param _baseThresholdFloor the max interest rate
+     */
     function setBaseThresholdFloor(int24 _baseThresholdFloor) external onlyGovernance {
         baseThresholdFloor = _baseThresholdFloor;
     }
 
+    /**
+     * @notice owner can set max twap deviation for the ETH/USDC pool oracle
+     * @param _maxTwapDeviationEthUsdc the max interest rate
+     */
     function setMaxTwapDeviationEthUsdc(int24 _maxTwapDeviationEthUsdc) external onlyGovernance {
         maxTwapDeviationEthUsdc = _maxTwapDeviationEthUsdc;
     }
 
+    /**
+     * @notice owner can set max twap deviation for the oSQTH/ETH pool oracle
+     * @param _maxTwapDeviationOsqthEth the max interest rate
+     */
     function setMaxTwapDeviationOsqthEth(int24 _maxTwapDeviationOsqthEth) external onlyGovernance {
         maxTwapDeviationOsqthEth = _maxTwapDeviationOsqthEth;
     }

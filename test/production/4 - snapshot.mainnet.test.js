@@ -1,16 +1,7 @@
 const { ethers } = require("hardhat");
 const { utils } = ethers;
-const {
-    wethAddress,
-    osqthAddress,
-    usdcAddress,
-    _governanceAddress,
-    _vaultStorageAddress,
-    _vaultMathAddress,
-    _vaultAddress,
-    _vaultTreasuryAddress,
-} = require("@shared/constants");
-const { resetFork, getERC20Balance, approveERC20 } = require("../helpers");
+const { _vaultStorageAddress, _vaultMathAddress, _vaultAddress, _vaultTreasuryAddress } = require("@shared/constants");
+const { resetFork } = require("../helpers");
 
 describe.skip("Snapshot Mainnet", function () {
     it("Get snapshot", async function () {

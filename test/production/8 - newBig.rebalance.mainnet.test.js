@@ -1,32 +1,13 @@
-const { expect, assert } = require("chai");
 const { ethers } = require("hardhat");
-const { utils } = ethers;
 const {
-    _rescueAddress,
-    _rebalancerAddress,
-    _rebalancerBigAddress,
     _governanceAddress,
-    _vaultAuctionAddress,
-    _vaultMathAddress,
     _vaultStorageAddress,
     _rebalanceModule,
     _hedgehogPeripheralsDeployer,
     _vaultTreasuryAddress,
     _cheapRebalancer,
 } = require("@shared/constants");
-const {
-    mineSomeBlocks,
-    resetFork,
-    getERC20Balance,
-    getUSDC,
-    getOSQTH,
-    getWETH,
-    logBlock,
-    getERC20Allowance,
-    approveERC20,
-    logBalance,
-    getETH,
-} = require("../helpers");
+const { resetFork, logBalance, getETH } = require("../helpers");
 const { deployContract } = require("@shared/deploy");
 
 describe

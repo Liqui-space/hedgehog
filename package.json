@@ -8,7 +8,7 @@
     "test": "npm run format && DEBUG=true npx hardhat compile && DEBUG=true npx hardhat test",
     "gas": "DEBUG=false REPORT_GAS=true npx hardhat test",
     "size": "npx hardhat size-contracts",
-    "deploy:mainnet": "npx hardhat run scripts/maintenance/cheapRebalanceOperations.js --network mainnet",
+    "deploy:mainnet": "npx hardhat run scripts/maintenance/deploy-partial.js --network mainnet",
     "verify": "npx hardhat verify <contract address> --network ropsten --constructor-args scripts/maintenance/_arguments.js",
     "node": "SIMULATION=true npx hardhat node",
     "sim1": "SIMULATION=true npx hardhat run scripts/simulation/bigReb.js --network localhost",

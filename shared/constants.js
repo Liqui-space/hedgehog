@@ -10,9 +10,12 @@ const maxUint256 = "115792089237316195423570985008687907853269984665640564039457
 
 const _vaultAddress = "0x6d4CA1177087924edfE0908ef655169EA766FDc3";
 const _vaultAuctionAddress = "0x2f1D08D53d04559933dBF436a5cD15182a190110";
+const _vaultAuctionAddressV2 = "0x30EF1938673c5513a817D202CDD33471894a7ED8";
 const _vaultMathAddress = "0x40B22821f694f1F3b226b57B5852d7832e2B5f3f";
+const _vaultMathAddressV2 = "0xf21A50489166B10d109381d7Cc5441f1152aE666";
 const _vaultTreasuryAddress = "0x12804580C15F4050dda61D44AFC94623198848bC";
 const _vaultStorageAddress = "0xa6D7b99c05038ad2CC39F695CF6D2A06DdAD799a";
+const _vaultStorageAddressV2 = "0x66aE7D409F559Df4E13dFe8b323b570Ab86e68B8";
 const _uniMathAddress = "0x61d3312e32f3f6f69ae5629d717f318bc4656abd";
 
 const _oneClickDepositAddress = "0x468363E262999046BAFC5EA954768920ee349358";
@@ -33,6 +36,9 @@ const _bigRebalancerEuler = "0x24F378A96eDAA91b20b86300771929Fcb10190E2";
 const _bigRebalancerEuler2 = "0xfE08EEb4d98551Ea6eB474b24356a82Cf60277e2";
 
 module.exports = {
+    _vaultAuctionAddressV2,
+    _vaultMathAddressV2,
+    _vaultStorageAddressV2,
     _cheapRebalancerOld,
     wethAddress,
     usdcAddress,

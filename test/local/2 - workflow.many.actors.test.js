@@ -1,6 +1,6 @@
 const { ethers } = require("hardhat");
 const { mineSomeBlocks, resetFork, getERC20Balance } = require("../helpers");
-const { hardhatDeploy, hardhatPartialDeploy, deploymentParams, hardhatGetPerepherals } = require("@shared/deploy");
+const { hardhatPartialDeploy, deploymentParams, hardhatGetPerepherals } = require("@shared/deploy");
 
 const {
     depositOCComponent,
