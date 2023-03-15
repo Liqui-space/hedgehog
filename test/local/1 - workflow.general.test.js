@@ -37,13 +37,13 @@ describe.only("General Workflow", function () {
 
     it("deposit2", () => depositOCComponent("5", depositor2, Vault, OneClickDeposit, "user2"));
 
-    // it("2 swaps", async function () {
-    //     await mineSomeBlocks(6000);
-    //     await swapComponent("WETH_USDC", "100", V3Helper);
-    //     await mineSomeBlocks(200);
-    //     await swapComponent("OSQTH_WETH", "40", V3Helper);
-    //     await mineSomeBlocks(81000);
-    // }).timeout(1000000);
+    it("2 swaps", async function () {
+        await mineSomeBlocks(6000);
+        await swapComponent("WETH_USDC", "100", V3Helper);
+        await mineSomeBlocks(200);
+        await swapComponent("OSQTH_WETH", "40", V3Helper);
+        await mineSomeBlocks(600000);
+    }).timeout(1000000);
 
     it("rebalance", () => rebalanceClassicComponent(rebalancerChad, Rebalancer, RebalanceModule4));
 
