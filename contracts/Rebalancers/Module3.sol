@@ -159,14 +159,15 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
         FlCallbackData memory data = calculateRebalance(); //TODO think aboud memory and other
         data.threshold = threshold;
 
-        if(data.amount2 == 0){
+        if (data.amount2 == 0) {
             address[] memory assets = new address[](1);
             uint256[] memory modes = new uint256[](1); // 0 = no debt, 1 = stable, 2 = variable
             uint256[] memory amounts = new uint256[](1);
             amounts[0] = data.amount1;
             modes[0] = 0;
 
-            if(data.type_of_arbitrage == 6) assets[0] = USDC; //6
+            if (data.type_of_arbitrage == 6)
+                assets[0] = USDC; //6
             else assets[0] = WETH; // 5,4,2
 
             LENDING_POOL.flashLoan(address(this), assets, amounts, modes, address(this), abi.encode(data), 0);
@@ -179,11 +180,11 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
             modes[0] = 0;
             modes[1] = 0;
 
-            if(data.type_of_arbitrage == 1){
+            if (data.type_of_arbitrage == 1) {
                 assets[0] = WETH;
                 assets[1] = USDC;
-            }
-            else { //3
+            } else {
+                //3
                 assets[0] = USDC;
                 assets[1] = WETH;
             }
@@ -263,6 +264,7 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
         return data;
     }
 
+    //TODO: optimize this if tree
     function executeOperation(
         address[] calldata assets,
         uint256[] calldata amounts,
@@ -278,7 +280,6 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
 
         uint256 ethBefore = IERC20(WETH).balanceOf(address(this));
         if (data.type_of_arbitrage == 1) {
-            
             IAuction(addressAuction).timeRebalance(address(this), 0, 0, 0);
 
             // swap all oSQTH to wETH
@@ -331,7 +332,7 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
 
             // sell all oSQTH to wETH
             swapExactInputSingle(OSQTH, 3000);
-            
+
             // swap all wETH to USDC
             swapExactOutputSingle(USDC, 500, data.amount1);
         }
@@ -339,34 +340,38 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
         return true;
     }
 
-    function swapExactInputSingle(address token1, uint256 pool) internal {
-            swapRouter.exactInputSingle(
-                ISwapRouter.ExactInputSingleParams({
-                    tokenIn: token1,
-                    tokenOut: WETH,
-                    fee: pool,
-                    recipient: address(this),
-                    deadline: block.timestamp,
-                    amountIn: IERC20(token1).balanceOf(address(this)),
-                    amountOutMinimum: 0,
-                    sqrtPriceLimitX96: 0
-                })
-            );
+    function swapExactInputSingle(address token1, uint24 pool) internal {
+        swapRouter.exactInputSingle(
+            ISwapRouter.ExactInputSingleParams({
+                tokenIn: token1,
+                tokenOut: WETH,
+                fee: pool,
+                recipient: address(this),
+                deadline: block.timestamp,
+                amountIn: IERC20(token1).balanceOf(address(this)),
+                amountOutMinimum: 0,
+                sqrtPriceLimitX96: 0
+            })
+        );
     }
 
-    function swapExactOutputSingle(address token2, uint256 pool, uint256 amountOut) internal {
-            swapRouter.exactOutputSingle(
-                ISwapRouter.ExactOutputSingleParams({
-                    tokenIn: WETH,
-                    tokenOut: token2,
-                    fee: pool,
-                    recipient: address(this),
-                    deadline: block.timestamp,
-                    amountOut: amountOut,
-                    amountInMaximum: type(uint256).max,
-                    sqrtPriceLimitX96: 0
-                })
-            );
+    function swapExactOutputSingle(
+        address token2,
+        uint24 pool,
+        uint256 amountOut
+    ) internal {
+        swapRouter.exactOutputSingle(
+            ISwapRouter.ExactOutputSingleParams({
+                tokenIn: WETH,
+                tokenOut: token2,
+                fee: pool,
+                recipient: address(this),
+                deadline: block.timestamp,
+                amountOut: amountOut,
+                amountInMaximum: type(uint256).max,
+                sqrtPriceLimitX96: 0
+            })
+        );
     }
 
     receive() external payable {}
