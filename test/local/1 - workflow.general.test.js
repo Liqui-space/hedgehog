@@ -20,7 +20,7 @@ describe.only("General Workflow", function () {
 
     let Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, tx;
     it("Should deploy contract", async function () {
-        await resetFork(16828230);
+        await resetFork(16833023);
 
         [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, _arguments] = await hardhatPartialDeploy();
 
@@ -33,10 +33,9 @@ describe.only("General Workflow", function () {
         console.log("> ethUsdcLower", (await VaultStorage.orderEthUsdcLower()).toString());
     });
 
-    it("deposit1", () => depositOCComponent("0.2", depositor1, Vault, OneClickDeposit, "user1"));
+    it("deposit1", () => depositOCComponent("1", depositor1, Vault, OneClickDeposit, "user1", "955000000000000000"));
 
-    return;
-    // it("deposit2", () => depositOCComponent("5", depositor2, Vault, OneClickDeposit, "user2"));
+    it("deposit2", () => depositOCComponent("5", depositor2, Vault, OneClickDeposit, "user2"));
 
     // it("2 swaps", async function () {
     //     await mineSomeBlocks(6000);
@@ -46,7 +45,6 @@ describe.only("General Workflow", function () {
     //     await mineSomeBlocks(81000);
     // }).timeout(1000000);
 
-    // return;
     it("rebalance", () => rebalanceClassicComponent(rebalancerChad, Rebalancer, RebalanceModule4));
 
     return;

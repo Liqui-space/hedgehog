@@ -45,7 +45,7 @@ interface IModule {
 contract Rebalancer is Ownable {
     using PRBMathUD60x18 for uint256;
 
-    address addressStorage = 0xa6D7b99c05038ad2CC39F695CF6D2A06DdAD799a;
+    address addressStorage = 0x66aE7D409F559Df4E13dFe8b323b570Ab86e68B8;
 
     mapping(address => bool) public isOwner;
 

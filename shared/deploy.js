@@ -174,19 +174,20 @@ const hardhatInitializedDeploy = async () => {
 const hardhatGetPerepherals = async (governance, keeper, rebalancer, _arguments, VaultStorage) => {
     const [, _Vault, _VaultAuction, _VaultMath, _VaultTreasury, _VaultStorage] = _arguments;
 
-    const V3Helper = await deployContract("V3Helper", [], false);
+    const V3Helper = await deployContract("V3Helper", [], true);
 
     //-- Perepherals
 
-    MyContract = await ethers.getContractFactory("OneClickDeposit");
-    const OneClickDeposit = await MyContract.attach(_oneClickDepositAddress);
+    // MyContract = await ethers.getContractFactory("OneClickDeposit");
+    // const OneClickDeposit = await MyContract.attach(_oneClickDepositAddress);
+    const OneClickDeposit = await deployContract("OneClickDeposit", [], true);
 
     MyContract = await ethers.getContractFactory("OneClickWithdraw");
     const OneClickWithdraw = await MyContract.attach(_oneClickWithdrawAddress);
 
     //-- Rebalancers
 
-    const Rebalancer = await deployContract("Rebalancer", [], false);
+    const Rebalancer = await deployContract("Rebalancer", [], true);
     await executeTx(Rebalancer.transferOwnership(rebalancer.address));
 
     const CheapRebalancerOld = await ethers.getContractAt("ICheapRebalancerOld", _cheapRebalancerOld);
@@ -195,13 +196,18 @@ const hardhatGetPerepherals = async (governance, keeper, rebalancer, _arguments,
     await executeTx(CheapRebalancerOld.connect(owner).returnOwner(owner.address));
     const ModuleOld = await ethers.getContractAt("IModuleOld", await CheapRebalancerOld.bigRebalancer());
 
-    const RebalanceModule4 = await deployContract("Module3", [], false);
+    const RebalanceModule4 = await deployContract("Module3", [], true);
     await executeTx(RebalanceModule4.setContracts(_VaultAuction, _VaultMath, _VaultTreasury, _VaultStorage));
     await executeTx(RebalanceModule4.transferOwnership(Rebalancer.address));
 
-    await executeTx(ModuleOld.connect(owner).setKeeper(RebalanceModule4.address));
+    await executeTx(ModuleOld.connect(owner).setKeeper(Rebalancer.address));
 
     await executeTx(CheapRebalancerOld.connect(owner).returnGovernance(Rebalancer.address));
+
+    console.log("keeper", await VaultStorage.keeper());
+    console.log("governance", await VaultStorage.governance());
+    console.log("Rebalancer", Rebalancer.address);
+    console.log("Module4", RebalanceModule4.address);
 
     return [V3Helper, OneClickDeposit, OneClickWithdraw, Rebalancer, undefined, undefined, undefined, RebalanceModule4];
 };
