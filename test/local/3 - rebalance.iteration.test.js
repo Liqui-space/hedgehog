@@ -1,9 +1,10 @@
 const { ethers } = require("hardhat");
-const { mineSomeBlocks, resetFork } = require("../helpers");
-const { depositOCComponent, swapComponent, rebalanceClassicComponent } = require("../helpers/components");
+const { mineSomeBlocks, resetFork, logBalance } = require("../helpers");
+const { depositOCComponent, swapComponent, rebalanceClassicComponent, executeTx } = require("../helpers/components");
 
 const { hardhatGetPerepherals, hardhatPartialDeploy } = require("@shared/deploy");
 
+const nullAddress = "0x0000000000000000000000000000000000000000";
 describe.only("Rebalance iterative", function () {
     it("Should set actors", async function () {
         [, governance, rebalancerChad, depositor1, keeper, depositor2, depositor3, notgovernance] =
@@ -92,5 +93,27 @@ describe.only("Rebalance iterative", function () {
         await mineSomeBlocks(600); //13
     }).timeout(1000000);
 
-    it("rebalance", () => rebalanceClassicComponent(rebalancerChad, Rebalancer, RebalanceModule4));
+    // it("rebalance", () => rebalanceClassicComponent(rebalancerChad, Rebalancer, RebalanceModule4));
+
+    it("rebalance new cheap", async () => {
+        inface = new ethers.utils.Interface(["function rebalance(uint256 threshold, uint256 triggerTime)"]);
+        data = inface.encodeFunctionData("rebalance", [0, 0]);
+
+        await logBalance(RebalanceModule4.address, "> RebalanceModule before rebalance");
+
+        await executeTx(
+            Rebalancer.connect(rebalancerChad).complexCall(
+                RebalanceModule4.address,
+                data,
+                nullAddress,
+                RebalanceModule4.address,
+                0,
+                0
+            ),
+            "new classic Rebalance",
+            true
+        );
+
+        await logBalance(RebalanceModule4.address, "> RebalanceModule after rebalance");
+    });
 });

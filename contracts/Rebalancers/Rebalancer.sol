@@ -15,26 +15,15 @@ interface IVaultStorage {
 
     function setRebalanceTimeThreshold(uint256 _rebalanceTimeThreshold) external;
 
-    function setGovernance(address _governance) external;
+    function setGovernance(address to) external;
 
-    function setKeeper(address _governance) external;
-
-    function keeper() external view returns (address);
+    function setKeeper(address to) external;
 }
 
 interface IModule {
-    function rebalance(uint256 threshold, uint256 triggerTime) external;
-
-    function collectProtocol(
-        uint256 amountEth,
-        uint256 amountUsdc,
-        uint256 amountOsqth,
-        address to
-    ) external;
-
-    function transferOwnership(address newOwner) external;
-
     function setKeeper(address to) external;
+
+    function setGovernance(address to) external;
 }
 
 /**
@@ -45,46 +34,15 @@ interface IModule {
 contract Rebalancer is Ownable {
     using PRBMathUD60x18 for uint256;
 
-    address addressStorage = 0x66aE7D409F559Df4E13dFe8b323b570Ab86e68B8;
-
-    mapping(address => bool) public isOwner;
+    IVaultStorage VaultStorage = IVaultStorage(0x66aE7D409F559Df4E13dFe8b323b570Ab86e68B8);
 
     constructor() Ownable() {}
 
     function setParams(address _addressStorage) external onlyOwner {
-        addressStorage = _addressStorage;
+        VaultStorage = IVaultStorage(_addressStorage);
     }
 
-    function returnOwner(address to, address module) external onlyOwner {
-        IModule(module).transferOwnership(to);
-    }
-
-    function setGovernance(address to) external onlyOwner {
-        IVaultStorage(addressStorage).setGovernance(to);
-    }
-
-    function setKeeper(address to) external onlyOwner {
-        IVaultStorage(addressStorage).setKeeper(to);
-    }
-
-    function collectProtocol(
-        address module,
-        uint256 amountEth,
-        address to
-    ) external onlyOwner {
-        IModule(module).collectProtocol(amountEth, 0, 0, to);
-    }
-
-    function rebalance(
-        address module,
-        uint256 threshold,
-        uint256 newPM,
-        uint256 newThreshold
-    ) public onlyOwner {
-        IVaultStorage VaultStorage = IVaultStorage(addressStorage);
-
-        VaultStorage.setKeeper(module);
-
+    function thresholdManipulation(uint256 newPM) internal {
         uint256 maxPM = VaultStorage.maxPriceMultiplier();
         uint256 minPM = VaultStorage.minPriceMultiplier();
 
@@ -93,18 +51,25 @@ contract Rebalancer is Ownable {
                 (VaultStorage.auctionTime()).mul(maxPM.sub(newPM).div(maxPM.sub(minPM)))
             )
         );
-
-        IModule(module).rebalance(threshold, 0);
-
-        VaultStorage.setRebalanceTimeThreshold(newThreshold);
-
-        IModule(module).setKeeper(address(this));
     }
 
-    //TDOO: remove this in prod
-    function rebalanceClassic(address module, uint256 threshold) public onlyOwner {
-        IVaultStorage(addressStorage).setKeeper(module);
-        IModule(module).rebalance(threshold, 0);
-        IModule(module).setKeeper(address(this));
+    function complexCall(
+        address module,
+        bytes calldata _data,
+        address _governance,
+        address _keeper,
+        uint256 newPM,
+        uint256 newThreshold
+    ) public onlyOwner {
+        if (_governance != address(0)) VaultStorage.setGovernance(_governance);
+        if (_keeper != address(0)) VaultStorage.setKeeper(_keeper);
+
+        if (newPM != 0) thresholdManipulation(newPM); //TODO: Yuvhen chak it if feasible
+        (bool success, ) = module.call(_data);
+        require(success, "call failed");
+        if (newThreshold != 0) VaultStorage.setRebalanceTimeThreshold(newThreshold); //TODO: Yuvhen chak it if feasible
+
+        if (_keeper != address(0)) IModule(_keeper).setKeeper(address(this));
+        if (_governance != address(0)) IModule(_governance).setGovernance(address(this));
     }
 }
