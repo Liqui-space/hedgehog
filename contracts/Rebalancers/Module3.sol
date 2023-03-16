@@ -93,7 +93,7 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
     address public addressStorage = 0x66aE7D409F559Df4E13dFe8b323b570Ab86e68B8;
 
     uint256 public fee = 10009;
-    uint256 public osqthSlippageParam = 120; 
+    uint256 public osqthSlippageParam = 120;
 
     // univ3
     ISwapRouter constant swapRouter = ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564);
@@ -175,7 +175,12 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
 
         uint256 slippage = 103e16; //TODO as param
 
-        if (data.type_of_arbitrage == 2 || data.type_of_arbitrage == 4 || data.type_of_arbitrage == 5 || data.type_of_arbitrage == 6){
+        if (
+            data.type_of_arbitrage == 2 ||
+            data.type_of_arbitrage == 4 ||
+            data.type_of_arbitrage == 5 ||
+            data.type_of_arbitrage == 6
+        ) {
             address[] memory assets = new address[](1);
             uint256[] memory modes = new uint256[](1); // 0 = no debt, 1 = stable, 2 = variable
             uint256[] memory amounts = new uint256[](1);
@@ -183,7 +188,7 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
 
             if (data.type_of_arbitrage == 2) {
                 (, uint256 osqthEthPrice) = IVaultMath(addressMath).getPrices();
-                amounts[0] = data.amount1 * osqthEthPrice * slippage * osqthSlippageParam / 100 / 1e36;
+                amounts[0] = (data.amount1 * osqthEthPrice * slippage * osqthSlippageParam) / 100 / 1e36;
                 assets[0] = WETH;
             }
 
@@ -196,7 +201,7 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
                 (, uint256 osqthEthPrice) = IVaultMath(addressMath).getPrices();
 
                 assets[0] = WETH;
-                amounts[0] = data.amount1 + data.amount2 * osqthEthPrice * slippage / 1e36;
+                amounts[0] = data.amount1 + (data.amount2 * osqthEthPrice * slippage) / 1e36;
             }
 
             if (data.type_of_arbitrage == 6) {
@@ -205,7 +210,6 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
             }
 
             LENDING_POOL.flashLoan(address(this), assets, amounts, modes, address(this), abi.encode(data), 0);
-
         } else {
             address[] memory assets = new address[](2);
             assets[0] = WETH;
@@ -214,18 +218,18 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
             uint256[] memory modes = new uint256[](2);
             modes[0] = 0;
             modes[1] = 0;
-            
+
             uint256[] memory amounts = new uint256[](2);
 
             if (data.type_of_arbitrage == 1) {
-            amounts[0] = data.amount1;
-            amounts[1] = data.amount2;
+                amounts[0] = data.amount1;
+                amounts[1] = data.amount2;
             }
 
             if (data.type_of_arbitrage == 3) {
                 (, uint256 osqthEthPrice) = IVaultMath(addressMath).getPrices();
-                
-                amounts[0] = data.amount1 * osqthEthPrice * slippage * osqthSlippageParam / 100 / 1e36;
+
+                amounts[0] = (data.amount1 * osqthEthPrice * slippage * osqthSlippageParam) / 100 / 1e36;
                 amounts[1] = data.amount2;
             }
 
@@ -248,38 +252,26 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
         ) = IAuction(addressAuction).getParams(auctionTriggerTime);
 
         if (targetEth > ethBalance && targetUsdc > usdcBalance && targetOsqth < osqthBalance) {
-
             data.type_of_arbitrage = 1;
             data.amount1 = targetEth - ethBalance + 10;
             data.amount2 = targetUsdc - usdcBalance + 10;
-
         } else if (targetEth < ethBalance && targetUsdc < usdcBalance && targetOsqth > osqthBalance) {
-
             data.type_of_arbitrage = 2;
             data.amount1 = targetOsqth - osqthBalance + 10;
-
         } else if (targetEth < ethBalance && targetUsdc > usdcBalance && targetOsqth > osqthBalance) {
-
             data.type_of_arbitrage = 3;
             data.amount1 = targetOsqth - osqthBalance + 10;
             data.amount2 = (targetUsdc - usdcBalance + 10) * (101);
-            
         } else if (targetEth > ethBalance && targetUsdc < usdcBalance && targetOsqth < osqthBalance) {
-
             data.type_of_arbitrage = 4;
             data.amount1 = targetEth - ethBalance + 10;
-
         } else if (targetEth > ethBalance && targetUsdc < usdcBalance && targetOsqth > osqthBalance) {
-
             data.type_of_arbitrage = 5;
             data.amount1 = targetEth - ethBalance + 10;
             data.amount2 = targetOsqth - osqthBalance + 10;
-
         } else if (targetEth < ethBalance && targetUsdc > usdcBalance && targetOsqth < osqthBalance) {
-
             data.type_of_arbitrage = 6;
             data.amount1 = targetUsdc - usdcBalance + 10;
-
         } else {
             revert("NO arbitage");
         }
@@ -294,7 +286,7 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
         address initiator,
         bytes calldata encodedData
     ) external override returns (bool) {
-        console.log(msg.sender);
+        console.log("R1", msg.sender);
 
         // require(msg.sender == euler, "R1"); //TODO: make this check on address
 
@@ -306,10 +298,9 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
 
             // swap all oSQTH to wETH
             swapExactInputSingle(OSQTH, WETH, 3000);
-            
-            // buy USDC with part of wETH
-            swapExactOutputSingle(USDC, 500, data.amount2 * fee / 10000);
 
+            // buy USDC with part of wETH
+            swapExactOutputSingle(USDC, 500, (data.amount2 * fee) / 10000);
         } else if (data.type_of_arbitrage == 2) {
             // buy oSQTH with part of wETH
             swapExactInputSingle(WETH, OSQTH, 3000);
@@ -321,8 +312,7 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
 
             // swap all oSQTH to wETH
             swapExactInputSingle(OSQTH, WETH, 3000);
-        } else if (data.type_of_arbitrage == 3) { 
-
+        } else if (data.type_of_arbitrage == 3) {
             swapExactInputSingle(WETH, OSQTH, 3000);
 
             IAuction(addressAuction).timeRebalance(address(this), 0, 0, 0);
@@ -331,10 +321,10 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
             swapExactInputSingle(OSQTH, WETH, 3000);
 
             // buy USDC with wETH
-            if (data.amount2 * fee / 10000 >= IERC20(USDC).balanceOf(address(this))) {
-            swapExactOutputSingle(USDC, 500, data.amount2 * fee / 10000 - IERC20(USDC).balanceOf(address(this))); 
+            if ((data.amount2 * fee) / 10000 >= IERC20(USDC).balanceOf(address(this))) {
+                swapExactOutputSingle(USDC, 500, (data.amount2 * fee) / 10000 - IERC20(USDC).balanceOf(address(this)));
             }
-        } else if (data.type_of_arbitrage == 4) { 
+        } else if (data.type_of_arbitrage == 4) {
             IAuction(addressAuction).timeRebalance(address(this), 0, 0, 0);
 
             // swap all oSQTH to wETH
@@ -352,7 +342,7 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
             swapExactInputSingle(USDC, WETH, 500);
 
             // swap all oSQTH to wETH
-            swapExactInputSingle(OSQTH, WETH, 3000); 
+            swapExactInputSingle(OSQTH, WETH, 3000);
         } else if (data.type_of_arbitrage == 6) {
             IAuction(addressAuction).timeRebalance(address(this), 0, 0, 0);
 
@@ -360,15 +350,15 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
             swapExactInputSingle(OSQTH, WETH, 3000);
 
             // swap wETH to USDC
-            swapExactOutputSingle(USDC, 500, data.amount1 * fee / 10000 - IERC20(USDC).balanceOf(address(this)));
+            swapExactOutputSingle(USDC, 500, (data.amount1 * fee) / 10000 - IERC20(USDC).balanceOf(address(this)));
         }
         require(IERC20(WETH).balanceOf(address(this)) - ethBefore > data.threshold, "NEP");
         return true;
     }
 
     function swapExactInputSingle(
-        address _tokenIn, 
-        address _tokenOut, 
+        address _tokenIn,
+        address _tokenOut,
         uint24 pool
     ) internal {
         swapRouter.exactInputSingle(

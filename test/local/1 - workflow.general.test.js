@@ -68,7 +68,7 @@ describe.only("General Workflow", function () {
         await mineSomeBlocks(600);
         await mineSomeBlocks(100); //13
     }).timeout(1000000);
-    
+
     //case #4
     it("2 swaps", async function () {
         this.skip();
