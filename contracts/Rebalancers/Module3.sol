@@ -174,7 +174,7 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
     }
 
     function rebalance(uint256 threshold, uint256 triggerTime) public onlyOwner {
-        FlCallbackData memory data = calculateRebalance(); //TODO think aboud memory and other
+        FlCallbackData memory data = calculateRebalance();
         console.log(data.type_of_arbitrage);
         data.threshold = threshold;
 
@@ -270,7 +270,7 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
         address initiator,
         bytes calldata encodedData
     ) external override returns (bool) {
-        require(msg.sender == lendingPool, "M0"); //TODO: make this check on address
+        require(msg.sender == lendingPool, "M0");
 
         FlCallbackData memory data = abi.decode(encodedData, (FlCallbackData));
 
@@ -303,8 +303,9 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
             swapExactInputSingle(OSQTH, WETH, 3000);
 
             // buy USDC with wETH
-            if ((data.amount2 * fee) / 10000 >= IERC20(USDC).balanceOf(address(this))) {
-                swapExactOutputSingle(USDC, 500, (data.amount2 * fee) / 10000 - IERC20(USDC).balanceOf(address(this)));
+            uint256 balance = IERC20(USDC).balanceOf(address(this));
+            if ((data.amount2 * fee) / 10000 >= balance) {
+                swapExactOutputSingle(USDC, 500, (data.amount2 * fee) / 10000 - balance);
             }
         } else if (data.type_of_arbitrage == 4) {
             IAuction(addressAuction).timeRebalance(address(this), 0, 0, 0);

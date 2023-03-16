@@ -4,7 +4,7 @@ const { depositOCComponent, swapComponent, rebalanceClassicComponent } = require
 
 const { hardhatGetPerepherals, hardhatPartialDeploy } = require("@shared/deploy");
 
-describe.only("General Workflow", function () {
+describe.only("Rebalance iterative", function () {
     it("Should set actors", async function () {
         [, governance, rebalancerChad, depositor1, keeper, depositor2, depositor3, notgovernance] =
             await ethers.getSigners();
