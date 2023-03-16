@@ -39,7 +39,7 @@ interface IModule {
 
 /**
  * Error
- * M0: Not an owner
+ * C0: Not an owner
  */
 
 contract Rebalancer is Ownable {

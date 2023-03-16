@@ -70,8 +70,11 @@ const swapComponent = async (swapType, swapAmountString, V3Helper, log = false) 
 const rebalanceClassicComponent = async (rebalancer, Rebalancer, RebalanceModule) => {
     await logBalance(RebalanceModule.address, "> RebalanceModule before rebalance");
 
-    tx = await Rebalancer.connect(rebalancer).rebalanceClassic(RebalanceModule.address, 0);
-    receipt = await tx.wait();
+    await executeTx(
+        Rebalancer.connect(rebalancer).rebalanceClassic(RebalanceModule.address, 0),
+        "classicRebalance",
+        true
+    );
 
     await logBalance(RebalanceModule.address, "> RebalanceModule after rebalance");
 };

@@ -86,6 +86,11 @@ interface IVaultMath {
     function getPrices() external view returns (uint256, uint256);
 }
 
+/**
+ * Error
+ * M0: Not a pool
+ */
+
 contract Module3 is Ownable, FlashLoanReceiverBase {
     address public addressAuction = 0x30EF1938673c5513a817D202CDD33471894a7ED8;
     address public addressMath = 0x47c05BCCA7d57c87083EB4e586007530eE4539e9; //TODO: chage to current addresses
@@ -175,42 +180,7 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
 
         uint256 slippage = 103e16; //TODO as param
 
-        if (
-            data.type_of_arbitrage == 2 ||
-            data.type_of_arbitrage == 4 ||
-            data.type_of_arbitrage == 5 ||
-            data.type_of_arbitrage == 6
-        ) {
-            address[] memory assets = new address[](1);
-            uint256[] memory modes = new uint256[](1); // 0 = no debt, 1 = stable, 2 = variable
-            uint256[] memory amounts = new uint256[](1);
-            modes[0] = 0;
-
-            if (data.type_of_arbitrage == 2) {
-                (, uint256 osqthEthPrice) = IVaultMath(addressMath).getPrices();
-                amounts[0] = (data.amount1 * osqthEthPrice * slippage * osqthSlippageParam) / 100 / 1e36;
-                assets[0] = WETH;
-            }
-
-            if (data.type_of_arbitrage == 4) {
-                assets[0] = WETH;
-                amounts[0] = data.amount1;
-            }
-
-            if (data.type_of_arbitrage == 5) {
-                (, uint256 osqthEthPrice) = IVaultMath(addressMath).getPrices();
-
-                assets[0] = WETH;
-                amounts[0] = data.amount1 + (data.amount2 * osqthEthPrice * slippage) / 1e36;
-            }
-
-            if (data.type_of_arbitrage == 6) {
-                assets[0] = USDC;
-                amounts[0] = data.amount1;
-            }
-
-            LENDING_POOL.flashLoan(address(this), assets, amounts, modes, address(this), abi.encode(data), 0);
-        } else {
+        if (data.type_of_arbitrage == 1 || data.type_of_arbitrage == 3) {
             address[] memory assets = new address[](2);
             assets[0] = WETH;
             assets[1] = USDC;
@@ -220,17 +190,32 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
             modes[1] = 0;
 
             uint256[] memory amounts = new uint256[](2);
-
-            if (data.type_of_arbitrage == 1) {
-                amounts[0] = data.amount1;
-                amounts[1] = data.amount2;
-            }
+            amounts[0] = data.amount1;
+            amounts[1] = data.amount2;
 
             if (data.type_of_arbitrage == 3) {
                 (, uint256 osqthEthPrice) = IVaultMath(addressMath).getPrices();
-
                 amounts[0] = (data.amount1 * osqthEthPrice * slippage * osqthSlippageParam) / 100 / 1e36;
-                amounts[1] = data.amount2;
+            }
+
+            LENDING_POOL.flashLoan(address(this), assets, amounts, modes, address(this), abi.encode(data), 0);
+        } else {
+            //2,4,5,6
+            address[] memory assets = new address[](1);
+            uint256[] memory modes = new uint256[](1);
+            uint256[] memory amounts = new uint256[](1);
+            modes[0] = 0;
+            assets[0] = WETH; //2,4,5
+            amounts[0] = data.amount1; //4, 6
+
+            if (data.type_of_arbitrage == 2) {
+                (, uint256 osqthEthPrice) = IVaultMath(addressMath).getPrices();
+                amounts[0] = (data.amount1 * osqthEthPrice * slippage * osqthSlippageParam) / 100 / 1e36;
+            } else if (data.type_of_arbitrage == 5) {
+                (, uint256 osqthEthPrice) = IVaultMath(addressMath).getPrices();
+                amounts[0] = data.amount1 + (data.amount2 * osqthEthPrice * slippage) / 1e36;
+            } else if (data.type_of_arbitrage == 6) {
+                assets[0] = USDC;
             }
 
             LENDING_POOL.flashLoan(address(this), assets, amounts, modes, address(this), abi.encode(data), 0);
@@ -278,7 +263,6 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
         return data;
     }
 
-    //TODO: optimize this if tree
     function executeOperation(
         address[] calldata assets,
         uint256[] calldata amounts,
@@ -286,9 +270,7 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
         address initiator,
         bytes calldata encodedData
     ) external override returns (bool) {
-        console.log("R1", msg.sender);
-
-        // require(msg.sender == euler, "R1"); //TODO: make this check on address
+        require(msg.sender == lendingPool, "M0"); //TODO: make this check on address
 
         FlCallbackData memory data = abi.decode(encodedData, (FlCallbackData));
 

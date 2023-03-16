@@ -20,7 +20,7 @@ describe.only("General Workflow", function () {
 
     let Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, tx;
     it("Should deploy contract", async function () {
-        await resetFork(16838721);
+        await resetFork(16828230);
 
         [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, _arguments] = await hardhatPartialDeploy();
 
@@ -33,86 +33,30 @@ describe.only("General Workflow", function () {
         console.log("> ethUsdcLower", (await VaultStorage.orderEthUsdcLower()).toString());
     });
 
-    it("deposit1", () => depositOCComponent("1", depositor1, Vault, OneClickDeposit, "user1", "955000000000000000"));
+    it("deposit1", () => depositOCComponent("0.2", depositor1, Vault, OneClickDeposit, "user1"));
 
     it("deposit2", () => depositOCComponent("5", depositor2, Vault, OneClickDeposit, "user2"));
 
-    // case #1 done
     it("2 swaps", async function () {
-        this.skip();
-
-        await mineSomeBlocks(358663);
-        await swapComponent("WETH_USDC", "1000", V3Helper, true);
-        await mineSomeBlocks(600);
-        await mineSomeBlocks(600); //13
-    }).timeout(1000000);
-
-    //case #2 done
-    it("2 swaps", async function () {
-        //this.skip();
-
-        await mineSomeBlocks(358663);
-        await swapComponent("WETH_USDC", "1000", V3Helper, true);
-        await swapComponent("WETH_OSQTH", "150", V3Helper, true);
-        await mineSomeBlocks(600);
-        await mineSomeBlocks(100); //13
-    }).timeout(1000000);
-
-    // case #3 done
-    it("2 swaps", async function () {
-        this.skip();
-
-        await mineSomeBlocks(358663);
-        await swapComponent("WETH_USDC", "10000", V3Helper, true);
-        await swapComponent("WETH_OSQTH", "150", V3Helper, true);
-        await mineSomeBlocks(600);
-        await mineSomeBlocks(100); //13
-    }).timeout(1000000);
-
-    //case #4
-    it("2 swaps", async function () {
-        this.skip();
-
-        await mineSomeBlocks(358663);
-        await swapComponent("USDC_WETH", "1000000", V3Helper, true);
-        await mineSomeBlocks(600);
-        await mineSomeBlocks(300); //13
-    }).timeout(1000000);
-
-    // case #5 done
-    it("2 swaps", async function () {
-        this.skip();
-
-        await mineSomeBlocks(358663);
-        await swapComponent("WETH_USDC", "1000", V3Helper, true);
-        await mineSomeBlocks(600);
-        await mineSomeBlocks(100); //13
-    }).timeout(1000000);
-
-    //case #6 done
-    it("2 swaps", async function () {
-        this.skip();
-
-        await mineSomeBlocks(358663);
-        await swapComponent("WETH_USDC", "10000", V3Helper, true);
-        await swapComponent("OSQTH_WETH", "1000", V3Helper, true);
-        await mineSomeBlocks(600);
-        await mineSomeBlocks(600); //13
+        await mineSomeBlocks(6000);
+        await swapComponent("WETH_USDC", "100", V3Helper);
+        await mineSomeBlocks(200);
+        await swapComponent("OSQTH_WETH", "40", V3Helper);
+        await mineSomeBlocks(81000);
     }).timeout(1000000);
 
     it("rebalance", () => rebalanceClassicComponent(rebalancerChad, Rebalancer, RebalanceModule4));
 
-    return;
-    // it("deposit3 -> cap limit", async function () {
-    //     console.log("> totalSupply:", (await Vault.totalSupply()).toString());
-    //     console.log("> cap:", (await VaultStorage.cap()).toString());
+    it("deposit3 -> cap limit", async function () {
+        console.log("> totalSupply:", (await Vault.totalSupply()).toString());
+        console.log("> cap:", (await VaultStorage.cap()).toString());
 
-    //     await shouldThrowErrorComponent(
-    //         depositOCComponent("1000", depositor3, Vault, OneClickDeposit, "user3"),
-    //         "C4",
-    //         "Cap was not reached"
-    //     );
-    // });
+        await shouldThrowErrorComponent(
+            depositOCComponent("1000", depositor3, Vault, OneClickDeposit, "user3"),
+            "C4",
+            "Cap was not reached"
+        );
+    });
 
     it("deposit3", () => depositOCComponent("5", depositor3, Vault, OneClickDeposit, "user3", "990000000000000000"));
 
@@ -151,17 +95,18 @@ describe.only("General Workflow", function () {
         await swapComponent("WETH_OSQTH", "1500", V3Helper, true);
     }).timeout(10000000);
 
-    // it("price rebalance", async function () {
-    //     await mineSomeBlocks(200);
-    //     await logBlock();
-    //     await logBalance(rebalancerChad.address, "> rebalancerChad Balance Before price rebalance");
-    //     await mineSomeBlocks(1250);
+    it("price rebalance", async function () {
+        this.skip();
+        await mineSomeBlocks(200);
+        await logBlock();
+        await logBalance(rebalancerChad.address, "> rebalancerChad Balance Before price rebalance");
+        await mineSomeBlocks(1250);
 
-    //     tx = await VaultAuction.connect(rebalancerChad).priceRebalance(rebalancerChad.address, 1663937523, 0, 0, 0);
-    //     await tx.wait();
+        tx = await VaultAuction.connect(rebalancerChad).priceRebalance(rebalancerChad.address, 1663937523, 0, 0, 0);
+        await tx.wait();
 
-    //     await logBalance(rebalancerChad.address, "> rebalancerChad Balance After price rebalance");
-    // });
+        await logBalance(rebalancerChad.address, "> rebalancerChad Balance After price rebalance");
+    });
 
     it("withdraw3", async function () {
         const allShares = await getERC20Balance(depositor3.address, Vault.address);

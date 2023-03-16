@@ -1,10 +1,10 @@
 const { ethers } = require("hardhat");
-const { mineSomeBlocks, resetFork, logBalance } = require("../helpers");
-const { hardhatPartialDeploy, deploymentParams, hardhatGetPerepherals } = require("@shared/deploy");
+const { mineSomeBlocks, resetFork } = require("../helpers");
+const { depositOCComponent, swapComponent, rebalanceClassicComponent } = require("../helpers/components");
 
-const { depositOCComponent, swapComponent, executeTx } = require("../helpers/components");
+const { hardhatGetPerepherals, hardhatPartialDeploy } = require("@shared/deploy");
 
-describe.skip("Test of Rebalance in different market conditions", function () {
+describe.only("General Workflow", function () {
     it("Should set actors", async function () {
         [, governance, rebalancerChad, depositor1, keeper, depositor2, depositor3, notgovernance] =
             await ethers.getSigners();
@@ -12,36 +12,85 @@ describe.skip("Test of Rebalance in different market conditions", function () {
 
     let Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, tx;
     it("Should deploy contract", async function () {
-        await resetFork(16634147);
+        await resetFork(16838721);
 
-        const params = [...deploymentParams];
-        params[6] = "0";
-        [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, _arguments] = await hardhatPartialDeploy(
-            governance.address,
-            params,
-            keeper.address
-        );
+        [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, _arguments] = await hardhatPartialDeploy();
 
         [V3Helper, OneClickDeposit, OneClickWithdraw, Rebalancer, , , RebalanceModule3, RebalanceModule4] =
             await hardhatGetPerepherals(governance, keeper, rebalancerChad, _arguments, VaultStorage);
+
+        console.log("> totalSupply:", (await Vault.totalSupply()).toString());
+        console.log("> cap:", (await VaultStorage.cap()).toString());
+        console.log("> balances:", (await VaultMath.getTotalAmounts()).toString());
+        console.log("> ethUsdcLower", (await VaultStorage.orderEthUsdcLower()).toString());
     });
 
-    it("deposit1", () => depositOCComponent("4", depositor1, Vault, OneClickDeposit, "user1"));
+    it("deposit1", () => depositOCComponent("1", depositor1, Vault, OneClickDeposit, "user1", "955000000000000000"));
 
+    it("deposit2", () => depositOCComponent("5", depositor2, Vault, OneClickDeposit, "user2"));
+
+    // case #1 done
     it("2 swaps", async function () {
-        await mineSomeBlocks(6000);
-        await swapComponent("WETH_USDC", "100", V3Helper);
-        await mineSomeBlocks(200);
-        await swapComponent("OSQTH_WETH", "40", V3Helper);
-        await mineSomeBlocks(81000);
-    });
+        this.skip();
 
-    it("rebalance", async () => {
-        const RebalanceModule = RebalanceModule4;
-        await logBalance(RebalanceModule.address, "> RebalanceModule before rebalance");
+        await mineSomeBlocks(358663);
+        await swapComponent("WETH_USDC", "1000", V3Helper, true);
+        await mineSomeBlocks(600);
+        await mineSomeBlocks(600); //13
+    }).timeout(1000000);
 
-        await executeTx(Rebalancer.connect(rebalancerChad).rebalanceClassic(RebalanceModule.address, 0));
+    //case #2 done
+    it("2 swaps", async function () {
+        this.skip();
 
-        await logBalance(RebalanceModule.address, "> RebalanceModule after rebalance");
-    });
+        await mineSomeBlocks(358663);
+        await swapComponent("WETH_USDC", "1000", V3Helper, true);
+        await swapComponent("WETH_OSQTH", "150", V3Helper, true);
+        await mineSomeBlocks(600);
+        await mineSomeBlocks(100); //13
+    }).timeout(1000000);
+
+    // case #3 done
+    it("2 swaps", async function () {
+        // this.skip();
+
+        await mineSomeBlocks(358663);
+        await swapComponent("WETH_USDC", "10000", V3Helper, true);
+        await swapComponent("WETH_OSQTH", "150", V3Helper, true);
+        await mineSomeBlocks(600);
+        await mineSomeBlocks(100); //13
+    }).timeout(1000000);
+
+    //case #4
+    it("2 swaps", async function () {
+        this.skip();
+
+        await mineSomeBlocks(358663);
+        await swapComponent("USDC_WETH", "1000000", V3Helper, true);
+        await mineSomeBlocks(600);
+        await mineSomeBlocks(300); //13
+    }).timeout(1000000);
+
+    // case #5 done
+    it("2 swaps", async function () {
+        this.skip();
+
+        await mineSomeBlocks(358663);
+        await swapComponent("WETH_USDC", "1000", V3Helper, true);
+        await mineSomeBlocks(600);
+        await mineSomeBlocks(100); //13
+    }).timeout(1000000);
+
+    //case #6 done
+    it("2 swaps", async function () {
+        this.skip();
+
+        await mineSomeBlocks(358663);
+        await swapComponent("WETH_USDC", "10000", V3Helper, true);
+        await swapComponent("OSQTH_WETH", "1000", V3Helper, true);
+        await mineSomeBlocks(600);
+        await mineSomeBlocks(600); //13
+    }).timeout(1000000);
+
+    it("rebalance", () => rebalanceClassicComponent(rebalancerChad, Rebalancer, RebalanceModule4));
 });
