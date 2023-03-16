@@ -20,7 +20,7 @@ describe.only("General Workflow", function () {
 
     let Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, tx;
     it("Should deploy contract", async function () {
-        await resetFork(16833023);
+        await resetFork(16838721);
 
         [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, _arguments] = await hardhatPartialDeploy();
 
@@ -39,10 +39,12 @@ describe.only("General Workflow", function () {
 
     it("2 swaps", async function () {
         await mineSomeBlocks(6000);
-        await swapComponent("WETH_USDC", "100", V3Helper);
+        await swapComponent("WETH_USDC", "1000", V3Helper);
         await mineSomeBlocks(200);
-        await swapComponent("OSQTH_WETH", "40", V3Helper);
-        await mineSomeBlocks(600000);
+        await swapComponent("OSQTH_WETH", "400", V3Helper);
+        await mineSomeBlocks(352463);
+        await mineSomeBlocks(600);
+        await mineSomeBlocks(100);
     }).timeout(1000000);
 
     it("rebalance", () => rebalanceClassicComponent(rebalancerChad, Rebalancer, RebalanceModule4));

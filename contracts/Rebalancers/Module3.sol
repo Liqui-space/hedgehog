@@ -82,6 +82,10 @@ interface IAuction {
 
 interface IVaultMath {
     function isTimeRebalance() external view returns (bool, uint256);
+
+    function getPriceMultiplier(uint256) external view returns (uint256);
+
+    function getPrices() external view returns (uint256, uint256);
 }
 
 contract Module3 is Ownable, FlashLoanReceiverBase {
@@ -94,7 +98,7 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
     ISwapRouter constant swapRouter = ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564);
 
     //aavev2
-    address constant landingPool = 0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9;
+    address constant lendingPool = 0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9;
 
     // erc20 tokens
     address constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
@@ -119,9 +123,9 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
         IERC20(OSQTH).approve(addressAuction, type(uint256).max);
         IERC20(WETH).approve(addressAuction, type(uint256).max);
 
-        IERC20(USDC).approve(landingPool, type(uint256).max);
-        IERC20(OSQTH).approve(landingPool, type(uint256).max);
-        IERC20(WETH).approve(landingPool, type(uint256).max);
+        IERC20(USDC).approve(lendingPool, type(uint256).max);
+        IERC20(OSQTH).approve(lendingPool, type(uint256).max);
+        IERC20(WETH).approve(lendingPool, type(uint256).max);
     }
 
     function setContracts(
@@ -155,41 +159,110 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
         if (amountOsqth > 0) IERC20(OSQTH).transfer(to, amountOsqth);
     }
 
-    function rebalance(uint256 threshold, uint256 triggerTime) public onlyOwner {
+    function rebalance(uint256 threshold, uint256 triggerTime, uint256 slippage) public onlyOwner {
         FlCallbackData memory data = calculateRebalance(); //TODO think aboud memory and other
+        console.log(data.type_of_arbitrage);
         data.threshold = threshold;
 
-        if (data.amount2 == 0) {
+        slippage = 1e18;
+
+        console.log("data.amount1 %s", data.amount1);
+        console.log("data.amount2 %s", data.amount2);
+
+        // if (data.amount2 == 0) {
+        //     address[] memory assets = new address[](1);
+        //     uint256[] memory modes = new uint256[](1); // 0 = no debt, 1 = stable, 2 = variable
+        //     uint256[] memory amounts = new uint256[](1);
+        //     amounts[0] = data.amount1;
+        //     modes[0] = 0;
+
+        //     if (data.type_of_arbitrage == 6)
+        //         assets[0] = USDC; //6
+        //     else assets[0] = WETH; // 5,4,2
+
+        //     LENDING_POOL.flashLoan(address(this), assets, amounts, modes, address(this), abi.encode(data), 0);
+        // } else {
+        //     address[] memory assets = new address[](2);
+        //     uint256[] memory modes = new uint256[](2);
+        //     uint256[] memory amounts = new uint256[](2);
+        //     amounts[0] = data.amount1;
+        //     amounts[1] = data.amount2;
+        //     modes[0] = 0;
+        //     modes[1] = 0;
+
+        //     if (data.type_of_arbitrage == 1) {
+        //         assets[0] = WETH;
+        //         assets[1] = USDC;
+        //     } else {
+        //         //3
+        //         assets[0] = USDC;
+        //         assets[1] = WETH;
+        //     }
+
+        //     LENDING_POOL.flashLoan(address(this), assets, amounts, modes, address(this), abi.encode(data), 0);
+        // }
+
+        if (data.type_of_arbitrage == 2 || data.type_of_arbitrage == 4 || data.type_of_arbitrage == 5 || data.type_of_arbitrage == 6){
             address[] memory assets = new address[](1);
             uint256[] memory modes = new uint256[](1); // 0 = no debt, 1 = stable, 2 = variable
             uint256[] memory amounts = new uint256[](1);
-            amounts[0] = data.amount1;
             modes[0] = 0;
 
-            if (data.type_of_arbitrage == 6)
-                assets[0] = USDC; //6
-            else assets[0] = WETH; // 5,4,2
-
-            LENDING_POOL.flashLoan(address(this), assets, amounts, modes, address(this), abi.encode(data), 0);
-        } else {
-            address[] memory assets = new address[](2);
-            uint256[] memory modes = new uint256[](2);
-            uint256[] memory amounts = new uint256[](2);
-            amounts[0] = data.amount1;
-            amounts[1] = data.amount2;
-            modes[0] = 0;
-            modes[1] = 0;
-
-            if (data.type_of_arbitrage == 1) {
+            if (data.type_of_arbitrage == 2) {
+                (, uint256 osqthEthPrice) = IVaultMath(addressMath).getPrices();
+                console.log("osqthEthPrice %s", osqthEthPrice);
+                amounts[0] = data.amount1 * osqthEthPrice * slippage;
+                console.log("ethToBorrow %s", amounts[0]);
                 assets[0] = WETH;
-                assets[1] = USDC;
-            } else {
-                //3
+            }
+
+            if (data.type_of_arbitrage == 4) {
+                assets[0] = WETH;
+                amounts[0] = data.amount1;
+            }
+
+            if (data.type_of_arbitrage == 5) {
+                (, uint256 osqthEthPrice) = IVaultMath(addressMath).getPrices();
+                console.log("osqthEthPrice %s", osqthEthPrice);
+
+                assets[0] = WETH;
+                amounts[0] = data.amount1 + data.amount2 * osqthEthPrice * slippage;
+                console.log("ethToBorrow %s", amounts[0]);
+            }
+
+            if (data.type_of_arbitrage == 6) {
                 assets[0] = USDC;
-                assets[1] = WETH;
+                amounts[0] = data.amount1;
             }
 
             LENDING_POOL.flashLoan(address(this), assets, amounts, modes, address(this), abi.encode(data), 0);
+
+        } else {
+            address[] memory assets = new address[](2);
+            assets[0] = WETH;
+            assets[1] = USDC;
+
+            uint256[] memory modes = new uint256[](2);
+            modes[0] = 0;
+            modes[1] = 0;
+            
+            uint256[] memory amounts = new uint256[](2);
+
+            if (data.type_of_arbitrage == 1) {
+            amounts[0] = data.amount1;
+            amounts[1] = data.amount2;
+            }
+
+            if (data.type_of_arbitrage == 3) {
+                (, uint256 osqthEthPrice) = IVaultMath(addressMath).getPrices();
+                console.log("osqthEthPrice %s", osqthEthPrice);
+                
+                amounts[0] = data.amount1 * osqthEthPrice * slippage;
+                amounts[1] = data.amount2;
+            }
+
+            LENDING_POOL.flashLoan(address(this), assets, amounts, modes, address(this), abi.encode(data), 0);
+
         }
     }
 
@@ -206,6 +279,8 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
             uint256 usdcBalance,
             uint256 osqthBalance
         ) = IAuction(addressAuction).getParams(auctionTriggerTime);
+
+        console.log(block.timestamp);
 
         if (targetEth > ethBalance && targetUsdc > usdcBalance && targetOsqth < osqthBalance) {
             // 1) borrow weth & usdc
@@ -231,8 +306,9 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
             // 4) return usdc & weth
 
             data.type_of_arbitrage = 3;
-            data.amount1 = (targetUsdc - usdcBalance + 10) * (101);
-            data.amount2 = targetOsqth - osqthBalance + 10;
+            data.amount1 = targetOsqth - osqthBalance + 10;
+            data.amount2 = (targetUsdc - usdcBalance + 10) * (101);
+            
         } else if (targetEth > ethBalance && targetUsdc < usdcBalance && targetOsqth < osqthBalance) {
             // 1) borrow weth
             // 2) get usdc & osqth
@@ -284,9 +360,10 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
 
             // swap all oSQTH to wETH
             swapExactInputSingle(OSQTH, 3000);
-
+            
             // buy USDC with part of wETH
-            swapExactOutputSingle(USDC, 500, data.amount2);
+            swapExactOutputSingle(USDC, 500, data.amount2 * 1009 / 1000); //TODO fee as param
+
         } else if (data.type_of_arbitrage == 2) {
             // buy oSQTH with part of wETH
             swapExactOutputSingle(OSQTH, 3000, data.amount1);
@@ -298,7 +375,7 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
 
             // swap all oSQTH to wETH
             swapExactInputSingle(OSQTH, 3000);
-        } else if (data.type_of_arbitrage == 3) {
+        } else if (data.type_of_arbitrage == 3) { //weird TODO
             // buy oSQTH with wETH
             swapExactOutputSingle(OSQTH, 3000, data.amount2);
 
@@ -309,7 +386,9 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
 
             // buy USDC with wETH
             swapExactOutputSingle(USDC, 500, data.amount1 - IERC20(USDC).balanceOf(address(this)));
-        } else if (data.type_of_arbitrage == 4) {
+        } else if (data.type_of_arbitrage == 4) { 
+            console.log("here");
+
             IAuction(addressAuction).timeRebalance(address(this), 0, 0, 0);
 
             // swap all oSQTH to wETH
@@ -318,6 +397,7 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
             // swap all USDC to wETH
             swapExactInputSingle(USDC, 500);
         } else if (data.type_of_arbitrage == 5) {
+            console.log("here");
             // swap part wETH to oSQTH
             swapExactOutputSingle(OSQTH, 3000, data.amount2);
 
@@ -325,8 +405,10 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
 
             // swap all USDC to wETH
             swapExactInputSingle(USDC, 500);
+
+            console.log(IERC20(OSQTH).balanceOf(address(this)));
             // swap all oSQTH to wETH
-            swapExactInputSingle(OSQTH, 3000);
+            swapExactInputSingle(OSQTH, 3000); //check TODO
         } else if (data.type_of_arbitrage == 6) {
             IAuction(addressAuction).timeRebalance(address(this), 0, 0, 0);
 
@@ -334,7 +416,7 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
             swapExactInputSingle(OSQTH, 3000);
 
             // swap all wETH to USDC
-            swapExactOutputSingle(USDC, 500, data.amount1);
+            swapExactOutputSingle(USDC, 500, data.amount1); //fee TODO
         }
         require(IERC20(WETH).balanceOf(address(this)) - ethBefore > data.threshold, "NEP");
         return true;
