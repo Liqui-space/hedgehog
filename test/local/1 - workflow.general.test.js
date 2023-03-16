@@ -37,14 +37,67 @@ describe.only("General Workflow", function () {
 
     it("deposit2", () => depositOCComponent("5", depositor2, Vault, OneClickDeposit, "user2"));
 
+    // case #1 done
     it("2 swaps", async function () {
-        await mineSomeBlocks(6000);
-        await swapComponent("WETH_USDC", "1000", V3Helper);
-        await mineSomeBlocks(200);
-        await swapComponent("OSQTH_WETH", "400", V3Helper);
-        await mineSomeBlocks(352463);
+        this.skip();
+
+        await mineSomeBlocks(358663);
+        await swapComponent("WETH_USDC", "1000", V3Helper, true);
         await mineSomeBlocks(600);
-        await mineSomeBlocks(100);
+        await mineSomeBlocks(600); //13
+    }).timeout(1000000);
+
+    //case #2 done
+    it("2 swaps", async function () {
+        //this.skip();
+
+        await mineSomeBlocks(358663);
+        await swapComponent("WETH_USDC", "1000", V3Helper, true);
+        await swapComponent("WETH_OSQTH", "150", V3Helper, true);
+        await mineSomeBlocks(600);
+        await mineSomeBlocks(100); //13
+    }).timeout(1000000);
+
+    // case #3 done
+    it("2 swaps", async function () {
+        this.skip();
+
+        await mineSomeBlocks(358663);
+        await swapComponent("WETH_USDC", "10000", V3Helper, true);
+        await swapComponent("WETH_OSQTH", "150", V3Helper, true);
+        await mineSomeBlocks(600);
+        await mineSomeBlocks(100); //13
+    }).timeout(1000000);
+    
+    //case #4
+    it("2 swaps", async function () {
+        this.skip();
+
+        await mineSomeBlocks(358663);
+        await swapComponent("USDC_WETH", "1000000", V3Helper, true);
+        await mineSomeBlocks(600);
+        await mineSomeBlocks(300); //13
+    }).timeout(1000000);
+
+    // case #5 done
+    it("2 swaps", async function () {
+        this.skip();
+
+        await mineSomeBlocks(358663);
+        await swapComponent("WETH_USDC", "1000", V3Helper, true);
+        await mineSomeBlocks(600);
+        await mineSomeBlocks(100); //13
+    }).timeout(1000000);
+
+    //case #6 done
+    it("2 swaps", async function () {
+        this.skip();
+
+        await mineSomeBlocks(358663);
+        await swapComponent("WETH_USDC", "10000", V3Helper, true);
+        await swapComponent("OSQTH_WETH", "1000", V3Helper, true);
+        await mineSomeBlocks(600);
+        await mineSomeBlocks(600); //13
     }).timeout(1000000);
 
     it("rebalance", () => rebalanceClassicComponent(rebalancerChad, Rebalancer, RebalanceModule4));
