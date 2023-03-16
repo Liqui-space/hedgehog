@@ -3,13 +3,7 @@ pragma solidity =0.8.4;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
-import {FlashLoanReceiverBase} from "../libraries/aave/FlashLoanReceiverBase.sol";
-import {ILendingPool} from "../libraries/aave/interfaces/ILendingPool.sol";
-import {ILendingPoolAddressesProvider} from "../libraries/aave/interfaces/ILendingPoolAddressesProvider.sol";
-
 import {ISwapRouter} from "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
-import {TransferHelper} from "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 
 import "hardhat/console.sol";
 
@@ -86,12 +80,24 @@ interface IVaultMath {
     function getPrices() external view returns (uint256, uint256);
 }
 
+interface ILendingPool {
+    function flashLoan(
+        address receiverAddress,
+        address[] calldata assets,
+        uint256[] calldata amounts,
+        uint256[] calldata modes,
+        address onBehalfOf,
+        bytes calldata params,
+        uint16 referralCode
+    ) external;
+}
+
 /**
  * Error
  * M0: Not a pool
  */
 
-contract Module3 is Ownable, FlashLoanReceiverBase {
+contract Module3 is Ownable {
     address public addressAuction = 0x30EF1938673c5513a817D202CDD33471894a7ED8;
     address public addressMath = 0x47c05BCCA7d57c87083EB4e586007530eE4539e9; //TODO: chage to current addresses
     address public addressTreasury = 0x12804580C15F4050dda61D44AFC94623198848bC;
@@ -105,6 +111,7 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
 
     //aavev2
     address constant lendingPool = 0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9;
+    ILendingPool constant LENDING_POOL = ILendingPool(lendingPool);
 
     // erc20 tokens
     address constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
@@ -118,13 +125,11 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
         uint256 threshold;
     }
 
-    constructor()
-        Ownable()
-        FlashLoanReceiverBase(ILendingPoolAddressesProvider(0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5))
-    {
-        TransferHelper.safeApprove(OSQTH, address(swapRouter), type(uint256).max);
-        TransferHelper.safeApprove(WETH, address(swapRouter), type(uint256).max);
-        TransferHelper.safeApprove(USDC, address(swapRouter), type(uint256).max);
+    constructor() Ownable() {
+        IERC20(USDC).approve(address(swapRouter), type(uint256).max);
+        IERC20(OSQTH).approve(address(swapRouter), type(uint256).max);
+        IERC20(WETH).approve(address(swapRouter), type(uint256).max);
+
         IERC20(USDC).approve(addressAuction, type(uint256).max);
         IERC20(OSQTH).approve(addressAuction, type(uint256).max);
         IERC20(WETH).approve(addressAuction, type(uint256).max);
@@ -269,7 +274,7 @@ contract Module3 is Ownable, FlashLoanReceiverBase {
         uint256[] calldata premiums,
         address initiator,
         bytes calldata encodedData
-    ) external override returns (bool) {
+    ) external returns (bool) {
         require(msg.sender == lendingPool, "M0");
 
         FlCallbackData memory data = abi.decode(encodedData, (FlCallbackData));
