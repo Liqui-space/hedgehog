@@ -1,4 +1,4 @@
-// process.exit(0); // Block file in order to not accidentally deploy
+process.exit(0); // Block file in order to not accidentally deploy
 
 const { ethers } = require("hardhat");
 const { utils } = ethers;
