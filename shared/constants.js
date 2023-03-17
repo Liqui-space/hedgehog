@@ -13,6 +13,7 @@ const _vaultAuctionAddress = "0x2f1D08D53d04559933dBF436a5cD15182a190110";
 const _vaultAuctionAddressV2 = "0x30EF1938673c5513a817D202CDD33471894a7ED8";
 const _vaultMathAddress = "0x40B22821f694f1F3b226b57B5852d7832e2B5f3f";
 const _vaultMathAddressV2 = "0xf21A50489166B10d109381d7Cc5441f1152aE666";
+const _vaultMathAddressV3 = "0x2b1cb93B8fe1B6fB3810Ab294D681865421C4E37";
 const _vaultTreasuryAddress = "0x12804580C15F4050dda61D44AFC94623198848bC";
 const _vaultStorageAddress = "0xa6D7b99c05038ad2CC39F695CF6D2A06DdAD799a";
 const _vaultStorageAddressV2 = "0x66aE7D409F559Df4E13dFe8b323b570Ab86e68B8";
@@ -24,6 +25,7 @@ const _oneClickWithdrawAddress = "0xeD14d82a2D3435571646dA537A52AbBC113F5140";
 const _rebalanceModule1 = "0x86345a7f1D77F6056E2ff83e1b1071238AEf1483";
 const _rebalanceModule2 = "0x24F378A96eDAA91b20b86300771929Fcb10190E2";
 const _rebalanceModule3 = "0xfE08EEb4d98551Ea6eB474b24356a82Cf60277e2";
+const _rebalanceModule3New = "0xf4ED64d8ad251E3F76D408702163774eDcD1F560";
 const _rebalancer = "0x17e8a3e01A73c754052cdCdee29E5804300c5406";
 const _cheapRebalancerOld = "0x17e8a3e01A73c754052cdCdee29E5804300c5406";
 
@@ -36,8 +38,8 @@ const _bigRebalancerEuler = "0x24F378A96eDAA91b20b86300771929Fcb10190E2";
 const _bigRebalancerEuler2 = "0xfE08EEb4d98551Ea6eB474b24356a82Cf60277e2";
 
 module.exports = {
+    _rebalanceModule3New,
     _vaultAuctionAddressV2,
-    _vaultMathAddressV2,
     _vaultStorageAddressV2,
     _cheapRebalancerOld,
     wethAddress,
@@ -51,6 +53,8 @@ module.exports = {
     _vaultAddress,
     _vaultAuctionAddress,
     _vaultMathAddress,
+    _vaultMathAddressV2,
+    _vaultMathAddressV3,
     _vaultTreasuryAddress,
     _vaultStorageAddress,
     _uniMathAddress,

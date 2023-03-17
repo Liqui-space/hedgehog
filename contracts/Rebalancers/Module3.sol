@@ -5,8 +5,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ISwapRouter} from "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
 
-import "hardhat/console.sol";
-
 // Rebalance flow
 
 // branch 1 (targetEth > ethBalance && targetUsdc > usdcBalance && targetOsqth < osqthBalance)
@@ -99,7 +97,7 @@ interface ILendingPool {
 
 contract Module3 is Ownable {
     address public addressAuction = 0x30EF1938673c5513a817D202CDD33471894a7ED8;
-    address public addressMath = 0x47c05BCCA7d57c87083EB4e586007530eE4539e9; //TODO: chage to current addresses
+    address public addressMath = 0x2b1cb93B8fe1B6fB3810Ab294D681865421C4E37;
     address public addressTreasury = 0x12804580C15F4050dda61D44AFC94623198848bC;
     address public addressStorage = 0x66aE7D409F559Df4E13dFe8b323b570Ab86e68B8;
 
@@ -178,12 +176,9 @@ contract Module3 is Ownable {
         if (amountOsqth > 0) IERC20(OSQTH).transfer(to, amountOsqth);
     }
 
-    function rebalance(uint256 threshold, uint256 triggerTime) public onlyOwner {
+    function rebalance(uint256 threshold, uint256 slippage) external onlyOwner {
         FlCallbackData memory data = calculateRebalance();
-        console.log(data.type_of_arbitrage);
         data.threshold = threshold;
-
-        uint256 slippage = 103e16; //TODO as param
 
         if (data.type_of_arbitrage == 1 || data.type_of_arbitrage == 3) {
             address[] memory assets = new address[](2);

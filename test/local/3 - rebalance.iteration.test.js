@@ -108,7 +108,7 @@ describe.only("Rebalance iterative", function () {
                 nullAddress,
                 RebalanceModule4.address,
                 0,
-                0
+                ethers.utils.parseUnits(103, 16)
             ),
             "new classic Rebalance",
             true
