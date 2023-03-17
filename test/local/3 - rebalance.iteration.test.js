@@ -107,7 +107,7 @@ describe.only("Rebalance iterative", function () {
                 data,
                 nullAddress,
                 RebalanceModule4.address,
-                "999000000000000000"
+                "999900000000000000"
             ),
             "new classic Rebalance",
             true

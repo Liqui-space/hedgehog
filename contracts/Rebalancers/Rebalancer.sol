@@ -2,7 +2,6 @@
 pragma solidity =0.8.4;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import {PRBMathUD60x18} from "../libraries/math/PRBMathUD60x18.sol";
 
 interface IVaultStorage {
     function timeAtLastRebalance() external view returns (uint256);
@@ -27,7 +26,6 @@ interface IModule {
 }
 
 contract Rebalancer is Ownable {
-    using PRBMathUD60x18 for uint256;
 
     IVaultStorage VaultStorage = IVaultStorage(0x66aE7D409F559Df4E13dFe8b323b570Ab86e68B8);
 
@@ -48,9 +46,7 @@ contract Rebalancer is Ownable {
         uint256 minPM = VaultStorage.minPriceMultiplier();
 
         VaultStorage.setRebalanceTimeThreshold(
-            block.timestamp.sub(VaultStorage.timeAtLastRebalance()).sub(
-                (VaultStorage.auctionTime()).mul(maxPM.sub(newPM).div(maxPM.sub(minPM)))
-            )
+            block.timestamp - VaultStorage.timeAtLastRebalance() - VaultStorage.auctionTime() * (maxPM - newPM) / (maxPM - minPM) 
         );
     }
 
