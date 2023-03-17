@@ -26,7 +26,6 @@ interface IModule {
 }
 
 contract Rebalancer is Ownable {
-
     IVaultStorage VaultStorage = IVaultStorage(0x66aE7D409F559Df4E13dFe8b323b570Ab86e68B8);
 
     uint256 public newThreshold = 604800;
@@ -46,7 +45,10 @@ contract Rebalancer is Ownable {
         uint256 minPM = VaultStorage.minPriceMultiplier();
 
         VaultStorage.setRebalanceTimeThreshold(
-            block.timestamp - VaultStorage.timeAtLastRebalance() - VaultStorage.auctionTime() * (maxPM - newPM) / (maxPM - minPM) 
+            block.timestamp -
+                VaultStorage.timeAtLastRebalance() -
+                (VaultStorage.auctionTime() * (maxPM - newPM)) /
+                (maxPM - minPM)
         );
     }
 
@@ -56,7 +58,7 @@ contract Rebalancer is Ownable {
         address _governance,
         address _keeper,
         uint256 newPM
-    ) public onlyOwner {
+    ) external onlyOwner {
         if (_governance != address(0)) VaultStorage.setGovernance(_governance);
         if (_keeper != address(0)) VaultStorage.setKeeper(_keeper);
 

@@ -53,7 +53,7 @@ describe.only("Rebalance iterative", function () {
 
     // case #3 done
     it("2 swaps", async function () {
-        // this.skip();
+        this.skip();
 
         await mineSomeBlocks(358663);
         await swapComponent("WETH_USDC", "10000", V3Helper, true);
@@ -64,7 +64,7 @@ describe.only("Rebalance iterative", function () {
 
     //case #4
     it("2 swaps", async function () {
-        this.skip();
+        // this.skip();
 
         await mineSomeBlocks(358663);
         await swapComponent("USDC_WETH", "1000000", V3Helper, true);
