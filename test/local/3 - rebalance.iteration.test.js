@@ -97,7 +97,7 @@ describe.only("Rebalance iterative", function () {
 
     it("rebalance new cheap", async () => {
         inface = new ethers.utils.Interface(["function rebalance(uint256 threshold, uint256 triggerTime)"]);
-        data = inface.encodeFunctionData("rebalance", [0, 0]);
+        data = inface.encodeFunctionData("rebalance", [0, ethers.utils.parseUnits("103", 16).toString()]);
 
         await logBalance(RebalanceModule4.address, "> RebalanceModule before rebalance");
 
@@ -107,7 +107,7 @@ describe.only("Rebalance iterative", function () {
                 data,
                 nullAddress,
                 RebalanceModule4.address,
-                "999000000000000000",
+                "999000000000000000"
             ),
             "new classic Rebalance",
             true

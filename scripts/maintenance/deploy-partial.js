@@ -1,4 +1,4 @@
-process.exit(0); // Block file in order to not accidentally deploy
+// process.exit(0); // Block file in order to not accidentally deploy
 
 const { ethers } = require("hardhat");
 const { utils } = ethers;
@@ -9,6 +9,7 @@ const {
     _deployerAddress,
     usdcAddress,
     _vaultAddress,
+    _vaultMathAddressV3,
     _vaultTreasuryAddress,
     _vaultAuctionAddressV2,
     _vaultMathAddressV2,
@@ -38,14 +39,15 @@ const hardhatDeployContractsPartial = async () => {
     // console.log(VaultStorage);
     // const newContracts = [
     //     _uniMathAddress,
-    //     _vaultAddress, //
+    //     _vaultAddress,
     //     _vaultAuctionAddressV2, //
-    //     _vaultMathAddressV2, //
+    //     _vaultMathAddressV3, //
     //     _vaultTreasuryAddress, //
     //     _vaultStorageAddressV2, //
     // ];
     // IFaucet = await ethers.getContractFactory("Faucet");
     // const Faucet = await IFaucet.attach(_vaultAddress);
+    // tx = await Faucet.setComponents(...newContracts);
     // ModuleOld = await ethers.getContractAt("IModuleOld", _bigRebalancerEuler2);
     // console.log((await ModuleOld.addressAuction()) == _vaultAuctionAddressV2);
     // console.log((await ModuleOld.addressMath()) == _vaultMathAddressV2);
@@ -59,6 +61,14 @@ const hardhatDeployContractsPartial = async () => {
     // );
     // tx = await ModuleOld.transferOwnership(_cheapRebalancerOld);
     // console.log(tx);
+    // #1
+    // const Rebalancer = await deployContract("Rebalancer", [], false);
+    // console.log(Rebalancer);
+    //#2
+    // transfer ownerhip from Cheap to module
+    // keeper from module to Reb
+    // gov from Cheap to Reb
+    // ownership from rebelnce deployer to multisig
 };
 
 hardhatDeployContractsPartial().catch((error) => {

@@ -22,6 +22,7 @@ interface IVaultStorage {
 
 interface IModule {
     function setKeeper(address to) external;
+
     function setGovernance(address to) external;
 }
 
