@@ -14,7 +14,7 @@ const {
 
 describe.only("Cheap Rebalancer test mainnet", function () {
     it("Initial", async function () {
-        await resetFork(16854063);
+        await resetFork(16854670);
 
         Rebalancer = await (await ethers.getContractFactory("Rebalancer")).attach(_rebalancer);
         VaultStorage = await (await ethers.getContractFactory("VaultStorage")).attach(_vaultStorageAddress);
@@ -34,6 +34,7 @@ describe.only("Cheap Rebalancer test mainnet", function () {
         // console.log((await Module3.addressMath()) == _vaultMathAddress);
         // console.log((await Module3.addressTreasury()) == _vaultTreasuryAddress);
         // console.log((await Module3.addressStorage()) == _vaultStorageAddress);
+        console.log(await Module3.owner());
     });
 
     it("rebalance", async function () {

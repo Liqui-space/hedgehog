@@ -1,9 +1,15 @@
 const { ethers } = require("hardhat");
 const { mineSomeBlocks, resetFork, logBalance } = require("../helpers");
-const { depositOCComponent, swapComponent, rebalanceClassicComponent, executeTx } = require("../helpers/components");
+const {
+    depositOCComponent,
+    swapComponent,
+    rebalanceClassicComponent,
+    getActivatedOwner,
+    executeTx,
+} = require("../helpers/components");
 
-const { hardhatGetPerepherals, hardhatPartialDeploy } = require("@shared/deploy");
-const { nullAddress } = require("../../shared/constants");
+const { hardhatGetPerepherals, hardhatInitializedDeploy } = require("@shared/deploy");
+const { nullAddress, _rebalanceModule4 } = require("../../shared/constants");
 
 describe.skip("Rebalance iterative", function () {
     it("Should set actors", async function () {
@@ -13,12 +19,16 @@ describe.skip("Rebalance iterative", function () {
 
     let Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, tx;
     it("Should deploy contract", async function () {
-        await resetFork(16838721);
+        await resetFork(16854421);
 
-        [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, _arguments] = await hardhatPartialDeploy();
+        [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, _arguments] = await hardhatInitializedDeploy();
 
-        [V3Helper, OneClickDeposit, OneClickWithdraw, Rebalancer, , , RebalanceModule3, RebalanceModule4] =
-            await hardhatGetPerepherals(governance, keeper, rebalancerChad, _arguments, VaultStorage);
+        [V3Helper, OneClickDeposit, OneClickWithdraw, Rebalancer, , , , Module4] = await hardhatGetPerepherals(
+            governance,
+            keeper,
+            rebalancerChad,
+            _arguments
+        );
 
         console.log("> totalSupply:", (await Vault.totalSupply()).toString());
         console.log("> cap:", (await VaultStorage.cap()).toString());
@@ -26,9 +36,9 @@ describe.skip("Rebalance iterative", function () {
         console.log("> ethUsdcLower", (await VaultStorage.orderEthUsdcLower()).toString());
     });
 
-    it("deposit1", () => depositOCComponent("1", depositor1, Vault, OneClickDeposit, "user1", "955000000000000000"));
+    // it("deposit1", () => depositOCComponent("1", depositor1, Vault, OneClickDeposit, "user1", "955000000000000000"));
 
-    it("deposit2", () => depositOCComponent("5", depositor2, Vault, OneClickDeposit, "user2"));
+    // it("deposit2", () => depositOCComponent("5", depositor2, Vault, OneClickDeposit, "user2"));
 
     // case #1 done
     it("2 swaps", async function () {
@@ -64,7 +74,7 @@ describe.skip("Rebalance iterative", function () {
 
     //case #4
     it("2 swaps", async function () {
-        // this.skip();
+        this.skip();
 
         await mineSomeBlocks(358663);
         await swapComponent("USDC_WETH", "1000000", V3Helper, true);
@@ -93,26 +103,25 @@ describe.skip("Rebalance iterative", function () {
         await mineSomeBlocks(600); //13
     }).timeout(1000000);
 
-    // it("rebalance", () => rebalanceClassicComponent(rebalancerChad, Rebalancer, RebalanceModule4));
+    // it("rebalance", () => rebalanceClassicComponent(rebalancerChad, Rebalancer, Module4));
 
     it("rebalance new cheap", async () => {
+        await logBalance(Module4.address, "> RebalanceModule before rebalance");
+
+        const owner = await getActivatedOwner(Rebalancer);
         inface = new ethers.utils.Interface(["function rebalance(uint256 threshold, uint256 triggerTime)"]);
-        data = inface.encodeFunctionData("rebalance", [0, ethers.utils.parseUnits("103", 16).toString()]);
-
-        await logBalance(RebalanceModule4.address, "> RebalanceModule before rebalance");
-
         await executeTx(
-            Rebalancer.connect(rebalancerChad).complexCall(
-                RebalanceModule4.address,
-                data,
+            Rebalancer.connect(owner).complexCall(
+                Module4.address,
+                inface.encodeFunctionData("rebalance", [0, ethers.utils.parseUnits("103", 16).toString()]),
                 nullAddress,
-                RebalanceModule4.address,
-                "999900000000000000"
+                Module4.address,
+                "993000000000000000"
             ),
-            "new classic Rebalance",
+            "new cheap Rebalance",
             true
         );
 
-        await logBalance(RebalanceModule4.address, "> RebalanceModule after rebalance");
+        await logBalance(Module4.address, "> RebalanceModule after rebalance");
     });
 });

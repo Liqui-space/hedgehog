@@ -2,7 +2,16 @@ const { assert } = require("chai");
 
 const { ethers } = require("hardhat");
 const { utils } = ethers;
-const { getAndApproveWETH, getERC20Balance, logBalance, getWETH, getOSQTH, getUSDC } = require("./index");
+const {
+    getAndApproveWETH,
+    getERC20Balance,
+    logBalance,
+    getWETH,
+    getOSQTH,
+    getUSDC,
+    impersontate,
+    getETH,
+} = require("./index");
 
 const depositOCComponent = async (
     ethAmount,
@@ -67,6 +76,21 @@ const swapComponent = async (swapType, swapAmountString, V3Helper, log = false) 
     if (log) await logBalance(V3Helper.address, `> V3Helper after ${swapType}`);
 };
 
+const getContract = async (name, address) => {
+    const contract = await ethers.getContractFactory(name);
+    return await contract.attach(address);
+};
+
+const getActivatedOwner = async (ContractFacory) => {
+    const owner = await impersontate(await ContractFacory.owner());
+    await getETH(owner, utils.parseEther("20"));
+    return owner;
+};
+
+const getInterface = async (name, address) => {
+    return await ethers.getContractAt(name, address);
+};
+
 const rebalanceClassicComponent = async (rebalancer, Rebalancer, RebalanceModule) => {
     await logBalance(RebalanceModule.address, "> RebalanceModule before rebalance");
 
@@ -101,6 +125,9 @@ const executeTx = async (promise, label = "", logGas = false) => {
 };
 
 module.exports = {
+    getActivatedOwner,
+    getInterface,
+    getContract,
     executeTx,
     rebalanceClassicComponent,
     depositOCComponent,
