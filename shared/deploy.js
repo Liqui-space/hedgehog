@@ -9,14 +9,9 @@ const {
     _vaultMathAddress,
     _vaultTreasuryAddress,
     _vaultStorageAddress,
-    _rebalanceModule1,
-    _rebalanceModule2,
-    _rebalanceModule3,
     _cheapRebalancerOld,
     _oneClickDepositAddress,
     _oneClickWithdrawAddress,
-    _vaultAuctionAddress,
-    _vaultStorageAddress,
 } = require("./constants");
 
 const deployContract = async (name, params, deploy = true) => {
