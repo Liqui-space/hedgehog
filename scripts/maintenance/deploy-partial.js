@@ -1,4 +1,4 @@
-// process.exit(0); // Block file in order to not accidentally deploy
+process.exit(0); // Block file in order to not accidentally deploy
 
 const { ethers } = require("hardhat");
 const { utils } = ethers;
@@ -12,13 +12,13 @@ const {
     _vaultMathAddress,
     _vaultTreasuryAddress,
     _vaultAuctionAddress,
-    _vaultMathAddress,
     _cheapRebalancerOld,
     _vaultStorageAddress,
     _rebalanceModule2,
     _rebalanceModule3,
     _rebalancer,
     _rebalanceModule4,
+    _sharedGovernance,
 } = require("../../shared/constants");
 const { deployContract, deploymentParams } = require("../../shared/deploy");
 
@@ -50,51 +50,46 @@ const hardhatDeployContractsPartial = async () => {
     // IFaucet = await ethers.getContractFactory("Faucet");
     // const Faucet = await IFaucet.attach(_vaultAddress);
     // tx = await Faucet.setComponents(...newContracts);
-    ModuleOld = await ethers.getContractAt("IModuleOld", _rebalanceModule4);
-    console.log((await ModuleOld.addressAuction()) == _vaultAuctionAddress);
-    console.log((await ModuleOld.addressMath()) == _vaultMathAddress);
-    console.log((await ModuleOld.addressTreasury()) == _vaultTreasuryAddress);
-    console.log((await ModuleOld.addressStorage()) == _vaultStorageAddress);
+    // ModuleOld = await ethers.getContractAt("IModuleOld", _rebalanceModule4);
+    // console.log((await ModuleOld.addressAuction()) == _vaultAuctionAddress);
+    // console.log((await ModuleOld.addressMath()) == _vaultMathAddress);
+    // console.log((await ModuleOld.addressTreasury()) == _vaultTreasuryAddress);
+    // console.log((await ModuleOld.addressStorage()) == _vaultStorageAddress);
     // tx = await ModuleOld.callStatic.setContracts(
     //     _vaultAuctionAddress,
     //     _vaultMathAddress,
     //     _vaultTreasuryAddress,
     //     _vaultStorageAddress
     // );
-    // tx = await ModuleOld.transferOwnership(_cheapRebalancerOld);
+    // tx = await ModuleOld.transferOwnership(_rebalancer);
     // console.log(tx);
     // #1
     // const Rebalancer = await deployContract("Rebalancer", [], false);
     // console.log(Rebalancer);
     //#2
-
     // CheapRebalancerOld = await ethers.getContractAt("ICheapRebalancerOld", _cheapRebalancerOld);
-
     // const Faucet = await (await ethers.getContractFactory("VaultStorage")).attach(_vaultStorageAddress);
-
     // console.log(await Faucet.governance());
     // console.log(await CheapRebalancerOld.bigRebalancer());
     // transfer ownerhip from Cheap to module
     // keeper from module to Reb
     // gov from Cheap to Reb
     // ownership from rebelnce deployer to multisig
-
     // return;
-    const Rebalancer = await (await ethers.getContractFactory("Rebalancer")).attach(_rebalancer);
     // Check
-
-    inface = new ethers.utils.Interface(["function rebalance(uint256 threshold, uint256 triggerTime)"]);
-    data = inface.encodeFunctionData("rebalance", [0, ethers.utils.parseUnits("103", 16).toString()]);
-
-    //
-    tx = await Rebalancer.callStatic.complexCall(
-        _rebalanceModule4,
-        data,
-        "0x0000000000000000000000000000000000000000",
-        _rebalanceModule4,
-        "991000000000000000"
-    );
-    console.log(tx);
+    // const Rebalancer = await (await ethers.getContractFactory("Rebalancer")).attach(_rebalancer);
+    // inface = new ethers.utils.Interface(["function rebalance(uint256 threshold, uint256 triggerTime)"]);
+    // data = inface.encodeFunctionData("rebalance", [0, ethers.utils.parseUnits("103", 16).toString()]);
+    // tx = await Rebalancer.callStatic.complexCall(
+    //     _rebalanceModule4,
+    //     data,
+    //     "0x0000000000000000000000000000000000000000",
+    //     _rebalanceModule4,
+    //     "991000000000000000"
+    // );
+    // console.log(tx);
+    // tx = await Rebalancer.transferOwnership(_sharedGovernance);
+    // console.log(tx);
 };
 
 hardhatDeployContractsPartial().catch((error) => {
