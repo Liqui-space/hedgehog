@@ -1,39 +1,39 @@
 const { ethers } = require("hardhat");
-const { _cheapRebalancerOld, _bigRebalancerEuler2, _vaultStorageAddressV2 } = require("@shared/constants");
-const { resetFork, getETH, impersontate } = require("../helpers");
+const { _vaultStorageAddress } = require("@shared/constants");
+const { resetFork, getETH, impersontate, logFaucet } = require("../helpers");
 const { executeTx } = require("../helpers/components");
+const { _rebalanceModule4, nullAddress, _rebalancer, _vaultMathAddress } = require("../../shared/constants");
 
-describe.skip("Cheap Rebalancer test mainnet", function () {
+describe.only("Cheap Rebalancer test mainnet", function () {
     it("Initial", async function () {
-        await resetFork(16797970);
+        await resetFork(16854063);
 
-        CheapRebalancerOld = await ethers.getContractAt("ICheapRebalancerOld", _cheapRebalancerOld);
-        ModuleOld = await ethers.getContractAt("IModuleOld", _bigRebalancerEuler2);
-        VaultStorage = await (await ethers.getContractFactory("VaultStorage")).attach(_vaultStorageAddressV2);
-        VaultMath = await (await ethers.getContractFactory("VaultMath")).attach(_vaultMathAddressV2);
+        Rebalancer = await (await ethers.getContractFactory("Rebalancer")).attach(_rebalancer);
+        VaultStorage = await (await ethers.getContractFactory("VaultStorage")).attach(_vaultStorageAddress);
+        VaultMath = await (await ethers.getContractFactory("VaultMath")).attach(_vaultMathAddress);
 
-        const _owner = await CheapRebalancerOld.owner();
-        owner = await impersontate(_owner);
-        await getETH(owner, ethers.utils.parseEther("3.0"));
-    });
-
-    it("Configure", async function () {
-        // this.skip();
-
-        await executeTx(CheapRebalancerOld.connect(owner).returnGovernance(owner.address));
-        await executeTx(VaultStorage.connect(owner).setIrMax(0));
-        await executeTx(VaultStorage.connect(owner).setGovernance(CheapRebalancerOld.address));
+        await logFaucet;
     });
 
     it("rebalance", async function () {
         // this.skip();
-
-        const _owner = await CheapRebalancerOld.owner();
-        owner = await impersontate(_owner);
-        await getETH(owner, ethers.utils.parseEther("30.0"));
-
         console.log("ir %s", await VaultMath.getInterestRate());
 
-        await executeTx(CheapRebalancerOld.connect(owner).rebalance("0", "999000000000000000"));
+        const _owner = await Rebalancer.owner();
+        owner = await impersontate(_owner);
+        await getETH(owner, ethers.utils.parseEther("3.0"));
+
+        inface = new ethers.utils.Interface(["function rebalance(uint256 threshold, uint256 triggerTime)"]);
+        await executeTx(
+            Rebalancer.connect(owner).complexCall(
+                _rebalanceModule4,
+                inface.encodeFunctionData("rebalance", [0, ethers.utils.parseUnits("103", 16).toString()]),
+                nullAddress,
+                _rebalanceModule4,
+                "993000000000000000"
+            ),
+            "new cheap Rebalance",
+            true
+        );
     });
 });

@@ -15,8 +15,8 @@ const {
     _cheapRebalancerOld,
     _oneClickDepositAddress,
     _oneClickWithdrawAddress,
-    _vaultAuctionAddressV2,
-    _vaultStorageAddressV2,
+    _vaultAuctionAddress,
+    _vaultStorageAddress,
 } = require("./constants");
 
 const deployContract = async (name, params, deploy = true) => {
@@ -91,11 +91,11 @@ const hardhatPartialDeploy = async () => {
     MyContract = await ethers.getContractFactory("Vault");
     const Vault = await MyContract.attach(_vaultAddress);
     MyContract = await ethers.getContractFactory("VaultAuction");
-    const VaultAuction = await MyContract.attach(_vaultAuctionAddressV2);
+    const VaultAuction = await MyContract.attach(_vaultAuctionAddress);
     MyContract = await ethers.getContractFactory("VaultTreasury");
     const VaultTreasury = await MyContract.attach(_vaultTreasuryAddress);
     MyContract = await ethers.getContractFactory("VaultStorage");
-    const VaultStorage = await MyContract.attach(_vaultStorageAddressV2);
+    const VaultStorage = await MyContract.attach(_vaultStorageAddress);
 
     const VaultMath = await deployContract("VaultMath", [], true);
 

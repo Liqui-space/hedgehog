@@ -7,8 +7,8 @@ const {
     _vaultTreasuryAddress,
     _hedgehogPeripheralsDeployer,
     wethAddress,
-    _bigRebalancerEuler,
-    _bigRebalancerEuler2,
+    _rebalanceModule2,
+    _rebalanceModule3,
     _rebalanceModule,
     _vaultStorageAddress,
     _sharedGovernance,
@@ -22,9 +22,9 @@ const operation = async () => {
     MyContract = await ethers.getContractFactory("VaultStorage");
     VaultStorage = await MyContract.attach(_vaultStorageAddress);
     MyContract = await ethers.getContractFactory("BigRebalancerEuler");
-    BigRebalancerEuler = await MyContract.attach(_bigRebalancerEuler);
+    BigRebalancerEuler = await MyContract.attach(_rebalanceModule2);
     MyContract = await ethers.getContractFactory("BigRebalancerEuler");
-    BigRebalancerEuler2 = await MyContract.attach(_bigRebalancerEuler2);
+    BigRebalancerEuler2 = await MyContract.attach(_rebalanceModule3);
     MyContract = await ethers.getContractFactory("BigRebalancer");
     BigRebalancer = await MyContract.attach(_rebalanceModule);
 
@@ -179,7 +179,7 @@ const collectToTreasuryOperations = async () => {
 
 const collectToAddress = async () => {
     // console.log(await CheapRebalancer.bigRebalancer());
-    // tx = await CheapRebalancer.setContracts(_bigRebalancerEuler2, {
+    // tx = await CheapRebalancer.setContracts(_rebalanceModule3, {
     //     gasLimit: 80000,
     //     gasPrice: 31 * 10 ** 9,
     // });

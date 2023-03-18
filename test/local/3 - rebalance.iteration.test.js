@@ -3,9 +3,9 @@ const { mineSomeBlocks, resetFork, logBalance } = require("../helpers");
 const { depositOCComponent, swapComponent, rebalanceClassicComponent, executeTx } = require("../helpers/components");
 
 const { hardhatGetPerepherals, hardhatPartialDeploy } = require("@shared/deploy");
+const { nullAddress } = require("../../shared/constants");
 
-const nullAddress = "0x0000000000000000000000000000000000000000";
-describe.only("Rebalance iterative", function () {
+describe.skip("Rebalance iterative", function () {
     it("Should set actors", async function () {
         [, governance, rebalancerChad, depositor1, keeper, depositor2, depositor3, notgovernance] =
             await ethers.getSigners();

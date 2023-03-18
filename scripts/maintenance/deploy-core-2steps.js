@@ -4,7 +4,7 @@ const { ethers } = require("hardhat");
 const { utils } = ethers;
 const { BigNumber } = require("ethers");
 const {
-    _governanceAddress,
+    _sharedGovernance,
     _keeperAddress,
     _deployerAddress,
     _vaultAddress,
@@ -33,7 +33,7 @@ const hardhatDeployContractsInParallel = async () => {
     const VaultMath = await deployContract("VaultMath", [], false);
     const VaultTreasury = await deployContract("VaultTreasury", [], false);
 
-    mainnetDeploymentParams.push(_governanceAddress);
+    mainnetDeploymentParams.push(_sharedGovernance);
     mainnetDeploymentParams.push(_keeperAddress);
     const VaultStorage = await deployContract("VaultStorage", mainnetDeploymentParams, false);
 
