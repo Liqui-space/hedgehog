@@ -12,7 +12,7 @@ const {
     _vaultTreasuryAddress,
 } = require("../../shared/constants");
 
-describe.only("Cheap Rebalancer test mainnet", function () {
+describe("Cheap Rebalancer test mainnet", function () {
     it("Initial", async function () {
         await resetFork(16854670);
 
