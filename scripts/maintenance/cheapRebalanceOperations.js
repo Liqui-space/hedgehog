@@ -1,4 +1,4 @@
-process.exit(0); // Block file in order to not accidentally deploy
+// process.exit(0); // Block file in order to not accidentally deploy
 
 const { utils } = require("ethers");
 const { ethers } = require("hardhat");
@@ -12,7 +12,7 @@ const {
     _rebalanceModule,
     _vaultStorageAddress,
     _sharedGovernance,
-} = require("../../test/common/index");
+} = require("../../shared/constants");
 
 let tx, CheapRebalancer, WETH;
 const operation = async () => {
@@ -31,7 +31,7 @@ const operation = async () => {
     console.log(await VaultStorage.owner());
     console.log(await CheapRebalancer.owner());
     // await governanceOperations();
-    // await rebalanceOperations();
+    await rebalanceOperations();
     // await collectToTreasuryOperations();
     // await collectToAddress();
     // await rebalanceManipulations();
