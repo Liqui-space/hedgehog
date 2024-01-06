@@ -98,11 +98,7 @@ contract Module1 is Ownable {
         IERC20(WETH).approve(euler, type(uint256).max);
     }
 
-    function setContracts(
-        address _addressAuction,
-        address _addressMath,
-        address _addressTreasury
-    ) external onlyOwner {
+    function setContracts(address _addressAuction, address _addressMath, address _addressTreasury) external onlyOwner {
         addressAuction = _addressAuction;
         addressMath = _addressMath;
         addressTreasury = _addressTreasury;

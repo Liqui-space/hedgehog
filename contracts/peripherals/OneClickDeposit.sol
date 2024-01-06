@@ -64,14 +64,7 @@ contract OneClickDeposit is Ownable, ReentrancyGuard {
         return shares;
     }
 
-    function swap(uint256 amountEth, uint256 slippage)
-        internal
-        returns (
-            uint256,
-            uint256,
-            uint256
-        )
-    {
+    function swap(uint256 amountEth, uint256 slippage) internal returns (uint256, uint256, uint256) {
         (, , uint256 usdcToDeposit, uint256 osqthToDeposit) = IVault(addressVault).calcSharesAndAmounts(
             amountEth.mul(slippage),
             0,

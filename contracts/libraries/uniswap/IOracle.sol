@@ -21,8 +21,8 @@ interface IOracle {
 
     function getMaxPeriod(address _pool) external view returns (uint32);
 
-    function getTimeWeightedAverageTickSafe(address _pool, uint32 _period)
-        external
-        view
-        returns (int24 timeWeightedAverageTick);
+    function getTimeWeightedAverageTickSafe(
+        address _pool,
+        uint32 _period
+    ) external view returns (int24 timeWeightedAverageTick);
 }

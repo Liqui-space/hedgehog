@@ -21,18 +21,9 @@ interface IVaultTreasury {
         int24 tickUpper
     ) external returns (uint256 collect0, uint256 collect1);
 
-    function mintLiquidity(
-        address pool,
-        int24 tickLower,
-        int24 tickUpper,
-        uint128 liquidity
-    ) external;
+    function mintLiquidity(address pool, int24 tickLower, int24 tickUpper, uint128 liquidity) external;
 
-    function transfer(
-        IERC20 token,
-        address recipient,
-        uint256 amount
-    ) external;
+    function transfer(IERC20 token, address recipient, uint256 amount) external;
 
     function amountsForLiquidity(
         address pool,
@@ -45,29 +36,13 @@ interface IVaultTreasury {
         Constants.Boundaries memory boundaries,
         uint128 liquidityEthUsdc,
         uint128 liquidityOsqthEth
-    )
-        external
-        view
-        returns (
-            uint256,
-            uint256,
-            uint256
-        );
+    ) external view returns (uint256, uint256, uint256);
 
     function position(
         address pool,
         int24 tickLower,
         int24 tickUpper
-    )
-        external
-        view
-        returns (
-            uint128,
-            uint256,
-            uint256,
-            uint128,
-            uint128
-        );
+    ) external view returns (uint128, uint256, uint256, uint128, uint128);
 
     function positionLiquidityEthUsdc() external view returns (uint128);
 

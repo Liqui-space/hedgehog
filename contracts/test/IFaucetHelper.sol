@@ -16,12 +16,5 @@ interface IFaucetHelper {
 
     function vaultStorage() external view returns (address);
 
-    function setComponents(
-        address,
-        address,
-        address,
-        address,
-        address,
-        address
-    ) external;
+    function setComponents(address, address, address, address, address, address) external;
 }

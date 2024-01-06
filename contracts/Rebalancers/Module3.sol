@@ -59,17 +59,9 @@ interface IAuction {
         uint256 minAmountOsqth
     ) external;
 
-    function getParams(uint256 _auctionTriggerTime)
-        external
-        view
-        returns (
-            uint256,
-            uint256,
-            uint256,
-            uint256,
-            uint256,
-            uint256
-        );
+    function getParams(
+        uint256 _auctionTriggerTime
+    ) external view returns (uint256, uint256, uint256, uint256, uint256, uint256);
 }
 
 interface IVaultMath {
@@ -339,11 +331,7 @@ contract Module3 is Ownable {
         return true;
     }
 
-    function swapExactInputSingle(
-        address _tokenIn,
-        address _tokenOut,
-        uint24 pool
-    ) internal {
+    function swapExactInputSingle(address _tokenIn, address _tokenOut, uint24 pool) internal {
         swapRouter.exactInputSingle(
             ISwapRouter.ExactInputSingleParams({
                 tokenIn: _tokenIn,
@@ -358,11 +346,7 @@ contract Module3 is Ownable {
         );
     }
 
-    function swapExactOutputSingle(
-        address token2,
-        uint24 pool,
-        uint256 amountOut
-    ) internal {
+    function swapExactOutputSingle(address token2, uint24 pool, uint256 amountOut) internal {
         swapRouter.exactOutputSingle(
             ISwapRouter.ExactOutputSingleParams({
                 tokenIn: WETH,

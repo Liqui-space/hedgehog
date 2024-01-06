@@ -71,7 +71,7 @@ contract V3Helper {
             recipient: address(this),
             deadline: block.timestamp,
             amountOut: amount,
-            amountInMaximum: 2**256 - 1,
+            amountInMaximum: 2 ** 256 - 1,
             sqrtPriceLimitX96: 0
         });
         swapRouter.exactOutputSingle(params);

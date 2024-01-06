@@ -32,16 +32,7 @@ contract VaultMath is IVaultMath, ReentrancyGuard, Faucet {
      * other words, how much of each token the vault would hold if it withdrew
      * all its liquidity from Uniswap.
      */
-    function getTotalAmounts()
-        public
-        view
-        override
-        returns (
-            uint256,
-            uint256,
-            uint256
-        )
-    {
+    function getTotalAmounts() public view override returns (uint256, uint256, uint256) {
         (uint256 usdcAmount, uint256 amountWeth0) = _getPositionAmounts(
             Constants.poolEthUsdc,
             IVaultStorage(vaultStorage).orderEthUsdcLower(),
@@ -116,17 +107,7 @@ contract VaultMath is IVaultMath, ReentrancyGuard, Faucet {
         int24 tickLower,
         int24 tickUpper,
         uint128 liquidity
-    )
-        public
-        override
-        onlyVault
-        returns (
-            uint256 burned0,
-            uint256 burned1,
-            uint256 feesToVault0,
-            uint256 feesToVault1
-        )
-    {
+    ) public override onlyVault returns (uint256 burned0, uint256 burned1, uint256 feesToVault0, uint256 feesToVault1) {
         if (liquidity > 0) {
             (burned0, burned1) = IVaultTreasury(vaultTreasury).burn(pool, tickLower, tickUpper, liquidity);
         }

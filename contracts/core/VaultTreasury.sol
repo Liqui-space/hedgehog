@@ -45,17 +45,7 @@ contract VaultTreasury is IVaultTreasury, ReentrancyGuard, IUniswapV3MintCallbac
         address pool,
         int24 tickLower,
         int24 tickUpper
-    )
-        internal
-        view
-        returns (
-            uint128,
-            uint256,
-            uint256,
-            uint128,
-            uint128
-        )
-    {
+    ) internal view returns (uint128, uint256, uint256, uint128, uint128) {
         bytes32 positionKey = PositionKey.compute(address(this), tickLower, tickUpper);
 
         return IUniswapV3Pool(pool).positions(positionKey);
@@ -66,19 +56,7 @@ contract VaultTreasury is IVaultTreasury, ReentrancyGuard, IUniswapV3MintCallbac
         address pool,
         int24 tickLower,
         int24 tickUpper
-    )
-        external
-        view
-        override
-        onlyContracts
-        returns (
-            uint128,
-            uint256,
-            uint256,
-            uint128,
-            uint128
-        )
-    {
+    ) external view override onlyContracts returns (uint128, uint256, uint256, uint128, uint128) {
         return _position(pool, tickLower, tickUpper);
     }
 
@@ -87,17 +65,7 @@ contract VaultTreasury is IVaultTreasury, ReentrancyGuard, IUniswapV3MintCallbac
         Constants.Boundaries memory boundaries,
         uint128 liquidityEthUsdc,
         uint128 liquidityOsqthEth
-    )
-        external
-        view
-        override
-        onlyContracts
-        returns (
-            uint256,
-            uint256,
-            uint256
-        )
-    {
+    ) external view override onlyContracts returns (uint256, uint256, uint256) {
         (uint256 usdcAmount, uint256 ethAmount0) = amountsForLiquidity(
             Constants.poolEthUsdc,
             boundaries.ethUsdcLower,
@@ -166,11 +134,7 @@ contract VaultTreasury is IVaultTreasury, ReentrancyGuard, IUniswapV3MintCallbac
     }
 
     /// @dev ERC20 transfer
-    function transfer(
-        IERC20 token,
-        address recipient,
-        uint256 amount
-    ) external override onlyContracts {
+    function transfer(IERC20 token, address recipient, uint256 amount) external override onlyContracts {
         token.transfer(recipient, amount);
     }
 
@@ -195,11 +159,7 @@ contract VaultTreasury is IVaultTreasury, ReentrancyGuard, IUniswapV3MintCallbac
      * @param tickLower lower tick of the position
      * @param tickUpper upper tick of the position
      */
-    function poke(
-        address pool,
-        int24 tickLower,
-        int24 tickUpper
-    ) internal {
+    function poke(address pool, int24 tickLower, int24 tickUpper) internal {
         (uint128 liquidity, , , , ) = _position(pool, tickLower, tickUpper);
 
         if (liquidity > 0) {

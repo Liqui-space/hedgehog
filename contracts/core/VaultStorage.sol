@@ -316,11 +316,7 @@ contract VaultStorage is IVaultStorage, Faucet {
     }
 
     /// @dev function to update accrude fees on withdrawals
-    function updateAccruedFees(
-        uint256 amountEth,
-        uint256 amountUsdc,
-        uint256 amountOsqth
-    ) external override onlyVault {
+    function updateAccruedFees(uint256 amountEth, uint256 amountUsdc, uint256 amountOsqth) external override onlyVault {
         accruedFeesUsdc = accruedFeesUsdc - amountUsdc;
         accruedFeesEth = accruedFeesEth - amountEth;
         accruedFeesOsqth = accruedFeesOsqth - amountOsqth;

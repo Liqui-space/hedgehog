@@ -268,15 +268,7 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
         Constants.Boundaries memory boundaries,
         uint128 liquidityEthUsdc,
         uint128 liquidityOsqthEth
-    )
-        internal
-        view
-        returns (
-            uint256,
-            uint256,
-            uint256
-        )
-    {
+    ) internal view returns (uint256, uint256, uint256) {
         (uint256 ethAmount, uint256 usdcAmount, uint256 osqthAmount) = IVaultTreasury(vaultTreasury)
             .allAmountsForLiquidity(boundaries, liquidityEthUsdc, liquidityOsqthEth);
 
@@ -347,19 +339,9 @@ contract VaultAuction is IAuction, Faucet, ReentrancyGuard {
      * @return usdcBalance current USDC balance
      * @return osqthBalance current Osqth balance
      */
-    function getParams(uint256 _auctionTriggerTime)
-        external
-        view
-        override
-        returns (
-            uint256,
-            uint256,
-            uint256,
-            uint256,
-            uint256,
-            uint256
-        )
-    {
+    function getParams(
+        uint256 _auctionTriggerTime
+    ) external view override returns (uint256, uint256, uint256, uint256, uint256, uint256) {
         Constants.AuctionParams memory auctionDetails = _getAuctionParams(_auctionTriggerTime);
 
         (uint256 targetEth, uint256 targetUsdc, uint256 targetOsqth) = _getTargets(

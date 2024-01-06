@@ -10,7 +10,7 @@ const {
 } = require("@shared/constants");
 const { resetFork, impersontate, getERC20Balance } = require("../helpers");
 
-describe.only("Cheap Rebalancer test mainnet", function () {
+describe("Cheap Rebalancer test mainnet", function () {
     it("Initial", async function () {
         await resetFork(17914434);
 

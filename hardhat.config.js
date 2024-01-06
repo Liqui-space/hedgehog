@@ -20,7 +20,7 @@ const test = {
     allowUnlimitedContractSize: process.env.DEBUG ? true : false,
     chainId: 1,
     forking: getForkingParams(),
-    gasPrice: 30 * 10 ** 9,
+    gasPrice: 35 * 10 ** 9,
 };
 
 const simulate = {

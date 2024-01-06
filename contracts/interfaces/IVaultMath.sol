@@ -15,14 +15,7 @@ interface IVaultMath {
         int24 tickLower,
         int24 tickUpper,
         uint128 liquidity
-    )
-        external
-        returns (
-            uint256 burned0,
-            uint256 burned1,
-            uint256 feesToVault0,
-            uint256 feesToVault1
-        );
+    ) external returns (uint256 burned0, uint256 burned1, uint256 feesToVault0, uint256 feesToVault1);
 
     function burnLiquidityShare(
         address pool,
@@ -31,14 +24,7 @@ interface IVaultMath {
         uint256 ratio
     ) external returns (uint256 amount0, uint256 amount1);
 
-    function getTotalAmounts()
-        external
-        view
-        returns (
-            uint256,
-            uint256,
-            uint256
-        );
+    function getTotalAmounts() external view returns (uint256, uint256, uint256);
 
     function getPrices() external view returns (uint256 ethUsdcPrice, uint256 osqthEthPrice);
 

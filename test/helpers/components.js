@@ -104,7 +104,7 @@ const rebalanceClassicComponent = async (rebalancer, Rebalancer, RebalanceModule
 };
 
 const shouldThrowErrorComponent = async (promise, errMessage, errText) => {
-    if (errMessage.length < 10)
+    if (errMessage.length < 20)
         errMessage = `VM Exception while processing transaction: reverted with reason string '${errMessage}'`;
     let succeded = false;
 

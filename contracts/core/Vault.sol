@@ -251,12 +251,7 @@ contract Vault is IVault, ERC20, ReentrancyGuard, Faucet {
         public
         view
         override
-        returns (
-            uint256 shares,
-            uint256 ethToDeposit,
-            uint256 usdcToDeposit,
-            uint256 osqthToDeposit
-        )
+        returns (uint256 shares, uint256 ethToDeposit, uint256 usdcToDeposit, uint256 osqthToDeposit)
     {
         //Get current prices
         (uint256 ethUsdcPrice, uint256 osqthEthPrice) = IVaultMath(vaultMath).getPrices();
