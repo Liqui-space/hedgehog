@@ -1,11 +1,12 @@
 const { ethers } = require("hardhat");
 
 const { deployContract } = require("@shared/deploy");
-const { nullAddress } = require("@shared/constants");
-const { resetFork, mineSomeBlocks } = require("../helpers");
+const { nullAddress, wethAddress } = require("@shared/constants");
+const { resetFork, mineSomeBlocks, getWETH, getERC20Balance } = require("../helpers");
 
-const { depositOCComponent, shouldThrowErrorComponent, executeTx } = require("../helpers/components");
+const { shouldThrowErrorComponent, executeTx } = require("../helpers/components");
 const { assert } = require("chai");
+const { utils } = require("ethers");
 
 describe.only("Rip test mainnet", function () {
     let Rip;
@@ -13,6 +14,11 @@ describe.only("Rip test mainnet", function () {
         await resetFork(18942139);
         [deployer, multisig, admin1, admin2, admin3, chad] = await ethers.getSigners();
         Rip = await deployContract("Rip", [multisig.address, admin1.address, admin2.address], true);
+        await getWETH(utils.parseEther("1"), Rip);
+
+        inface = new ethers.utils.Interface(["function transfer(address to, uint256 value)"]);
+        data = inface.encodeFunctionData("transfer", [nullAddress, utils.parseEther("0.01")]);
+        assert((await getERC20Balance(Rip, wethAddress)) == utils.parseEther("1"), "Should be 1");
     });
 
     it("Could add delegate", async function () {
@@ -46,26 +52,26 @@ describe.only("Rip test mainnet", function () {
         await executeTx(Rip.connect(admin3).activateDelegate(), "delegate activation");
 
         await shouldThrowErrorComponent(
-            Rip.connect(multisig).executeCall(nullAddress, "0x"),
+            Rip.connect(multisig).executeCall(wethAddress, data),
             "VM Exception while processing transaction: reverted with reason string 'Not a delegate'",
             "Should be error"
         );
         await shouldThrowErrorComponent(
-            Rip.connect(admin3).executeCall(nullAddress, "0x"),
+            Rip.connect(admin3).executeCall(wethAddress, data),
             "VM Exception while processing transaction: reverted with reason string 'Not activated'",
             "Should be error"
         );
 
         await mineSomeBlocks((await Rip.timelockInBlocks()).toNumber());
 
-        await executeTx(Rip.connect(admin3).executeCall(nullAddress, "0x"), "succesful call");
+        await executeTx(Rip.connect(admin3).executeCall(wethAddress, data), "succesful call");
     });
 
     it("Could deactivate delegate", async function () {
         await executeTx(Rip.connect(admin2).deactivateDelegate(admin3.address), "deactivate delegate");
 
         await shouldThrowErrorComponent(
-            Rip.connect(admin3).executeCall(nullAddress, "0x"),
+            Rip.connect(admin3).executeCall(wethAddress, data),
             "VM Exception while processing transaction: reverted with reason string 'Not activated'",
             "Should be error"
         );
@@ -84,14 +90,14 @@ describe.only("Rip test mainnet", function () {
         await executeTx(Rip.connect(admin2).activateDelegate(), "delegate activation");
 
         await shouldThrowErrorComponent(
-            Rip.connect(admin2).executeCall(nullAddress, "0x"),
+            Rip.connect(admin2).executeCall(wethAddress, data),
             "VM Exception while processing transaction: reverted with reason string 'Not activated'",
             "Should be error"
         );
 
         await mineSomeBlocks(timeLockInBlocks);
 
-        await executeTx(Rip.connect(admin2).executeCall(nullAddress, "0x"), "succesful call");
+        await executeTx(Rip.connect(admin2).executeCall(wethAddress, data), "succesful call");
     });
 
     it("Could remove delegate", async function () {
@@ -104,9 +110,11 @@ describe.only("Rip test mainnet", function () {
         await executeTx(Rip.connect(multisig).removeDelegate(admin2.address), "remove delegate");
 
         await shouldThrowErrorComponent(
-            Rip.connect(admin2).executeCall(nullAddress, "0x"),
+            Rip.connect(admin2).executeCall(wethAddress, data),
             "VM Exception while processing transaction: reverted with reason string 'Not a delegate'",
             "Should be error"
         );
+
+        assert((await getERC20Balance(Rip, wethAddress)) == utils.parseEther("0.98"), "Should be 0.98");
     });
 });
