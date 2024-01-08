@@ -1,15 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.4;
 
-import "hardhat/console.sol";
-
 contract Rip {
-    struct Owner {
-        bool exists;
-        uint256 activationBlock;
-    }
-
-    mapping(address => Owner) public owners;
+    mapping(address => uint256) public owners;
     mapping(address => bool) public isOwner;
 
     address public multisig;
@@ -22,11 +15,8 @@ contract Rip {
         _addOwner(owner2);
     }
 
-    // check is 2 out of 3 is enougth to remove this contract from multisig
-    function executeCall(
-        address target,
-        bytes memory data
-    ) public payable isOwner isActivatedOwner returns (bytes memory) {
+    //TODO: check is 2 out of 3 is enougth to remove this contract from multisig
+    function executeCall(address target, bytes memory data) public payable onlyActivatedOwner returns (bytes memory) {
         (bool success, bytes memory response) = target.call{value: msg.value}(data);
         require(success, "External call failed");
         return response;
@@ -34,50 +24,49 @@ contract Rip {
 
     //? owner activation
 
-    function activateOwner() external isOwner {
-        owners[msg.sender].activationBlock = block.number;
+    function activateOwner() external onlyOwner {
+        owners[msg.sender] = block.number;
     }
 
-    function deactivateOwner(address _owner) external isOwner {
-        owners[_owner].activationBlock = 0;
+    function deactivateOwner(address _owner) external onlyOwner {
+        owners[_owner] = 0;
     }
 
-    function setTimelockInBlocks(uint256 _timelockInBlocks) external isAdmin {
+    function setTimelockInBlocks(uint256 _timelockInBlocks) external onlyMultisig {
         timelockInBlocks = _timelockInBlocks;
     }
 
-    function addOwner(address owner) external isAdmin {
+    function addOwner(address owner) external onlyMultisig {
         _addOwner(owner);
     }
 
-    function removeOwner(address owner) external isAdmin {
+    function removeOwner(address owner) external onlyMultisig {
         delete owners[owner];
+        delete isOwner[owner];
     }
 
     //? internal
 
     function _addOwner(address owner) internal {
-        require(!owners[owner].exists, "Owner already exists");
-        owners[owner] = Owner(true, 0);
+        require(!isOwner[owner], "Owner already exists");
+        owners[owner] = 0;
+        isOwner[owner] = true;
     }
 
     //? modifiers
 
-    modifier isActivatedOwner() {
-        require(
-            owners[msg.sender].activationBlock > 0 &&
-                block.number - owners[msg.sender].activationBlock >= timelockInBlocks,
-            "Not activated"
-        );
+    modifier onlyActivatedOwner() {
+        require(isOwner[msg.sender], "Not an owner");
+        require(owners[msg.sender] > 0 && block.number - owners[msg.sender] >= timelockInBlocks, "Not activated");
         _;
     }
 
-    modifier isOwner() {
-        require(owners[msg.sender].exists, "Not a owner");
+    modifier onlyOwner() {
+        require(isOwner[msg.sender], "Not an owner");
         _;
     }
 
-    modifier isAdmin() {
+    modifier onlyMultisig() {
         require(msg.sender == multisig, "Not multisig");
         _;
     }

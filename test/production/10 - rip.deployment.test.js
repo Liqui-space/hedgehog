@@ -3,7 +3,7 @@ const { ethers } = require("hardhat");
 const { deployContract } = require("@shared/deploy");
 const { resetFork, impersontate, getETH } = require("../helpers");
 
-describe.only("Rip deployment mainnet", function () {
+describe("Rip deployment mainnet", function () {
     const multisig = "0x631432DffA535F62A2b9C1e835124e988162427d";
     const ivan = "0x31Ac457944bD3754bfbe7a103a182ddc9CeBc5F5";
     const yevhen = "0xCFA2Aa4F0Aaf2B86E495bcEaEF5519C8dCeC397C";

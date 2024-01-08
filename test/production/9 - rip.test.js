@@ -8,7 +8,7 @@ const { shouldThrowErrorComponent, executeTx } = require("../helpers/components"
 const { assert } = require("chai");
 const { utils } = require("ethers");
 
-describe("Rip test mainnet", function () {
+describe.only("Rip test mainnet", function () {
     let Rip;
     it("Initial", async function () {
         await resetFork(18942139);
@@ -47,18 +47,18 @@ describe("Rip test mainnet", function () {
     });
 
     it("Could activate owner", async function () {
-        assert((await Rip.owners(admin3.address)).activationBlock == 0, "Should be 0");
+        assert(await Rip.isOwner(admin3.address), "Should be 0");
 
         await executeTx(Rip.connect(admin3).activateOwner(), "owner activation");
 
         await shouldThrowErrorComponent(
             Rip.connect(multisig).executeCall(wethAddress, data),
-            "VM Exception while processing transaction: reverted with reason string 'Not a owner'",
+            "Not an owner",
             "Should be error"
         );
         await shouldThrowErrorComponent(
             Rip.connect(admin3).executeCall(wethAddress, data),
-            "VM Exception while processing transaction: reverted with reason string 'Not activated'",
+            "Not activated",
             "Should be error"
         );
 
@@ -72,15 +72,11 @@ describe("Rip test mainnet", function () {
 
         await shouldThrowErrorComponent(
             Rip.connect(admin3).executeCall(wethAddress, data),
-            "VM Exception while processing transaction: reverted with reason string 'Not activated'",
+            "Not activated",
             "Should be error"
         );
 
-        await shouldThrowErrorComponent(
-            Rip.connect(admin1).setTimelockInBlocks(10),
-            "VM Exception while processing transaction: reverted with reason string 'Not multisig'",
-            "Should be error"
-        );
+        await shouldThrowErrorComponent(Rip.connect(admin1).setTimelockInBlocks(10), "Not multisig", "Should be error");
 
         await executeTx(Rip.connect(multisig).setTimelockInBlocks(10), "set timelock");
 
@@ -91,7 +87,7 @@ describe("Rip test mainnet", function () {
 
         await shouldThrowErrorComponent(
             Rip.connect(admin2).executeCall(wethAddress, data),
-            "VM Exception while processing transaction: reverted with reason string 'Not activated'",
+            "Not activated",
             "Should be error"
         );
 
@@ -103,7 +99,7 @@ describe("Rip test mainnet", function () {
     it("Could remove owner", async function () {
         await shouldThrowErrorComponent(
             Rip.connect(admin3).removeOwner(admin2.address),
-            "VM Exception while processing transaction: reverted with reason string 'Not multisig'",
+            "Not multisig",
             "Should be error"
         );
 
@@ -111,7 +107,7 @@ describe("Rip test mainnet", function () {
 
         await shouldThrowErrorComponent(
             Rip.connect(admin2).executeCall(wethAddress, data),
-            "VM Exception while processing transaction: reverted with reason string 'Not a owner'",
+            "Not an owner",
             "Should be error"
         );
 

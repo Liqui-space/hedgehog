@@ -107,12 +107,11 @@ const shouldThrowErrorComponent = async (promise, errMessage, errText) => {
     if (errMessage.length < 20)
         errMessage = `VM Exception while processing transaction: reverted with reason string '${errMessage}'`;
     let succeded = false;
-
     try {
         await promise;
     } catch (err) {
         if (err.message == errMessage) succeded = true;
-        else console.log(err.message);
+        else console.log("Error messege\n", err.message);
     }
     assert(succeded, errText);
 };
