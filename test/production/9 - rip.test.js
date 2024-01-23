@@ -21,7 +21,7 @@ describe.only("Rip test mainnet", function () {
     let Rip;
     it("Initial", async function () {
         await resetFork(18942139);
-        [deployer, multisig, admin1, admin2, admin3, chad] = await ethers.getSigners();
+        [deployer, multisig, admin1, admin2, admin3, chad, multisigV2] = await ethers.getSigners();
         Rip = await deployContract("Rip", [multisig.address, admin1.address, admin2.address], true);
         await getWETH(utils.parseEther("1"), Rip);
 
@@ -110,5 +110,31 @@ describe.only("Rip test mainnet", function () {
         );
 
         assert((await getERC20Balance(Rip, wethAddress)) == utils.parseEther("0.97"), "Should be 0.97");
+    });
+
+    it("Could change multisig", async function () {
+        assert((await Rip.multisig()) == multisig.address, "Should be multisig");
+
+        await shouldThrowErrorComponentVM(
+            Rip.connect(admin1).setMultisig(multisigV2.address),
+            "Not multisig",
+            ERR_CODE()
+        );
+
+        await shouldThrowErrorComponentVM(
+            Rip.connect(chad).setMultisig(multisigV2.address),
+            "Not multisig",
+            ERR_CODE()
+        );
+
+        await shouldThrowErrorComponentVM(
+            Rip.connect(deployer).setMultisig(multisigV2.address),
+            "Not multisig",
+            ERR_CODE()
+        );
+
+        await executeTx(Rip.connect(multisig).setMultisig(multisigV2.address), "change multisig");
+
+        assert((await Rip.multisig()) == multisigV2.address, "Should be multisigV2");
     });
 });

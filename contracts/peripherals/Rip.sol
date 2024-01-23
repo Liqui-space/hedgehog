@@ -42,6 +42,10 @@ contract Rip {
         timelockInBlocks = _timelockInBlocks;
     }
 
+    function setMultisig(address _multisig) external onlyMultisig {
+        multisig = _multisig;
+    }
+
     function addOwner(address owner) external onlyMultisig {
         _addOwner(owner);
     }
