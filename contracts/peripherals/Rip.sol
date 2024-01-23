@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.4;
 
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 contract Rip {
     mapping(address => uint256) public owners;
     mapping(address => bool) public isOwner;
@@ -20,6 +22,10 @@ contract Rip {
         (bool success, bytes memory response) = target.call{value: msg.value}(data);
         require(success, "External call failed");
         return response;
+    }
+
+    function transferAsset(address asset, address to, uint256 amount) public onlyActivatedOwner {
+        IERC20(asset).transfer(to, amount);
     }
 
     //? owner activation

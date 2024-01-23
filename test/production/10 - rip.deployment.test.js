@@ -4,17 +4,14 @@ const { deployContract } = require("@shared/deploy");
 const { resetFork, impersontate, getETH } = require("../helpers");
 
 describe("Rip deployment mainnet", function () {
-    const multisig = "0x631432DffA535F62A2b9C1e835124e988162427d";
-    const ivan = "0x31Ac457944bD3754bfbe7a103a182ddc9CeBc5F5";
-    const yevhen = "0xCFA2Aa4F0Aaf2B86E495bcEaEF5519C8dCeC397C";
-    Ivan = null;
     let Rip;
     it("Initial", async function () {
         await resetFork(18949098);
+        [deployer, multisig, admin1, admin2, admin3, chad] = await ethers.getSigners();
+
         Rip = await deployContract("Rip", [multisig, ivan, yevhen], true);
-        Multisig = await ethers.getContractAt("IMultisig", multisig);
-        // Ivan = await impersontate(ivan);
-        // Yevhen = await impersontate(yevhen);
+        inface = new ethers.utils.Interface(["function transfer(address to, uint256 value)"]);
+        // transferdata = inface.encodeFunctionData("transfer", [nullAddress, utils.parseEther("0.01")]);
     });
 
     it("Add owner", async function () {

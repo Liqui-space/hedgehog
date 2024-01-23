@@ -116,6 +116,18 @@ const shouldThrowErrorComponent = async (promise, errMessage, errText) => {
     assert(succeded, errText);
 };
 
+const shouldThrowErrorComponentVM = async (promise, errMessage, errText) => {
+    errMessage = `VM Exception while processing transaction: reverted with reason string '${errMessage}'`;
+    let succeded = false;
+    try {
+        await promise;
+    } catch (err) {
+        if (err.message == errMessage) succeded = true;
+        else console.log("Error messege\n", err.message);
+    }
+    assert(succeded, errText);
+};
+
 const executeTx = async (promise, label = "", logGas = false) => {
     tx = await promise;
     recipt = await tx.wait();
@@ -132,5 +144,6 @@ module.exports = {
     depositOCComponent,
     withdrawComponent,
     shouldThrowErrorComponent,
+    shouldThrowErrorComponentVM,
     swapComponent,
 };
