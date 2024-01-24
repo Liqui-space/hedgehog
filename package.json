@@ -9,6 +9,7 @@
     "gas": "DEBUG=false REPORT_GAS=true npx hardhat test",
     "size": "npx hardhat size-contracts",
     "deploy:mainnet": "npx hardhat run scripts/maintenance/deploy-partial.js --network mainnet",
+    "deploy:arbitrum": "npx hardhat run scripts/maintenance/deploy-multisig.js --network arbitrumMainnet",
     "verify": "npx hardhat verify <contract address> --network mainnet --constructor-args scripts/maintenance/_arguments.js",
     "node": "SIMULATION=true npx hardhat node",
     "sim1": "SIMULATION=true npx hardhat run scripts/simulation/bigReb.js --network localhost",

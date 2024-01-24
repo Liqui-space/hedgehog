@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.4;
 
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+interface IERC20 {
+    function transfer(address to, uint256 amount) external returns (bool);
+}
 
 contract Rip {
     mapping(address => uint256) public owners;
@@ -17,14 +19,16 @@ contract Rip {
         _addOwner(owner2);
     }
 
-    //TODO: check is 2 out of 3 is enougth to remove this contract from multisig
-    function executeCall(address target, bytes memory data) public payable onlyActivatedOwner returns (bytes memory) {
+    function executeCall(
+        address target,
+        bytes memory data
+    ) public payable onlyActivatedOwnerOrMultisig returns (bytes memory) {
         (bool success, bytes memory response) = target.call{value: msg.value}(data);
         require(success, "External call failed");
         return response;
     }
 
-    function transferAsset(address asset, address to, uint256 amount) public onlyActivatedOwner {
+    function transferAsset(address asset, address to, uint256 amount) public onlyActivatedOwnerOrMultisig {
         IERC20(asset).transfer(to, amount);
     }
 
@@ -65,10 +69,13 @@ contract Rip {
 
     //? modifiers
 
-    modifier onlyActivatedOwner() {
-        require(isOwner[msg.sender], "Not an owner");
-        require(owners[msg.sender] > 0 && block.number - owners[msg.sender] >= timelockInBlocks, "Not activated");
-        _;
+    modifier onlyActivatedOwnerOrMultisig() {
+        if (msg.sender == multisig) _;
+        else {
+            require(isOwner[msg.sender], "Not an owner");
+            require(owners[msg.sender] > 0 && block.number - owners[msg.sender] >= timelockInBlocks, "Not activated");
+            _;
+        }
     }
 
     modifier onlyOwner() {
