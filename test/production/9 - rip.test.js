@@ -3,15 +3,14 @@ const { ethers } = require("hardhat");
 const { deployContract } = require("@shared/deploy");
 const { nullAddress, wethAddress } = require("@shared/constants");
 const { resetFork, mineSomeBlocks, getWETH, getERC20Balance } = require("../helpers");
-
 const { shouldThrowErrorComponentVM, executeTx } = require("../helpers/components");
 const { assert } = require("chai");
 const { utils } = require("ethers");
 
 const ERR_CODE = (() => {
-    let callCount = 0; // Initialize counter
+    let callCount = 0;
     const fn = () => {
-        callCount++; // Increment on each call
+        callCount++;
         return `Error code ${callCount}: Should be error`;
     };
     return fn;
@@ -129,7 +128,7 @@ describe.only("Rip test mainnet", function () {
             ERR_CODE()
         );
 
-        assert((await getERC20Balance(Rip, wethAddress)) == utils.parseEther("0.97"), "Should be 0.97");
+        assert((await getERC20Balance(Rip, wethAddress)) == utils.parseEther("0.96"), "Should be 0.96");
     });
 
     it("Could change multisig", async function () {

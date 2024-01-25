@@ -8,6 +8,7 @@
     "test": "npm run format && DEBUG=true npx hardhat compile && DEBUG=true npx hardhat test",
     "gas": "DEBUG=false REPORT_GAS=true npx hardhat test",
     "size": "npx hardhat size-contracts",
+    "decode": "npx hardhat run scripts/maintenance/decode-data.js --network arbitrumMainnet",
     "deploy:mainnet": "npx hardhat run scripts/maintenance/deploy-partial.js --network mainnet",
     "deploy:arbitrum": "npx hardhat run scripts/maintenance/deploy-multisig.js --network arbitrumMainnet",
     "verify": "npx hardhat verify <contract address> --network mainnet --constructor-args scripts/maintenance/_arguments.js",
