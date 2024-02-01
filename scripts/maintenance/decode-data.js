@@ -18,9 +18,6 @@ const decodeSetTimelock = (data) => {
     console.log("Blocks:", decoded[0].toString());
 };
 
-// The data string you want to decode
-doSmthForYevhen("0xf9a50f550000000000000000000000000000000000000000000000000000000000000004");
-
 const doSmthForYevhen = (data) => {
     try {
         decodeTransferAsset(data);
@@ -29,6 +26,9 @@ const doSmthForYevhen = (data) => {
         decodeSetTimelock(data);
     } catch (e) {}
 };
+
+// The data string you want to decode
+doSmthForYevhen("0xf9a50f550000000000000000000000000000000000000000000000000000000000000004");
 
 // Alternative:
 // https://lab.miguelmota.com/ethereum-input-data-decoder/example/
