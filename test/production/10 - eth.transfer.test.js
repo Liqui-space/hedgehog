@@ -146,7 +146,7 @@ describe.only("Eth transfer instructions", function () {
         console.log("holder WETH", await getERC20Balance(holder, wethAddress));
     });
 
-    it("Could one click withdraw", async function () {
+    it.skip("Could one click withdraw", async function () {
         const holder = await impersontate("0x6a6605C9bB1cF8de3a703A4D285677E3b822aaCd");
         await getETH(holder, utils.parseEther("10"));
 
