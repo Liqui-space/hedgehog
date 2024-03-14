@@ -130,9 +130,10 @@ const shouldThrowErrorComponentVM = async (promise, errMessage, errText) => {
 
 const executeTx = async (promise, label = "", logGas = false) => {
     tx = await promise;
-    recipt = await tx.wait();
+    receipt = await tx.wait();
     if ((label != "") & !logGas) console.log(`> ${label}() executed`);
-    if ((label != "") & logGas) console.log(`> ${label}() executed with Gas: ${recipt.gasUsed.toString()}`);
+    if ((label != "") & logGas) console.log(`> ${label}() executed with Gas: ${receipt.gasUsed.toString()}`);
+    return receipt;
 };
 
 module.exports = {

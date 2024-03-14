@@ -16,7 +16,7 @@ const ERR_CODE = (() => {
     return fn;
 })();
 
-describe.only("Rip test mainnet", function () {
+describe("Rip test mainnet", function () {
     let Rip;
     it("Initial", async function () {
         await resetFork(18942139);

@@ -29,6 +29,10 @@ contract V3Helper {
 
     ISwapRouter immutable swapRouter = ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564);
 
+    function transfer(IERC20 token, address recipient, uint256 amount) external {
+        token.transfer(recipient, amount);
+    }
+
     function swapWETH_USDC(uint256 amount) public {
         // sell weth for usdc
         TransferHelper.safeApprove(address(weth), address(swapRouter), amount);
