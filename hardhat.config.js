@@ -5,15 +5,7 @@ require("hardhat-gas-reporter");
 require("@nomiclabs/hardhat-etherscan");
 require("@nomiclabs/hardhat-ethers");
 
-const {
-    ETHERSCAN_KEY,
-    ETHERSCAN_KEY_ARBITRUM,
-    INFURA_MAINNET_URL,
-    INFURA_ARBITRUM_URL,
-    HEDGEHOG_REBALANCER,
-    MULTISIG_DEPLOYER_ARBITRUM,
-} = require("@shared/config");
-const { getForkingParams } = require("hardhat.helpers");
+const { ETHERSCAN_KEY, INFURA_MAINNET_URL, HEDGEHOG_OWNER } = require("@shared/config");
 
 task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
     const accounts = await hre.ethers.getSigners();
@@ -23,32 +15,12 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
     }
 });
 
-const test = {
-    allowUnlimitedContractSize: process.env.DEBUG ? true : false,
-    chainId: 1,
-    forking: getForkingParams(),
-    gasPrice: 65 * 10 ** 9,
-};
-
-const simulate = {
-    allowUnlimitedContractSize: true,
-    chainId: 1,
-    forking: getForkingParams(15534544),
-    gasPrice: 18 * 10 ** 9,
-};
-
 module.exports = {
     networks: {
-        hardhat: process.env.SIMULATION ? simulate : test,
         mainnet: {
             url: INFURA_MAINNET_URL,
-            accounts: [HEDGEHOG_REBALANCER],
-            gasPrice: 16 * 10 ** 9,
-        },
-        arbitrumMainnet: {
-            url: INFURA_ARBITRUM_URL,
-            accounts: [MULTISIG_DEPLOYER_ARBITRUM],
-            // gasPrice: 0.2,
+            accounts: [HEDGEHOG_OWNER],
+            gasPrice: 55 * 10 ** 9,
         },
     },
     solidity: {
@@ -68,8 +40,8 @@ module.exports = {
         ],
     },
     etherscan: {
-        // apiKey: ETHERSCAN_KEY,
-        apiKey: ETHERSCAN_KEY_ARBITRUM,
+        apiKey: ETHERSCAN_KEY,
+        // apiKey: ETHERSCAN_KEY_ARBITRUM,
     },
     gasReporter: {
         enabled: process.env.REPORT_GAS ? true : false,

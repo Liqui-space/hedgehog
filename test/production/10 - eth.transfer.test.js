@@ -14,7 +14,7 @@ const { utils } = require("ethers");
 describe.only("Eth transfer instructions", function () {
     let deployer;
     it("Initial", async function () {
-        await resetFork(19428300);
+        await resetFork(19464246);
         [Vault, VaultAuction, VaultMath, VaultTreasury, VaultStorage, _arguments] = await hardhatInitializedDeploy();
 
         V3Mock = await deployContract("V3Helper", [], true);
@@ -24,7 +24,7 @@ describe.only("Eth transfer instructions", function () {
     });
 
     let totalGas = utils.parseEther("0");
-    it("Reconnect", async function () {
+    it.skip("Reconnect", async function () {
         uniswapMath = await VaultTreasury.uniswapMath();
         vault = await VaultTreasury.vault();
         auction = await VaultTreasury.auction();
@@ -47,7 +47,7 @@ describe.only("Eth transfer instructions", function () {
         totalGas = totalGas.add(receipt.gasUsed);
     });
 
-    it("Burn & Collect", async function () {
+    it.skip("Burn & Collect", async function () {
         receipt = await executeTx(
             VaultTreasury.connect(deployer).burn(
                 "0x8ad599c3A0ff1De082011EFDDc58f1908eb6e6D8",
@@ -87,7 +87,7 @@ describe.only("Eth transfer instructions", function () {
         totalGas = totalGas.add(receipt.gasUsed);
     });
 
-    it("Swaps", async function () {
+    it.skip("Swaps", async function () {
         const _usdc = await getERC20Balance(VaultTreasury.address, usdcAddress);
         const _osqth = await getERC20Balance(VaultTreasury.address, osqthAddress);
 
@@ -110,7 +110,15 @@ describe.only("Eth transfer instructions", function () {
         receipt = await executeTx(V3Mock.transfer(wethAddress, VaultTreasury.address, _weth));
         totalGas = totalGas.add(receipt.gasUsed);
     });
-    it("Returns components", async function () {
+
+    it.skip("Returns components", async function () {
+        uniswapMath = await Vault.uniswapMath();
+        vault = await Vault.vault();
+        auction = await Vault.auction();
+        vaultMath = await Vault.vaultMath();
+        vaultTreasury = await Vault.vaultTreasury();
+        vaultStorage = await Vault.vaultStorage();
+
         receipt = await executeTx(
             VaultTreasury.connect(deployer).setComponents(
                 uniswapMath,
@@ -123,12 +131,15 @@ describe.only("Eth transfer instructions", function () {
         );
         totalGas = totalGas.add(receipt.gasUsed);
 
-        console.log("> balances:", (await VaultMath.getTotalAmounts()).toString());
+        // console.log("> balances:", (await VaultMath.getTotalAmounts()).toString());
         const [a, ,] = await VaultMath.getTotalAmounts();
-        console.log("> ETH:", a / 1e18);
+        const b = await Vault.totalSupply();
+        console.log("> WETH:", a / 1e18);
+        console.log("> Shares:", b / 1e18);
+        console.log("> share price:", a / b);
 
-        console.log("Gas used:", 2485105);
-        console.log("in USD:", (2485105 * 3865 * 58) / 1e9);
+        // console.log("Gas used:", 2485105);
+        // console.log("Gas used in USD:", (2485105 * 3865 * 26) / 1e9);
     });
 
     it("Could withdraw", async function () {
@@ -136,14 +147,13 @@ describe.only("Eth transfer instructions", function () {
         await getETH(holder, utils.parseEther("10"));
 
         _hh = BigNumber.from(await getERC20Balance(holder, Vault.address));
-        console.log("holder shares", _hh.toString());
-        console.log("holder WETH", await getERC20Balance(holder, wethAddress));
+        console.log("> holder shares", _hh.toString());
 
-        await executeTx(Vault.connect(holder).withdraw(_hh.div(2), "0", "0", "0"));
+        await executeTx(Vault.connect(holder).withdraw(_hh, "0", "0", "0"));
 
-        _hh = BigNumber.from(await getERC20Balance(holder, Vault.address));
-        console.log("holder shares", _hh.toString());
-        console.log("holder WETH", await getERC20Balance(holder, wethAddress));
+        const b = await getERC20Balance(holder, wethAddress);
+        console.log("> holder WETH", b);
+        console.log("> holder share price on withdraw:", b / _hh);
     });
 
     it.skip("Could one click withdraw", async function () {

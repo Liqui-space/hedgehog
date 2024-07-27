@@ -3,3 +3,5 @@ sim:
 
 d:
 	npm run test
+t:
+	npx hardhat run scripts/maintenance/eth-transfer.js --network mainnet
